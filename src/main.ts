@@ -29,8 +29,8 @@ class Application {
     this.corsOriginList = process.env.CORS_ORIGIN_LIST
       ? process.env.CORS_ORIGIN_LIST.split(',').map((origin) => origin.trim())
       : ['*']
-    this.ADMIN_USER = process.env.ADMIN_USER || 'amamov'
-    this.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '1205'
+    this.ADMIN_USER = process.env.ADMIN_USER
+    this.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD
   }
 
   private setUpBasicAuth() {
