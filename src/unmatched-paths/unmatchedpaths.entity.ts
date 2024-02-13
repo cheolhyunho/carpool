@@ -21,7 +21,6 @@ export class UnmatchedPathEntity extends CommonEntity {
 
   @Column({ type: 'point', nullable: false })
   destinationPoint: string
-
   @Column({ type: 'int', nullable: false })
   fare: number
 
