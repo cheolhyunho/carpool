@@ -5,3 +5,16 @@ body {
 .bg_nest_color {
   background-color: rgb(217, 19, 70);
 }
+
+#sendButton {
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#sendButton:hover {
+  background-color: #45a049;
+}

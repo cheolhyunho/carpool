@@ -16,11 +16,12 @@ import { UserEntity } from 'src/users/users.entity'
   name: 'UnmatchedPaths',
 }) // USER : 테이블 명
 export class UnmatchedPathEntity extends CommonEntity {
-  @Column({ type: 'point', nullable: false })
-  startingPoint: string
+  @Column({ type: 'text', nullable: false })
+  startingPoint: any
 
-  @Column({ type: 'point', nullable: false })
-  destinationPoint: string
+  @Column({ type: 'text', nullable: false })
+  destinationPoint: any
+
   @Column({ type: 'int', nullable: false })
   fare: number
 
@@ -34,7 +35,6 @@ export class UnmatchedPathEntity extends CommonEntity {
 
   @OneToOne(() => UserEntity)
   user: UserEntity
-
   @ManyToOne(
     () => MatchedPathEntity,
     (matched: MatchedPathEntity) => matched.unmatchedPaths,
