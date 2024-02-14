@@ -1,15 +1,29 @@
 import { JwtAuthGuard } from './../users/jwt/jwt.guard'
-import { Controller, Get, Post, Render, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Render,
+  Req,
+  UseGuards,
+} from '@nestjs/common'
 import { UnmatchedPathsService } from './unmatched-paths.service'
+import { UnmatchedPathDto } from './dto/unmatchedPath.dto'
 
 @UseGuards(JwtAuthGuard)
-@Controller('unmatched-paths')
+@Controller('unmatchedPath')
 export class UnmatchedPathsController {
   constructor(private readonly unmatchedPathService: UnmatchedPathsService) {}
 
   @Get()
   @Render('index')
   test() {
-    return { message: 'hello' }
+    return { message: '' }
+  }
+
+  @Post()
+  async createUnmatchedPath(@Body() unmatchedPathDto: UnmatchedPathDto) {
+    return await this.unmatchedPathService.createUnmatchedPath(unmatchedPathDto)
   }
 }
