@@ -17,7 +17,7 @@ export class UnmatchedPathsController {
   constructor(private readonly unmatchedPathService: UnmatchedPathsService) {}
 
   @Get()
-  @Render('index')
+  @Render('map')
   test() {
     return { message: '' }
   }

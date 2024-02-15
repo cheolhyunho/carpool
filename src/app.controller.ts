@@ -1,9 +1,10 @@
-import { Controller, Get } from '@nestjs/common'
+import { Controller, Get, Render } from '@nestjs/common'
 
 @Controller()
 export class AppController {
-  @Get()
-  getRoot() {
-    return 'typeorm in nest, just coding'
+  @Get('/signup')
+  @Render('signup')
+  test() {
+    return { message: '' }
   }
 }
