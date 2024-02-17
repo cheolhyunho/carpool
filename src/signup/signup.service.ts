@@ -12,16 +12,19 @@ export class SignupService {
   ) {}
 
   async createUser(requestDto: RequestDto) {
+    console.log(requestDto)
     if (requestDto.password !== requestDto.confirmPassword) {
-      alert('비밀번호가 일치하지 않습니다.')
-      return
+      return '비밀번호가 일치하지 않습니다.'
     }
     const user = await this.userRepository.create({
       username: requestDto.username,
-      identityNumber: requestDto.identityNumber,
+      identityNumber: requestDto.identityNumber.toString(),
       email: requestDto.email,
       password: requestDto.password,
     })
+    console.log(
+      `user: ${user.username}, ${user.identityNumber}, ${user.email}, ${user.password}`,
+    )
     return user
   }
 }

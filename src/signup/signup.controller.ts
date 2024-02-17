@@ -14,6 +14,7 @@ export class SignupController {
 
   @Post()
   async createUser(@Body() requestDto: RequestDto) {
+    console.log('1')
     return await this.signupService.createUser(requestDto)
   }
 }
