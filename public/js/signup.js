@@ -1,21 +1,43 @@
+function sendPost(userInfo) {
+  fetch('/signup', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userInfo),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('user Model create Fail!')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      console.log('create Successful:', data)
+    })
+    .catch((error) => {
+      console.error('Error:', error)
+    })
+}
+
 function init() {
   const form = document.getElementById('signup-form')
   form.addEventListener('submit', function (event) {
     event.preventDefault()
     const name = document.getElementById('name').value
+    const identityNumber = document.getElementById('identityNumber').value
     const email = document.getElementById('email').value
     const password = document.getElementById('password').value
     const confirmPassword = document.getElementById('confirm-password').value
 
-    if (password !== confirPassword) {
-      alert('비밀번호가 일치하지 않습니다')
-      return
+    const userInfo = {
+      name,
+      identityNumber,
+      email,
+      password,
+      confirmPassword,
     }
-
-    console.log('이름:', name)
-    console.log('이메일:', email)
-    console.log('비밀번호:', password)
-    console.log('비밀번호 확인:', confirmPassword)
+    sendPost(userInfo)
   })
 }
 

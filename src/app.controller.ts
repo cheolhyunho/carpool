@@ -1,10 +1,9 @@
-import { Controller, Get, Render } from '@nestjs/common'
+import { Controller, Get } from '@nestjs/common'
 
 @Controller()
 export class AppController {
-  @Get('/signup')
-  @Render('signup')
+  @Get()
   test() {
-    return { message: '' }
+    return { message: '1' }
   }
 }
