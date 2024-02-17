@@ -7,7 +7,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator'
-import { CommonEntity } from '../common/entities/common.entity' // ormconfig.json에서 파싱 가능하도록 상대 경로로 지정
+import { CommonEntity } from './../common/entities/common.entity'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToOne } from 'typeorm'
 import { Exclude } from 'class-transformer'
 import { UnmatchedPathEntity } from './../unmatched-paths/unmatchedpaths.entity'

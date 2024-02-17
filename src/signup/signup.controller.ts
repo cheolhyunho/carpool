@@ -7,7 +7,10 @@ export class SignupController {
   constructor(private readonly signupService: SignupService) {}
 
   @Get()
-  tmp() {}
+  @Render('signup')
+  tmp() {
+    return
+  }
 
   @Post()
   async createUser(@Body() requestDto: RequestDto) {

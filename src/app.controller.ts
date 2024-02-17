@@ -1,9 +1,9 @@
 import { Controller, Get } from '@nestjs/common'
 
-@Controller()
+@Controller('/')
 export class AppController {
   @Get()
   test() {
-    return { message: '1' }
+    return 'hello'
   }
 }
