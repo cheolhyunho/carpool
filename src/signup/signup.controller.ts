@@ -1,6 +1,7 @@
 import { RequestDto } from './signup.request.dto'
-import { Body, Controller, Get, Post, Render } from '@nestjs/common'
+import { Body, Controller, Get, Post, Redirect, Render } from '@nestjs/common'
 import { SignupService } from './signup.service'
+import { response } from 'express'
 
 @Controller('signup')
 export class SignupController {
@@ -14,7 +15,6 @@ export class SignupController {
 
   @Post()
   async createUser(@Body() requestDto: RequestDto) {
-    console.log('1')
     return await this.signupService.createUser(requestDto)
   }
 }

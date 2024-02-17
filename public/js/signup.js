@@ -14,6 +14,7 @@ function sendPost(userInfo) {
     })
     .then((data) => {
       console.log('create Successful:', data)
+      window.location.href = '/'
     })
     .catch((error) => {
       console.error('Error:', error)
