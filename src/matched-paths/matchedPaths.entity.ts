@@ -1,9 +1,9 @@
 import { IsBoolean, IsEmail, IsNotEmpty, IsString } from 'class-validator'
 import { CommonEntity } from '../common/entities/common.entity' // ormconfig.json에서 파싱 가능하도록 상대 경로로 지정
 import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne } from 'typeorm'
-import { UserEntity } from 'src/users/users.entity'
-import { UnmatchedPathEntity } from 'src/unmatched-paths/unmatchedpaths.entity'
-import { TaxiDriverEntity } from 'src/taxi-driver/texiDrivers.entity'
+import { UserEntity } from './../users/users.entity'
+import { UnmatchedPathEntity } from './../unmatched-paths/unmatchedpaths.entity'
+import { TaxiDriverEntity } from './../taxi-driver/texiDrivers.entity'
 
 @Entity({
   name: 'MatchedPaths',
