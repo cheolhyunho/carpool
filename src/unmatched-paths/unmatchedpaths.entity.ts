@@ -16,10 +16,10 @@ import { UserEntity } from 'src/users/users.entity'
   name: 'UnmatchedPaths',
 }) // USER : 테이블 명
 export class UnmatchedPathEntity extends CommonEntity {
-  @Column({ type: 'point', nullable: false })
+  @Column({ type: 'text', nullable: false })
   startingPoint: string
 
-  @Column({ type: 'point', nullable: false })
+  @Column({ type: 'text', nullable: false })
   destinationPoint: string
   @Column({ type: 'int', nullable: false })
   fare: number
