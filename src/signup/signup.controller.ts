@@ -1,7 +1,7 @@
 import { RequestDto } from './signup.request.dto'
-import { Body, Controller, Get, Post, Render, Res } from '@nestjs/common'
 import { SignupService } from './signup.service'
 import { UserLogInDTO } from 'src/users/dtos/user-login.dto'
+import { Body, Controller, Get, Post, Redirect, Render } from '@nestjs/common'
 
 @Controller('signup')
 export class SignupController {

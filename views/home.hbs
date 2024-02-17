@@ -1,49 +1,30 @@
-//home.hbs
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>회원가입</title>
-    <link rel="stylesheet" href="css/signup.css" />
+    <title>Welcome to Our Website</title>
+    <link rel="stylesheet" href="css/home.css" />
   </head>
   <body>
-    <div class="container">
-      <h2>회원가입</h2>
-      <form id="signup-form">
-        <div class="form-group">
-          <label for="username">이름:</label>
-          <input type="text" id="username" name="username" required />
-        </div>
-        <div class="form-group">
-          <label for="identityNumber">주민번호:</label>
-          <input
-            type="text"
-            id="identityNumber"
-            name="identityNumber"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="email">이메일:</label>
-          <input type="email" id="email" name="email" required />
-        </div>
-
-        <div class="form-group">
-          <label for="password">비밀번호:</label>
-          <input type="password" id="password" name="password" required />
-        </div>
-        <div class="form-group">
-          <label for="confirm-password">비밀번호 확인:</label>
-          <input
-            type="password"
-            id="confirm-password"
-            name="confirm-password"
-            required
-          />
-        </div>
-        <button type="submit" id="signup-button">가입하기</button>
-      </form>
-    </div>
-    <script src="js/signup.js"></script>
+    <header>
+      <h1>Welcome to Our Website</h1>
+    </header>
+    <nav>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Services</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+    <section class="main-content">
+      <h2>About Us</h2>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vitae
+        nisi ut eros tincidunt interdum.</p>
+      <p>Sed dictum fringilla dui, sit amet convallis metus mollis et.</p>
+    </section>
+    <footer>
+      <p>&copy; 2024 Your Website. All rights reserved.</p>
+    </footer>
   </body>
 </html>

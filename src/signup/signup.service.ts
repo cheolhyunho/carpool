@@ -16,9 +16,9 @@ export class SignupService {
   ) {}
 
   async createUser(requestDto: RequestDto) {
+    console.log(requestDto)
     if (requestDto.password !== requestDto.confirmPassword) {
-      alert('비밀번호가 일치하지 않습니다.')
-      return
+      return '비밀번호가 일치하지 않습니다.'
     }
     const user = this.userRepository.create({
       username: requestDto.username,
