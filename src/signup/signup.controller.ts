@@ -7,10 +7,7 @@ export class SignupController {
   constructor(private readonly signupService: SignupService) {}
 
   @Get()
-  tmp() {
-    console.log('fdafsfsad')
-    return { message: 'fasdfdsa' }
-  }
+  tmp() {}
 
   @Post()
   async createUser(@Body() requestDto: RequestDto) {
