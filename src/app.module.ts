@@ -1,4 +1,3 @@
-import { SignupService } from './signup/signup.service'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm'
@@ -14,7 +13,6 @@ import { UnmatchedPathEntity } from './unmatched-paths/unmatchedpaths.entity'
 import { MatchedPathEntity } from './matched-paths/matchedPaths.entity'
 import { TaxiDriverEntity } from './taxi-driver/texiDrivers.entity'
 import { SignupModule } from './signup/signup.module'
-import { UsersService } from './users/users.service'
 
 const typeOrmModuleOptions = {
   useFactory: async (
@@ -68,6 +66,6 @@ const typeOrmModuleOptions = {
     SignupModule,
   ],
   controllers: [AppController],
-  providers: [UsersService],
+  providers: [UserEntity],
 })
 export class AppModule {}

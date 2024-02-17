@@ -1,6 +1,7 @@
 import { RequestDto } from './signup.request.dto'
-import { Body, Controller, Get, Post, Render } from '@nestjs/common'
+import { Body, Controller, Get, Post, Render, Res } from '@nestjs/common'
 import { SignupService } from './signup.service'
+import { UserLogInDTO } from 'src/users/dtos/user-login.dto'
 
 @Controller('signup')
 export class SignupController {
@@ -9,8 +10,12 @@ export class SignupController {
   @Get()
   @Render('signup')
   tmp() {
-    console.log('fdafsfsad')
-    return { message: 'fasdfdsa' }
+    return
+  }
+
+  @Post('login')
+  async loginUser(@Body() userloginDto: UserLogInDTO) {
+    return await this.signupService.loginUser(userloginDto)
   }
 
   @Post()

@@ -1,10 +1,16 @@
 import { Controller, Get, Render } from '@nestjs/common'
 
-@Controller()
+@Controller('/')
 export class AppController {
   @Get()
-  @Render('map')
+  @Render('login')
   test() {
-    return { message: '1' }
+    return
+  }
+
+  @Get('home')
+  @Render('home')
+  test1() {
+    return
   }
 }
