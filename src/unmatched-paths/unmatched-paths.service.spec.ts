@@ -1,18 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { UnmatchedPathsService } from './unmatched-paths.service';
+import { Test, TestingModule } from '@nestjs/testing'
+import { UnmatchedPathsService } from './unmatched-paths.service'
 
 describe('UnmatchedPathsService', () => {
-  let service: UnmatchedPathsService;
+  let service: UnmatchedPathsService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [UnmatchedPathsService],
-    }).compile();
+    }).compile()
 
-    service = module.get<UnmatchedPathsService>(UnmatchedPathsService);
-  });
+    service = module.get<UnmatchedPathsService>(UnmatchedPathsService)
+  })
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-});
+    expect(service).toBeDefined()
+  })
+})

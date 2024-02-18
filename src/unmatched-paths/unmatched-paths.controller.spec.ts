@@ -1,18 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { UnmatchedPathsController } from './unmatched-paths.controller';
+import { Test, TestingModule } from '@nestjs/testing'
+import { UnmatchedPathsController } from './unmatched-paths.controller'
 
 describe('UnmatchedPathsController', () => {
-  let controller: UnmatchedPathsController;
+  let controller: UnmatchedPathsController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UnmatchedPathsController],
-    }).compile();
+    }).compile()
 
-    controller = module.get<UnmatchedPathsController>(UnmatchedPathsController);
-  });
+    controller = module.get<UnmatchedPathsController>(UnmatchedPathsController)
+  })
 
   it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-});
+    expect(controller).toBeDefined()
+  })
+})
