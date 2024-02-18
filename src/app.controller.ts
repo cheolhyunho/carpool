@@ -1,4 +1,5 @@
-import { Controller, Get, Render } from '@nestjs/common'
+import { Controller, Get, Render, UseGuards } from '@nestjs/common'
+import { JwtAuthGuard } from './users/jwt/jwt.guard'
 
 @Controller('/')
 export class AppController {
@@ -9,8 +10,9 @@ export class AppController {
   }
 
   @Get('home')
+  @UseGuards(JwtAuthGuard)
   @Render('home')
-  test1() {
+  home() {
     return
   }
 }
