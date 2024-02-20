@@ -9,17 +9,17 @@ import { TaxiDriverEntity } from './../taxi-driver/texiDrivers.entity'
   name: 'MatchedPaths',
 }) // USER : 테이블 명
 export class MatchedPathEntity extends CommonEntity {
-  @Column({ type: 'point', nullable: false })
-  startingPoint: string
+  @Column({ type: 'varchar', nullable: false })
+  origin: string
 
-  @Column({ type: 'point', nullable: false })
-  firstWayPoint: string
+  @Column({ type: 'varchar', nullable: false })
+  waypoint1: string
 
-  @Column({ type: 'point', nullable: false })
-  secondWayPoint: string
+  @Column({ type: 'varchar', nullable: false })
+  waypoint2: string
 
-  @Column({ type: 'point', nullable: false })
-  destinationPoint: string
+  @Column({ type: 'varchar', nullable: false })
+  destination: string
 
   @Column({ type: 'int', nullable: false })
   lessFare: number
@@ -28,10 +28,10 @@ export class MatchedPathEntity extends CommonEntity {
   moreFare: number
 
   @Column({ type: 'int', nullable: false })
-  lessTime: number
+  lessDuration: number
 
   @Column({ type: 'int', nullable: false })
-  moreTime: number
+  moreDuration: number
 
   @Column({ type: 'bool', nullable: false })
   isReal: boolean

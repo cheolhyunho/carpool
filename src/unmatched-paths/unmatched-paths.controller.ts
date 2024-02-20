@@ -24,6 +24,12 @@ export class UnmatchedPathsController {
     private readonly unmatchedPathRepository: Repository<UnmatchedPathEntity>,
   ) {}
 
+  @Get()
+  @Render('map')
+  map() {
+    return
+  }
+
   @Post()
   async createUnmatchedPath(
     @Body() unmatchedPathDto: UnmatchedPathDto,
