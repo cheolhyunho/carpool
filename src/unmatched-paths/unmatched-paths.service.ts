@@ -1,3 +1,4 @@
+import { UserEntity } from './../users/users.entity'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, Transaction } from 'typeorm'
@@ -9,9 +10,14 @@ export class UnmatchedPathsService {
   constructor(
     @InjectRepository(UnmatchedPathEntity)
     private readonly unmatchedPathRepository: Repository<UnmatchedPathEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  async createUnmatchedPath(unmatchedPathDto: UnmatchedPathDto): Promise<any> {
+  async createUnmatchedPath(
+    unmatchedPathDto: UnmatchedPathDto,
+    userId,
+  ): Promise<any> {
     console.log(unmatchedPathDto.lat)
     console.log(unmatchedPathDto.lng)
 
@@ -25,6 +31,11 @@ export class UnmatchedPathsService {
     const savedUnmatchedPath = await this.unmatchedPathRepository.save(
       unmatchedPath,
     )
+
+    const user = await this.userRepository.findOne({ id: userId })
+
+    user.unmatchedPath = savedUnmatchedPath
+    const saveUser = await this.userRepository.save(user)
 
     return savedUnmatchedPath
   }

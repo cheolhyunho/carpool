@@ -10,8 +10,7 @@ export class AppController {
   }
 
   @Get('home')
-  @UseGuards(JwtAuthGuard)
-  @Render('home')
+  @Render('map')
   home() {
     return
   }

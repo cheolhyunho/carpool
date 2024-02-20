@@ -1,9 +1,21 @@
-import { Body, Controller, Get, Post, Render, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Render,
+  Req,
+  UseGuards,
+} from '@nestjs/common'
 import { UnmatchedPathsService } from './unmatched-paths.service'
 import { InjectRepository } from '@nestjs/typeorm'
 import { UnmatchedPathEntity } from './unmatchedpaths.entity'
 import { Repository } from 'typeorm'
 import { UnmatchedPathDto } from './dto/unmatchedPath.dto'
+import { JwtAuthGuard } from 'src/users/jwt/jwt.guard'
+import { CurrentUser } from 'src/common/decorators/current-user.decorator'
+
+@UseGuards(JwtAuthGuard)
 @Controller('unmatchedPath')
 export class UnmatchedPathsController {
   constructor(
@@ -13,7 +25,14 @@ export class UnmatchedPathsController {
   ) {}
 
   @Post()
-  async createUnmatchedPath(@Body() unmatchedPathDto: UnmatchedPathDto) {
-    return await this.unmatchedPathService.createUnmatchedPath(unmatchedPathDto)
+  async createUnmatchedPath(
+    @Body() unmatchedPathDto: UnmatchedPathDto,
+    @CurrentUser() req,
+  ) {
+    const userId = req.user.id
+    return await this.unmatchedPathService.createUnmatchedPath(
+      unmatchedPathDto,
+      userId,
+    )
   }
 }
