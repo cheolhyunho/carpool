@@ -33,9 +33,9 @@ export class UnmatchedPathsController {
   @Post()
   async createUnmatchedPath(
     @Body() unmatchedPathDto: UnmatchedPathDto,
-    @CurrentUser() req,
+    @CurrentUser() user,
   ) {
-    const userId = req.user.id
+    const userId = user.id
     return await this.unmatchedPathService.createUnmatchedPath(
       unmatchedPathDto,
       userId,

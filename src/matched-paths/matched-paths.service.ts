@@ -2,21 +2,24 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { MatchedPathEntity } from './matchedPaths.entity'
 import { Repository } from 'typeorm'
+import { UserEntity } from 'src/users/users.entity'
 
 @Injectable()
 export class MatchedPathsService {
   constructor(
     @InjectRepository(MatchedPathEntity)
     private readonly matchedPathRepository: Repository<MatchedPathEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  async createMatchedPath(matchedPathDto: any): Promise<any> {
+  async createMatchedPath(matchedPathDto: any, userId) {
     const matchedPath = await this.matchedPathRepository.create({
       origin: matchedPathDto.origin,
 
-      waypoint1: matchedPathDto.waypoint[0],
+      waypoint1: matchedPathDto.waypoint1,
 
-      waypoint2: matchedPathDto.waypoint[0],
+      waypoint2: matchedPathDto.waypoint2,
 
       destination: matchedPathDto.destination,
 
@@ -31,6 +34,11 @@ export class MatchedPathsService {
       isReal: true,
     })
     const savedMatchedPath = await this.matchedPathRepository.save(matchedPath)
+
+    const user = await this.userRepository.findOne(userId)
+
+    user.matchedPath = matchedPath
+    await this.userRepository.save(user)
 
     return savedMatchedPath
   }

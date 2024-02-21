@@ -7,6 +7,7 @@ import { Module } from '@nestjs/common'
 import { UnmatchedPathsController } from './unmatched-paths.controller'
 import { UnmatchedPathsService } from './unmatched-paths.service'
 import { UnmatchedPathEntity } from './unmatchedpaths.entity'
+import { JwtModule } from '@nestjs/jwt'
 
 @Module({
   imports: [

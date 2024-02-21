@@ -4,7 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, Transaction } from 'typeorm'
 import { UnmatchedPathEntity } from './unmatchedpaths.entity'
 import { UnmatchedPathDto } from './dto/unmatchedPath.dto'
-import { UserEntity } from 'src/users/users.entity'
 
 @Injectable()
 export class UnmatchedPathsService {
@@ -29,14 +28,16 @@ export class UnmatchedPathsService {
       distance: 2,
       time: 3,
     })
+
     const savedUnmatchedPath = await this.unmatchedPathRepository.save(
       unmatchedPath,
     )
 
-    const user = await this.userRepository.findOne({ id: userId })
+    const user = await this.userRepository.findOne(userId)
+
 
     user.unmatchedPath = savedUnmatchedPath
-    const saveUser = await this.userRepository.save(user)
+    await this.userRepository.save(user)
 
     return savedUnmatchedPath
   }
