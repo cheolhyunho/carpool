@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { UnmatchedPathEntity } from './unmatchedpaths.entity'
 import { Repository } from 'typeorm'
 import { UnmatchedPathDto } from './dto/unmatchedPath.dto'
+import { JwtAuthGuard } from 'src/users/jwt/jwt.guard'
 @Controller('unmatchedPath')
 export class UnmatchedPathsController {
   constructor(
@@ -13,6 +14,7 @@ export class UnmatchedPathsController {
   ) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   @Render('map')
   map() {
     return
