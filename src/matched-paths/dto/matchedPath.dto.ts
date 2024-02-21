@@ -1,9 +1,30 @@
 import { IsNumber, IsNotEmpty } from 'class-validator'
 
-export class UnmatchedPathDto {
+export class MatchedPathDto {
   @IsNotEmpty()
-  readonly lat: any
+  origin: string
 
   @IsNotEmpty()
-  readonly lng: any
+  waypoint1: string
+
+  @IsNotEmpty()
+  waypoint2: string
+
+  @IsNotEmpty()
+  destination: string
+
+  @IsNotEmpty()
+  lessFare: number
+
+  @IsNotEmpty()
+  moreFare: number
+
+  @IsNotEmpty()
+  lessDuration: number
+
+  @IsNotEmpty()
+  moreDuration: number
+
+  @IsNotEmpty()
+  isReal: boolean
 }

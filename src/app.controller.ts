@@ -10,6 +10,7 @@ import { OnlyPrivateInterceptor } from './common/interceptors/only-private.inter
 import { CurrentUser } from './common/decorators/current-user.decorator'
 import { UserEntity } from './users/users.entity'
 
+
 @Controller('/')
 export class AppController {
   @Get()
@@ -21,6 +22,7 @@ export class AppController {
   @Get('home')
   @Render('map')
   home() {
+
     return
   }
 

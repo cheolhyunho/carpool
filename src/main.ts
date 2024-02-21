@@ -12,6 +12,8 @@ import * as passport from 'passport'
 import * as cookieParser from 'cookie-parser'
 import { HttpApiExceptionFilter } from './common/exceptions/http-api-exception.filter'
 import { join } from 'path'
+import * as expressSession from 'express-session'
+import { SessionOptions } from 'express-session'
 
 class Application {
   private logger = new Logger(Application.name)
@@ -102,6 +104,12 @@ class Application {
 
 async function init(): Promise<void> {
   const server = await NestFactory.create<NestExpressApplication>(AppModule)
+  const sessionOptions: SessionOptions = {
+    secret: process.env.SECRET_KEY,
+    resave: false,
+    saveUninitialized: false,
+  }
+  server.use(expressSession(sessionOptions))
   const app = new Application(server)
   server.useStaticAssets(join(__dirname, '..', 'public'))
   server.setBaseViewsDir(join(__dirname, '..', 'views'))
