@@ -18,15 +18,8 @@ export class UnmatchedPathsService {
     unmatchedPathDto: UnmatchedPathDto,
     userId,
   ): Promise<any> {
-    console.log(unmatchedPathDto.lat)
-    console.log(unmatchedPathDto.lng)
-
     const unmatchedPath = await this.unmatchedPathRepository.create({
-      startingPoint: unmatchedPathDto.lat,
-      destinationPoint: unmatchedPathDto.lng,
-      fare: 1,
-      distance: 2,
-      time: 3,
+      startingPoint: [unmatchedPathDto.lat, unmatchedPathDto.lng],
     })
 
     const savedUnmatchedPath = await this.unmatchedPathRepository.save(
@@ -35,10 +28,19 @@ export class UnmatchedPathsService {
 
     const user = await this.userRepository.findOne(userId)
 
-
     user.unmatchedPath = savedUnmatchedPath
     await this.userRepository.save(user)
 
     return savedUnmatchedPath
+  }
+
+  async updateUnmatchedPath(body, userId) {
+    const user = await this.userRepository.findOne(userId)
+    const target = await this.unmatchedPathRepository.findOne(
+      user.unmatchedPath,
+    )
+    target.destinationPoint = [body.lat, body.lng]
+    const savedTarget = await this.unmatchedPathRepository.save(target)
+    return savedTarget
   }
 }

@@ -1,5 +1,5 @@
 body {
-  background-color: black;
+  background-color: white;
 }
 
 .bg_nest_color {
@@ -16,5 +16,33 @@ body {
 }
 
 #sendButton:hover {
+  background-color: #45a049;
+}
+
+#w-destination-wrapper {
+  position: fixed;
+  top: 0;
+  right: 0;
+  transform: translate(-100%, 0);
+}
+
+#destinationAddress {
+  width: calc(100% - 120px); /* 버튼 너비와 여백을 고려한 값으로 조정 */
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+#setDestinationButton {
+  width: 100px; /* 버튼 너비 */
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+#setDestinationButton:hover {
   background-color: #45a049;
 }

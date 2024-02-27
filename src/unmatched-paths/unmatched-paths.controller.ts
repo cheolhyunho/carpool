@@ -41,4 +41,10 @@ export class UnmatchedPathsController {
       userId,
     )
   }
+
+  @Post('setDes')
+  async updateUnmatchedPath(@Body() body:string[], @CurrentUser() user) {
+    const userId = user.id
+    return await this.unmatchedPathService.updateUnmatchedPath(body, userId)
+  }
 }

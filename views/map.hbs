@@ -12,26 +12,54 @@
     <link href="css/styles.css" rel="stylesheet" />
     <script
       type="text/javascript"
-      src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e2e6aaff52c5209242360a7098c2d078"
+      src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e2e6aaff52c5209242360a7098c2d078&libraries=services"
     ></script>
   </head>
   <body>
     <div style="overscroll-behavior: none">
       <div
         id="map"
-        style="  font-family: arial;
-  margin: 100px;
-  width: 500px;
-  height: 500px;
-
-                "
+        style="font-family: arial; margin: 100px; width: 500px; height: 500px;"
       ></div>
-      <button
-        id="triggerButton"
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Click Me
-      </button>
+
+      <div class="w-1/2" style="display: flex; flex-direction: row;">
+        <input
+          type="text"
+          id="originAddress"
+          placeholder="출발지 주소를 입력하세요"
+          class="w-full border border-gray-300 px-3 py-2 rounded-md mb-4"
+        />
+        <button
+          id="serachOriginButton"
+          class="bg-blue-500 text-white font-bold py-2 px-4 rounded mr-2"
+          style="height: auto; line-height: 1;"
+        >출발지 검색</button>
+        <button
+          id="setOriginButton"
+          class="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+          style="height: auto; line-height: 1;"
+        >출발지로 설정</button>
+      </div>
+
+      <div class="w-1/2" style="display: flex; flex-direction: row;">
+        <input
+          type="text"
+          id="destinationAddress"
+          placeholder="도착지 주소를 입력하세요"
+          class="w-full border border-gray-300 px-3 py-2 rounded-md mb-4"
+        />
+        <button
+          id="searchDestinationButton"
+          class="bg-blue-500 text-white font-bold py-2 px-4 rounded mr-2"
+          style="height: auto; line-height: 1;"
+        >도착지 검색</button>
+        <button
+          id="setDestinationButton"
+          class="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+          style="background-color: #3b82f6; height: auto; line-height: 1;"
+        >도착지 설정</button>
+      </div>
+
     </div>
 
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -44,6 +72,6 @@
       crossorigin="anonymous"
     ></script>
     <script src="js/createMap.js" defer></script>
-    <button id="sendButton">해당 위치를 출발지로 설정</button>
+    <button id="sendButton">현재위치를 출발지로 설정</button>
   </body>
 </html>

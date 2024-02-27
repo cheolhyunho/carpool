@@ -1,4 +1,9 @@
 const currentAddressSettingButton = document.getElementById('sendButton')
+const destinationAddressInput = document.getElementById('destinationAddress')
+const searchDestinationButton = document.getElementById(
+  'searchDestinationButton',
+)
+const setDestinationButton = document.getElementById('setDestinationButton')
 function sendPost(coordinateData) {
   fetch('/unmatchedPath', {
     method: 'POST',
@@ -19,6 +24,76 @@ function sendPost(coordinateData) {
     .catch((error) => {
       console.error('Error:', error)
     })
+}
+
+function setDestination(destinationPoint) {
+  fetch('/unmatchedPath/setDes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(destinationPoint),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('unmatchedPath destinationPoint Fetch Fail')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      console.log('create Successful:', data)
+    })
+    .catch((error) => {
+      console.error('Error:', error)
+    })
+}
+//주소로 목적지를 정하는 함수
+function updateMapWithDestination(destinaitionAddress) {
+  var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+    mapOption = {
+      center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+      level: 3, // 지도의 확대 레벨
+    }
+
+  // 지도를 생성합니다
+  var map = new kakao.maps.Map(mapContainer, mapOption)
+
+  // 주소-좌표 변환 객체를 생성합니다
+  var geocoder = new kakao.maps.services.Geocoder()
+
+  // 주소로 좌표를 검색합니다
+  geocoder.addressSearch(
+    JSON.stringify(destinaitionAddress),
+    function (result, status) {
+      // 정상적으로 검색이 완료됐으면
+      if (status === kakao.maps.services.Status.OK) {
+        var coords = new kakao.maps.LatLng(result[0].y, result[0].x)
+
+        // 결과값으로 받은 위치를 마커로 표시합니다
+        var marker = new kakao.maps.Marker({
+          map: map,
+          position: coords,
+        })
+
+        // 인포윈도우로 장소에 대한 설명을 표시합니다
+        var infowindow = new kakao.maps.InfoWindow({
+          content:
+            '<div style="width:150px;text-align:center;padding:6px 0;">목적지</div>',
+        })
+        infowindow.open(map, marker)
+
+        // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+        map.setCenter(coords)
+        const destinationPoint = {
+          lat: result[0].y,
+          lng: result[0].x,
+        }
+        setDestinationButton.addEventListener('click', function () {
+          setDestination(destinationPoint)
+        })
+      }
+    },
+  )
 }
 
 var mapContainer = document.getElementById('map'), // 지도를 표시할 div
@@ -85,4 +160,12 @@ currentAddressSettingButton.addEventListener('click', function () {
     }
     sendPost(coordinateData)
   })
+})
+
+searchDestinationButton.addEventListener('click', function () {
+  // 인풋박스에서 입력된 도착지 주소 가져오기
+  var destinationAddress = destinationAddressInput.value
+
+  // 주소를 이용하여 지도를 갱신하는 함수 호출
+  updateMapWithDestination(destinationAddress)
 })
