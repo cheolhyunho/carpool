@@ -43,8 +43,14 @@ export class UnmatchedPathsController {
   }
 
   @Post('setDes')
-  async updateUnmatchedPath(@Body() body:string[], @CurrentUser() user) {
+  async updateUnmatchedPath(@Body() body: string[], @CurrentUser() user) {
     const userId = user.id
     return await this.unmatchedPathService.updateUnmatchedPath(body, userId)
   }
+
+  // @Post('setEtc')
+  // async setEtc(@Body() body, @CurrentUser() user) {
+  //   const userId = user.id
+  //   return await this.unmatchedPathService.setEtc(body, userId)
+  // }
 }

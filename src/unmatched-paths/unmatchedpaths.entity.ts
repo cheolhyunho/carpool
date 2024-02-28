@@ -15,11 +15,11 @@ import { UserEntity } from './../users/users.entity'
   name: 'UnmatchedPaths',
 }) // USER : 테이블 명
 export class UnmatchedPathEntity extends CommonEntity {
-  @Column({ type: 'varchar', nullable: false })
-  startingPoint: string[]
+  @Column({ type: 'jsonb', nullable: false })
+  startingPoint: { lat: number; lng: number }
 
-  @Column({ type: 'varchar', nullable: true })
-  destinationPoint: string[]
+  @Column({ type: 'jsonb', nullable: true })
+  destinationPoint: { lat: number; lng: number }
 
   @Column({ type: 'int', nullable: true })
   fare: number
