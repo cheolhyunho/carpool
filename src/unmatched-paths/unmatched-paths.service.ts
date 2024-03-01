@@ -1,4 +1,3 @@
-import { TaxiDriverEntity } from './../taxi-driver/texiDrivers.entity'
 import { KakaoMobilityService } from './../common/kakaoMobilityService/kakao.mobility.service'
 import { UserEntity } from './../users/users.entity'
 import { Injectable } from '@nestjs/common'
@@ -86,11 +85,13 @@ export class UnmatchedPathsService {
     savedTarget.time = Math.floor(kakaoResponse.duration / 60)
 
     const reSavedTarget = await this.unmatchedPathRepository.save(savedTarget)
+    user.unmatchedPath = reSavedTarget
+    await this.userRepository.save(user)
 
     return reSavedTarget
   }
-
-  // async setEtc(body, userId) {
-  //   console.log(body.data)
-  // }
 }
+
+
+
+
