@@ -14,7 +14,7 @@ body {
   padding: 10px;
   margin-bottom: 10px;
 }
-#serachOriginButton {
+#searchOriginButton {
   position: absolute;
   top: 67%;
   left: 30%;
@@ -236,6 +236,16 @@ body {
 }
 
 #arriveButton {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin-top: 10px; /* 원하는 만큼의 상단 여백 설정 */
+  cursor: pointer;
+}
+
+#startButton {
   background-color: #4caf50;
   color: white;
   border: none;
