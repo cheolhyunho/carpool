@@ -13,6 +13,7 @@ import { UnmatchedPathEntity } from './unmatched-paths/unmatchedpaths.entity'
 import { MatchedPathEntity } from './matched-paths/matchedPaths.entity'
 import { TaxiDriverEntity } from './taxi-driver/texiDrivers.entity'
 import { SignupModule } from './signup/signup.module'
+import { JwtModule } from '@nestjs/jwt'
 
 const typeOrmModuleOptions = {
   useFactory: async (

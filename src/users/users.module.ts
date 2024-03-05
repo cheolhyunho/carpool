@@ -1,3 +1,6 @@
+import { SignupModule } from './../signup/signup.module'
+import { SignupService } from 'src/signup/signup.service'
+import { JwtStrategy } from './jwt/jwt.strategy'
 import { Module } from '@nestjs/common'
 import { UserEntity } from './users.entity'
 import { PassportModule } from '@nestjs/passport'
