@@ -3,11 +3,12 @@ import { SignupModule } from './../signup/signup.module'
 import { UsersModule } from './../users/users.module'
 import { SignupService } from 'src/signup/signup.service'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { Module } from '@nestjs/common'
+import { HttpModule, Module } from '@nestjs/common'
 import { UnmatchedPathsController } from './unmatched-paths.controller'
 import { UnmatchedPathsService } from './unmatched-paths.service'
 import { UnmatchedPathEntity } from './unmatchedpaths.entity'
 import { JwtModule } from '@nestjs/jwt'
+import { KakaoMobilityService } from 'src/common/kakaoMobilityService/kakao.mobility.service'
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { JwtModule } from '@nestjs/jwt'
     UsersModule,
   ],
   controllers: [UnmatchedPathsController],
-  providers: [UnmatchedPathsService],
+  providers: [UnmatchedPathsService, KakaoMobilityService],
 })
 export class UnmatchedPathsModule {}

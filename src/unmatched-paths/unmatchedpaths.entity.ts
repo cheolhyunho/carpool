@@ -15,19 +15,19 @@ import { UserEntity } from './../users/users.entity'
   name: 'UnmatchedPaths',
 }) // USER : 테이블 명
 export class UnmatchedPathEntity extends CommonEntity {
-  @Column({ type: 'text', nullable: false })
-  startingPoint: any
+  @Column({ type: 'jsonb', nullable: false })
+  startingPoint: { lat: number; lng: number }
 
-  @Column({ type: 'text', nullable: false })
-  destinationPoint: any
+  @Column({ type: 'jsonb', nullable: true })
+  destinationPoint: { lat: number; lng: number }
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: true })
   fare: number
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: true })
   distance: number
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: true })
   time: number
 
   //* Relation */

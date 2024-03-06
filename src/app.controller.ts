@@ -38,6 +38,13 @@ export class AppController {
     return
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('home')
+  @Render('map')
+  home() {
+    return
+  }
+
   @Get('user')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(OnlyPrivateInterceptor)
