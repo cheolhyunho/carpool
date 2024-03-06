@@ -1,15 +1,8 @@
 import { CommonEntity } from './../common/entities/common.entity' // ormconfig.json에서 파싱 가능하도록 상대 경로로 지정
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-} from 'typeorm'
+import { Column, Entity, ManyToOne, OneToOne } from 'typeorm'
 import { MatchedPathEntity } from './../matched-paths/matchedPaths.entity'
 import { UserEntity } from './../users/users.entity'
+import { text, uuid } from 'aws-sdk/clients/customerprofiles'
 
 @Entity({
   name: 'UnmatchedPaths',
@@ -29,6 +22,9 @@ export class UnmatchedPathEntity extends CommonEntity {
 
   @Column({ type: 'int', nullable: true })
   time: number
+
+  @Column({ type: 'varchar', nullable: true, array: true, default: [] })
+  userIdArray: string[]
 
   //* Relation */
 

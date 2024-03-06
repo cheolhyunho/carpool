@@ -694,3 +694,49 @@ searchOriginButton.addEventListener('click', function () {
   // 주소를 이용하여 지도를 갱신하는 함수 호출
   setOriginPoint(originAddress)
 })
+
+const matchingButton = document.getElementById('matching')
+
+matchingButton.addEventListener('click', function () {
+  fetch('/unmatchedPath/setMatching', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      console.log('Successful:', data)
+    })
+    .catch((error) => {
+      console.error('Error:', error)
+    })
+})
+
+const logoutButton = document.getElementById('logout')
+
+logoutButton.addEventListener('click', function () {
+  fetch('/signup/logout', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('')
+      }
+      return
+    })
+    .then(() => {
+      console.log('Successful')
+    })
+    .catch((error) => {
+      console.error('Error:', error)
+    })
+})

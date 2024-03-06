@@ -2,7 +2,7 @@ import { KakaoMobilityService } from './../common/kakaoMobilityService/kakao.mob
 import { UserEntity } from './../users/users.entity'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, Transaction } from 'typeorm'
+import { getConnection, Repository, Transaction } from 'typeorm'
 import { UnmatchedPathEntity } from './unmatchedpaths.entity'
 import { UnmatchedPathDto } from './dto/unmatchedPath.dto'
 
@@ -89,5 +89,50 @@ export class UnmatchedPathsService {
     await this.userRepository.save(user)
 
     return reSavedTarget
+  }
+
+  async setMatching(user) {
+    const targetUser = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
+      .where('user.id = :userId', { userId: user.id })
+      .getOne()
+
+    const targetUnmatchedPath = await this.unmatchedPathRepository.findOne(
+      targetUser.unmatchedPath.id,
+    )
+
+    targetUnmatchedPath.userIdArray = []
+
+    async function fetchUnmatchedPaths(userId) {
+      const queryBuilder = getConnection()
+        .getRepository(UserEntity)
+        .createQueryBuilder('user')
+        .leftJoin('user.unmatchedPath', 'unmatchedPath')
+        .where(
+          '(unmatchedPath.id IS NULL OR unmatchedPath.id <> :userId) AND user.id <> :userId',
+          {
+            // 수정된 부분
+            userId,
+          },
+        )
+        .getMany()
+
+      const userArray = await queryBuilder
+
+      return userArray
+    }
+
+    console.log(user.id)
+    const userArray = await fetchUnmatchedPaths(user.id)
+    console.log('userArray:', userArray)
+
+    const userIdArray = userArray.map((user) => user.id)
+
+    targetUnmatchedPath.userIdArray.push(...userIdArray)
+
+    const savedTargetUnmatchedPath =
+      this.unmatchedPathRepository.save(targetUnmatchedPath)
+    return savedTargetUnmatchedPath
   }
 }
