@@ -90,9 +90,12 @@ export class UnmatchedPathsService {
       savedTarget.destinationPoint.lat,
       savedTarget.destinationPoint.lng,
     )
-    savedTarget.fare = kakaoResponse.fare.taxi
-    savedTarget.distance = Math.floor(kakaoResponse.distance / 1000)
-    savedTarget.time = Math.floor(kakaoResponse.duration / 60)
+    if (kakaoResponse.result_code === 104) {
+      return '출발지와 목적지의 거리는 5m를 초과해야 합니다'
+    }
+    savedTarget.fare = kakaoResponse.summary.fare.taxi
+    savedTarget.distance = Math.floor(kakaoResponse.summary.distance / 1000)
+    savedTarget.time = Math.floor(kakaoResponse.summary.duration / 60)
 
     const reSavedTarget = await this.unmatchedPathRepository.save(savedTarget)
     user.unmatchedPath = reSavedTarget
@@ -178,8 +181,11 @@ export class UnmatchedPathsService {
         targetUnmatchedPath.startingPoint.lat,
         targetUnmatchedPath.startingPoint.lng,
       )
-
-      if (kakaoResponse.distance <= 10000) {
+      if (kakaoResponse.result_code === 104) {
+        tmpArray.push(savedTargetUnmatchedPath.userIdArray[i])
+        continue
+      }
+      if (kakaoResponse.summary.distance <= 10000) {
         tmpArray.push(savedTargetUnmatchedPath.userIdArray[i])
       }
     }
@@ -227,12 +233,20 @@ export class UnmatchedPathsService {
           targetUnmatchedPath2.destinationPoint.lng,
         )
 
-        if (kakaoResponse1.distance < kakaoResponse2.distance) {
+        if (kakaoResponse2.result_code === 104) {
+          break
+        }
+        if (kakaoResponse1.result_code === 104) {
+          resultArray.splice(0, 1)
+          resultArray.push(tmpArray[i])
+        }
+        if (kakaoResponse1.summary.distance < kakaoResponse2.summary.distance) {
           resultArray.splice(0, 1)
           resultArray.push(tmpArray[i])
         }
       }
-      return resultArray
     }
+    console.log('resultArray:', resultArray)
+    return resultArray
   }
 }

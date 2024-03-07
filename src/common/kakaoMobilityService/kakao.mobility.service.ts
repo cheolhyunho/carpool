@@ -19,9 +19,9 @@ export class KakaoMobilityService {
       // console.log(response.data.routes[0].summary.fare.taxi)
       // console.log(response.data.routes[0].summary.distance)
       // console.log(response.data.routes[0].summary.duration)
-      console.log('reponse.data:', response.data)
+      console.log('reponse.data:', response.data.routes[0].result_code)
 
-      return response.data.routes[0].summary
+      return response.data.routes[0]
     } catch (error) {
       throw new Error(`Failed to fetch directions: ${error.message}`)
     }
