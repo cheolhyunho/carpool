@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import axios from 'axios'
-import { RepositoryNotTreeError } from 'typeorm'
 
 @Injectable()
 export class KakaoMobilityService {
@@ -17,9 +16,10 @@ export class KakaoMobilityService {
       const response = await axios.get(url, {
         headers: { Authorization: `KakaoAK ${REST_API_KEY}` },
       })
-      console.log(response.data.routes[0].summary.fare.taxi)
-      console.log(response.data.routes[0].summary.distance)
-      console.log(response.data.routes[0].summary.duration)
+      // console.log(response.data.routes[0].summary.fare.taxi)
+      // console.log(response.data.routes[0].summary.distance)
+      // console.log(response.data.routes[0].summary.duration)
+      console.log('reponse.data:', response.data)
 
       return response.data.routes[0].summary
     } catch (error) {

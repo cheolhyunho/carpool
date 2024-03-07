@@ -43,8 +43,9 @@ export class UnmatchedPathsService {
       const savedUnmatchedPath = await this.unmatchedPathRepository.save(
         unmatchedPath,
       )
-
+      console.log('savedUnmatchedPath.id:', savedUnmatchedPath.id)
       user.unmatchedPath = savedUnmatchedPath
+      console.log('user.unmatchedPath.id:', user.unmatchedPath.id)
       await this.userRepository.save(user)
 
       return savedUnmatchedPath
@@ -52,10 +53,19 @@ export class UnmatchedPathsService {
   }
 
   async updateUnmatchedPath(body, userId) {
-    const user = await this.userRepository.findOne(userId)
+    // const user = await this.userRepository.findOne(userId)
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
+      .where('user.id = :userId', {
+        userId: userId,
+      })
+      .getOne()
+
     const target = await this.unmatchedPathRepository.findOne(
-      user.unmatchedPath,
+      user.unmatchedPath.id,
     )
+    console.log('target.id:', target.id)
     target.destinationPoint = {
       lat: body.lat,
       lng: body.lng,
@@ -110,9 +120,8 @@ export class UnmatchedPathsService {
         .createQueryBuilder('user')
         .leftJoin('user.unmatchedPath', 'unmatchedPath')
         .where(
-          '(unmatchedPath.id IS NULL OR unmatchedPath.id <> :userId) AND user.id <> :userId',
+          '((unmatchedPath.id IS NULL OR unmatchedPath.id <> :userId) AND unmatchedPath.id IS NOT NULL) AND user.id <> :userId',
           {
-            // 수정된 부분
             userId,
           },
         )
@@ -123,16 +132,107 @@ export class UnmatchedPathsService {
       return userArray
     }
 
-    console.log(user.id)
     const userArray = await fetchUnmatchedPaths(user.id)
-    console.log('userArray:', userArray)
 
     const userIdArray = userArray.map((user) => user.id)
 
     targetUnmatchedPath.userIdArray.push(...userIdArray)
 
-    const savedTargetUnmatchedPath =
-      this.unmatchedPathRepository.save(targetUnmatchedPath)
-    return savedTargetUnmatchedPath
+    const savedTargetUnmatchedPath = await this.unmatchedPathRepository.save(
+      targetUnmatchedPath,
+    )
+
+    if (savedTargetUnmatchedPath.userIdArray) {
+      let tmpArray = []
+      let resultArray = []
+      tmpArray = await this.pushToTmpArray(savedTargetUnmatchedPath, tmpArray)
+      console.log('tmpArray:', tmpArray)
+      resultArray = await this.setResultArray(
+        savedTargetUnmatchedPath,
+        tmpArray,
+        resultArray,
+      )
+      return resultArray
+    } else {
+      return '에러'
+    }
+  }
+
+  async pushToTmpArray(savedTargetUnmatchedPath, tmpArray) {
+    for (let i = 0; i < savedTargetUnmatchedPath.userIdArray.length; i++) {
+      const targetUser = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
+        .where('user.id = :userId', {
+          userId: savedTargetUnmatchedPath.userIdArray[i],
+        })
+        .getOne()
+
+      const targetUnmatchedPath = await this.unmatchedPathRepository.findOne(
+        targetUser.unmatchedPath.id,
+      )
+
+      const kakaoResponse = await this.kakaoMobilityService.getInfo(
+        savedTargetUnmatchedPath.startingPoint.lat,
+        savedTargetUnmatchedPath.startingPoint.lng,
+        targetUnmatchedPath.startingPoint.lat,
+        targetUnmatchedPath.startingPoint.lng,
+      )
+
+      if (kakaoResponse.distance <= 10000) {
+        tmpArray.push(savedTargetUnmatchedPath.userIdArray[i])
+      }
+    }
+    return tmpArray
+  }
+
+  async setResultArray(savedTargetUnmatchedPath, tmpArray, resultArray) {
+    for (let i = 0; i < tmpArray.length; i++) {
+      if (i === 0) {
+        resultArray.push(tmpArray[0])
+      } else {
+        // 반경 10km 이내에 있는 유저의 id 배열의 n번째 id
+        const targetUser1 = await this.userRepository
+          .createQueryBuilder('user')
+          .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
+          .where('user.id = :userId', {
+            userId: tmpArray[i],
+          })
+          .getOne()
+        const targetUnmatchedPath1 = await this.unmatchedPathRepository.findOne(
+          targetUser1.unmatchedPath.id,
+        )
+        // 로그인한 유저와 tmpArray[i] 에 유저와의 길찾기 api 호출
+        const kakaoResponse1 = await this.kakaoMobilityService.getInfo(
+          savedTargetUnmatchedPath.destinationPoint.lat,
+          savedTargetUnmatchedPath.destinationPoint.lng,
+          targetUnmatchedPath1.destinationPoint.lat,
+          targetUnmatchedPath1.destinationPoint.lng,
+        )
+        // resultArray 에 있는 값 === 현재까지 목적지가 가장 가까운 유저
+        const targetUser2 = await this.userRepository
+          .createQueryBuilder('user')
+          .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
+          .where('user.id = :userId', {
+            userId: resultArray[0],
+          })
+          .getOne()
+        const targetUnmatchedPath2 = await this.unmatchedPathRepository.findOne(
+          targetUser2.unmatchedPath.id,
+        )
+        const kakaoResponse2 = await this.kakaoMobilityService.getInfo(
+          savedTargetUnmatchedPath.destinationPoint.lat,
+          savedTargetUnmatchedPath.destinationPoint.lng,
+          targetUnmatchedPath2.destinationPoint.lat,
+          targetUnmatchedPath2.destinationPoint.lng,
+        )
+
+        if (kakaoResponse1.distance < kakaoResponse2.distance) {
+          resultArray.splice(0, 1)
+          resultArray.push(tmpArray[i])
+        }
+      }
+      return resultArray
+    }
   }
 }
