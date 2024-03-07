@@ -43,8 +43,9 @@ export class UnmatchedPathsService {
       const savedUnmatchedPath = await this.unmatchedPathRepository.save(
         unmatchedPath,
       )
-
+      console.log('savedUnmatchedPath.id:', savedUnmatchedPath.id)
       user.unmatchedPath = savedUnmatchedPath
+      console.log('user.unmatchedPath.id:', user.unmatchedPath.id)
       await this.userRepository.save(user)
 
       return savedUnmatchedPath
@@ -52,10 +53,19 @@ export class UnmatchedPathsService {
   }
 
   async updateUnmatchedPath(body, userId) {
-    const user = await this.userRepository.findOne(userId)
+    // const user = await this.userRepository.findOne(userId)
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
+      .where('user.id = :userId', {
+        userId: userId,
+      })
+      .getOne()
+
     const target = await this.unmatchedPathRepository.findOne(
-      user.unmatchedPath,
+      user.unmatchedPath.id,
     )
+    console.log('target.id:', target.id)
     target.destinationPoint = {
       lat: body.lat,
       lng: body.lng,
@@ -80,9 +90,9 @@ export class UnmatchedPathsService {
       savedTarget.destinationPoint.lat,
       savedTarget.destinationPoint.lng,
     )
-    savedTarget.fare = kakaoResponse.fare.taxi
-    savedTarget.distance = Math.floor(kakaoResponse.distance / 1000)
-    savedTarget.time = Math.floor(kakaoResponse.duration / 60)
+    savedTarget.fare = kakaoResponse.summary.fare.taxi
+    savedTarget.distance = Math.floor(kakaoResponse.summary.distance / 1000)
+    savedTarget.time = Math.floor(kakaoResponse.summary.duration / 60)
 
     const reSavedTarget = await this.unmatchedPathRepository.save(savedTarget)
     user.unmatchedPath = reSavedTarget
@@ -133,6 +143,112 @@ export class UnmatchedPathsService {
 
     const savedTargetUnmatchedPath =
       this.unmatchedPathRepository.save(targetUnmatchedPath)
-    return savedTargetUnmatchedPath
+
+    const compareUnmatchedPaths = []
+
+    for (let i = 0; i < targetUnmatchedPath.userIdArray.length; i++) {
+      const matchedUserId = targetUnmatchedPath.userIdArray[i]
+      const matchedUser = await this.userRepository.findOne(matchedUserId, {
+        relations: ['unmatchedPath'],
+      })
+
+      const compareUnmatchedPath = matchedUser.unmatchedPath
+      console.log('compare:', compareUnmatchedPath)
+
+      try {
+        const kakaoResponse = await this.kakaoMobilityService.getInfo(
+          targetUnmatchedPath.destinationPoint.lat,
+          targetUnmatchedPath.destinationPoint.lng,
+          compareUnmatchedPath.destinationPoint.lat,
+          compareUnmatchedPath.destinationPoint.lng,
+        )
+
+        // 104 에러가 발생했을 때 또는 kakaoResponse.distance가 10000 미만일 때 compareUnmatchedPath를 추가
+        if (kakaoResponse.summary.distance < 10000) {
+          compareUnmatchedPaths.push(compareUnmatchedPath)
+        }
+      } catch (error) {
+        compareUnmatchedPaths.push(compareUnmatchedPath)
+      }
+      console.log('목적지 반경 10km 이내 ', compareUnmatchedPaths)
+    }
+
+    const minFareArray = []
+
+    for (let i = 0; i < compareUnmatchedPaths.length; i++) {
+      let minFare = 99999999999999
+      let kakaoWaypointResponse =
+        await this.kakaoMobilityService.getWaypointInfo(
+          targetUnmatchedPath.startingPoint.lat,
+          targetUnmatchedPath.startingPoint.lng,
+          compareUnmatchedPaths[i].startingPoint.lat,
+          compareUnmatchedPaths[i].startingPoint.lng,
+          targetUnmatchedPath.destinationPoint.lat,
+          targetUnmatchedPath.destinationPoint.lng,
+          compareUnmatchedPaths[i].destinationPoint.lat,
+          compareUnmatchedPaths[i].destinationPoint.lng,
+        )
+      if (kakaoWaypointResponse.summary.fare.taxi < minFare) {
+        minFare = kakaoWaypointResponse.summary.fare.taxi
+      }
+
+      console.log('첫번째case:', minFare)
+
+      kakaoWaypointResponse = await this.kakaoMobilityService.getWaypointInfo(
+        compareUnmatchedPaths[i].startingPoint.lat,
+        compareUnmatchedPaths[i].startingPoint.lng,
+        targetUnmatchedPath.startingPoint.lat,
+        targetUnmatchedPath.startingPoint.lng,
+        targetUnmatchedPath.destinationPoint.lat,
+        targetUnmatchedPath.destinationPoint.lng,
+        compareUnmatchedPaths[i].destinationPoint.lat,
+        compareUnmatchedPaths[i].destinationPoint.lng,
+      )
+
+      if (kakaoWaypointResponse.summary.fare.taxi < minFare) {
+        minFare = kakaoWaypointResponse.summary.fare.taxi
+      }
+
+      console.log('두번째case:', minFare)
+
+      kakaoWaypointResponse = await this.kakaoMobilityService.getWaypointInfo(
+        targetUnmatchedPath.startingPoint.lat,
+        targetUnmatchedPath.startingPoint.lng,
+        compareUnmatchedPaths[i].startingPoint.lat,
+        compareUnmatchedPaths[i].startingPoint.lng,
+        compareUnmatchedPaths[i].destinationPoint.lat,
+        compareUnmatchedPaths[i].destinationPoint.lng,
+        targetUnmatchedPath.destinationPoint.lat,
+        targetUnmatchedPath.destinationPoint.lng,
+      )
+      if (kakaoWaypointResponse.summary.fare.taxi < minFare) {
+        minFare = kakaoWaypointResponse.summary.fare.taxi
+      }
+
+      console.log('세번째case:', minFare)
+
+      kakaoWaypointResponse = await this.kakaoMobilityService.getWaypointInfo(
+        compareUnmatchedPaths[i].startingPoint.lat,
+        compareUnmatchedPaths[i].startingPoint.lng,
+        targetUnmatchedPath.startingPoint.lat,
+        targetUnmatchedPath.startingPoint.lng,
+        compareUnmatchedPaths[i].destinationPoint.lat,
+        compareUnmatchedPaths[i].destinationPoint.lng,
+        targetUnmatchedPath.destinationPoint.lat,
+        targetUnmatchedPath.destinationPoint.lng,
+      )
+      if (kakaoWaypointResponse.summary.fare.taxi < minFare) {
+        minFare = kakaoWaypointResponse.summary.fare.taxi
+      }
+      console.log('네번째case:', minFare)
+      minFareArray.push(minFare)
+      console.log('minFare:Array:', minFareArray)
+    }
+    const minFareAll = Math.min(...minFareArray)
+    const minIndex = minFareArray.indexOf(minFareAll)
+
+    console.log(compareUnmatchedPaths[minIndex])
+
+    return compareUnmatchedPaths[minIndex]
   }
 }

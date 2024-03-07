@@ -27,14 +27,7 @@ export class UnmatchedPathsController {
 
   @Get('test')
   async test() {
-    const REST_API_KEY = process.env.REST_API_KEY
-    const url = `https://apis-navi.kakaomobility.com/v1/directions?origin=126.9754707,37.2138937&destination=127.128742990837,37.4113736407028&priority=RECOMMEND&car_fuel=GASOLINE&car_hipass=false&alternatives=false&road_details=false&summary=true`
-    console.log(url)
-
-    return await axios.get(url, {
-      headers: { Authorization: `KakaoAK ${REST_API_KEY}` },
-      responseType: 'arraybuffer',
-    })
+    return
   }
 
   @Get()
