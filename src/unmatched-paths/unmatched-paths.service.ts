@@ -155,22 +155,19 @@ export class UnmatchedPathsService {
       const compareUnmatchedPath = matchedUser.unmatchedPath
       console.log('compare:', compareUnmatchedPath)
 
-      try {
-        const kakaoResponse = await this.kakaoMobilityService.getInfo(
-          targetUnmatchedPath.destinationPoint.lat,
-          targetUnmatchedPath.destinationPoint.lng,
-          compareUnmatchedPath.destinationPoint.lat,
-          compareUnmatchedPath.destinationPoint.lng,
-        )
-
-        // 104 에러가 발생했을 때 또는 kakaoResponse.distance가 10000 미만일 때 compareUnmatchedPath를 추가
-        if (kakaoResponse.summary.distance < 10000) {
-          compareUnmatchedPaths.push(compareUnmatchedPath)
-        }
-      } catch (error) {
+      const kakaoResponse = await this.kakaoMobilityService.getInfo(
+        targetUnmatchedPath.destinationPoint.lat,
+        targetUnmatchedPath.destinationPoint.lng,
+        compareUnmatchedPath.destinationPoint.lat,
+        compareUnmatchedPath.destinationPoint.lng,
+      )
+      if (kakaoResponse.result_code == 104) {
+        compareUnmatchedPaths.push(compareUnmatchedPath)
+      } else if (kakaoResponse.summary.distance < 40000) {
         compareUnmatchedPaths.push(compareUnmatchedPath)
       }
-      console.log('목적지 반경 10km 이내 ', compareUnmatchedPaths)
+
+      console.log('목적지 반경 40km 이내 ', compareUnmatchedPaths)
     }
 
     const minFareArray = []
@@ -247,7 +244,7 @@ export class UnmatchedPathsService {
     const minFareAll = Math.min(...minFareArray)
     const minIndex = minFareArray.indexOf(minFareAll)
 
-    console.log(compareUnmatchedPaths[minIndex])
+    console.log('매칭성공', compareUnmatchedPaths[minIndex])
 
     return compareUnmatchedPaths[minIndex]
   }
