@@ -1,3 +1,4 @@
+import { CurrentUser } from 'src/common/decorators/current-user.decorator'
 import { KakaoMobilityService } from './../common/kakaoMobilityService/kakao.mobility.service'
 import { UserEntity } from './../users/users.entity'
 import { Injectable } from '@nestjs/common'
@@ -5,6 +6,8 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { getConnection, Repository, Transaction } from 'typeorm'
 import { UnmatchedPathEntity } from './unmatchedpaths.entity'
 import { UnmatchedPathDto } from './dto/unmatchedPath.dto'
+import { User } from 'aws-sdk/clients/budgets'
+import { userDetailListType } from 'aws-sdk/clients/iam'
 
 @Injectable()
 export class UnmatchedPathsService {
@@ -155,7 +158,50 @@ export class UnmatchedPathsService {
         tmpArray,
         resultArray,
       )
-      return resultArray
+      const currentUserUP = targetUnmatchedPath
+      const matchedUser = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
+        .where('user.id = :userId', {
+          userId: resultArray[0],
+        })
+        .getOne()
+      const matchedUserUP = await this.unmatchedPathRepository.findOne(
+        matchedUser.unmatchedPath.id,
+      )
+
+      const kakaoResponse1 = await this.kakaoMobilityService.getInfo(
+        currentUserUP.startingPoint.lat,
+        currentUserUP.startingPoint.lng,
+        currentUserUP.destinationPoint.lat,
+        currentUserUP.destinationPoint.lng,
+      )
+
+      const kakaoReponse2 = await this.kakaoMobilityService.getInfo(
+        matchedUserUP.startingPoint.lat,
+        matchedUserUP.startingPoint.lng,
+        matchedUserUP.destinationPoint.lat,
+        matchedUserUP.destinationPoint.lng,
+      )
+
+
+      let longerOne = currentUserUP
+      let shorterOne = matchedUserUP
+      if (kakaoResponse1.summary.distance < kakaoReponse2.summary.distance) {
+        longerOne = matchedUserUP
+        shorterOne = currentUserUP
+      }
+      const kakaoReponse3 = await this.kakaoMobilityService.getInfo2(
+        longerOne.startingPoint.lat,
+        longerOne.startingPoint.lng,
+        shorterOne.startingPoint.lat,
+        shorterOne.startingPoint.lng,
+        shorterOne.destinationPoint.lat,
+        shorterOne.destinationPoint.lng,
+        longerOne.destinationPoint.lat,
+        longerOne.destinationPoint.lng,
+      )
+      return
     } else {
       return '에러'
     }

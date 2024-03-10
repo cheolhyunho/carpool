@@ -33,7 +33,7 @@ export class MatchedPathEntity extends CommonEntity {
   @Column({ type: 'int', nullable: false })
   moreDuration: number
 
-  @Column({ type: 'bool', nullable: false })
+  @Column({ type: 'bool', nullable: false, default: false })
   isReal: boolean
 
   //* Relation */

@@ -32,6 +32,7 @@ export class UnmatchedPathEntity extends CommonEntity {
   user: UserEntity
   @ManyToOne(
     () => MatchedPathEntity,
+    //수정해야 하는지 검토할 부분
     (matched: MatchedPathEntity) => matched.unmatchedPaths,
     {
       onDelete: 'CASCADE',
