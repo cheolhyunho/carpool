@@ -141,111 +141,117 @@ export class UnmatchedPathsService {
 
     targetUnmatchedPath.userIdArray.push(...userIdArray)
 
-    const savedTargetUnmatchedPath =
-      this.unmatchedPathRepository.save(targetUnmatchedPath)
+    return this.unmatchedPathRepository.save(targetUnmatchedPath)
 
-    const compareUnmatchedPaths = []
+    //   const compareUnmatchedPaths = []
 
-    for (let i = 0; i < targetUnmatchedPath.userIdArray.length; i++) {
-      const matchedUserId = targetUnmatchedPath.userIdArray[i]
-      const matchedUser = await this.userRepository.findOne(matchedUserId, {
-        relations: ['unmatchedPath'],
-      })
+    //   for (let i = 0; i < targetUnmatchedPath.userIdArray.length; i++) {
+    //     const matchedUserId = targetUnmatchedPath.userIdArray[i]
+    //     const matchedUser = await this.userRepository.findOne(matchedUserId, {
+    //       relations: ['unmatchedPath'],
+    //     })
 
-      const compareUnmatchedPath = matchedUser.unmatchedPath
-      console.log('compare:', compareUnmatchedPath)
+    //     const compareUnmatchedPath = matchedUser.unmatchedPath
+    //     console.log('compare:', compareUnmatchedPath)
 
-      const kakaoResponse = await this.kakaoMobilityService.getInfo(
-        targetUnmatchedPath.destinationPoint.lat,
-        targetUnmatchedPath.destinationPoint.lng,
-        compareUnmatchedPath.destinationPoint.lat,
-        compareUnmatchedPath.destinationPoint.lng,
-      )
-      if (kakaoResponse.result_code == 104) {
-        compareUnmatchedPaths.push(compareUnmatchedPath)
-      } else if (kakaoResponse.summary.distance < 40000) {
-        compareUnmatchedPaths.push(compareUnmatchedPath)
-      }
+    //     const kakaoResponse = await this.kakaoMobilityService.getInfo(
+    //       targetUnmatchedPath.destinationPoint.lat,
+    //       targetUnmatchedPath.destinationPoint.lng,
+    //       compareUnmatchedPath.destinationPoint.lat,
+    //       compareUnmatchedPath.destinationPoint.lng,
+    //     )
+    //     if (kakaoResponse.result_code == 104) {
+    //       compareUnmatchedPaths.push(compareUnmatchedPath)
+    //     } else if (kakaoResponse.summary.distance < 40000) {
+    //       compareUnmatchedPaths.push(compareUnmatchedPath)
+    //     }
 
-      console.log('목적지 반경 40km 이내 ', compareUnmatchedPaths)
-    }
+    //     console.log('목적지 반경 40km 이내 ', compareUnmatchedPaths)
+    //   }
 
-    const minFareArray = []
+    //   const minFareArray = []
+    //   let matchedPath
 
-    for (let i = 0; i < compareUnmatchedPaths.length; i++) {
-      let minFare = 99999999999999
-      let kakaoWaypointResponse =
-        await this.kakaoMobilityService.getWaypointInfo(
-          targetUnmatchedPath.startingPoint.lat,
-          targetUnmatchedPath.startingPoint.lng,
-          compareUnmatchedPaths[i].startingPoint.lat,
-          compareUnmatchedPaths[i].startingPoint.lng,
-          targetUnmatchedPath.destinationPoint.lat,
-          targetUnmatchedPath.destinationPoint.lng,
-          compareUnmatchedPaths[i].destinationPoint.lat,
-          compareUnmatchedPaths[i].destinationPoint.lng,
-        )
-      if (kakaoWaypointResponse.summary.fare.taxi < minFare) {
-        minFare = kakaoWaypointResponse.summary.fare.taxi
-      }
+    //   for (let i = 0; i < compareUnmatchedPaths.length; i++) {
+    //     let minFare = 99999999999999
+    //     let kakaoWaypointResponse =
+    //       await this.kakaoMobilityService.getWaypointInfo(
+    //         targetUnmatchedPath.startingPoint.lat,
+    //         targetUnmatchedPath.startingPoint.lng,
+    //         compareUnmatchedPaths[i].startingPoint.lat,
+    //         compareUnmatchedPaths[i].startingPoint.lng,
+    //         targetUnmatchedPath.destinationPoint.lat,
+    //         targetUnmatchedPath.destinationPoint.lng,
+    //         compareUnmatchedPaths[i].destinationPoint.lat,
+    //         compareUnmatchedPaths[i].destinationPoint.lng,
+    //       )
+    //     if (kakaoWaypointResponse.summary.fare.taxi < minFare) {
+    //       minFare = kakaoWaypointResponse.summary.fare.taxi
+    //       matchedPath = kakaoWaypointResponse
+    //     }
 
-      console.log('첫번째case:', minFare)
+    //     console.log('첫번째case:', minFare)
 
-      kakaoWaypointResponse = await this.kakaoMobilityService.getWaypointInfo(
-        compareUnmatchedPaths[i].startingPoint.lat,
-        compareUnmatchedPaths[i].startingPoint.lng,
-        targetUnmatchedPath.startingPoint.lat,
-        targetUnmatchedPath.startingPoint.lng,
-        targetUnmatchedPath.destinationPoint.lat,
-        targetUnmatchedPath.destinationPoint.lng,
-        compareUnmatchedPaths[i].destinationPoint.lat,
-        compareUnmatchedPaths[i].destinationPoint.lng,
-      )
+    //     kakaoWaypointResponse = await this.kakaoMobilityService.getWaypointInfo(
+    //       compareUnmatchedPaths[i].startingPoint.lat,
+    //       compareUnmatchedPaths[i].startingPoint.lng,
+    //       targetUnmatchedPath.startingPoint.lat,
+    //       targetUnmatchedPath.startingPoint.lng,
+    //       targetUnmatchedPath.destinationPoint.lat,
+    //       targetUnmatchedPath.destinationPoint.lng,
+    //       compareUnmatchedPaths[i].destinationPoint.lat,
+    //       compareUnmatchedPaths[i].destinationPoint.lng,
+    //     )
 
-      if (kakaoWaypointResponse.summary.fare.taxi < minFare) {
-        minFare = kakaoWaypointResponse.summary.fare.taxi
-      }
+    //     if (kakaoWaypointResponse.summary.fare.taxi < minFare) {
+    //       minFare = kakaoWaypointResponse.summary.fare.taxi
+    //       matchedPath = kakaoWaypointResponse
+    //     }
 
-      console.log('두번째case:', minFare)
+    //     console.log('두번째case:', minFare)
 
-      kakaoWaypointResponse = await this.kakaoMobilityService.getWaypointInfo(
-        targetUnmatchedPath.startingPoint.lat,
-        targetUnmatchedPath.startingPoint.lng,
-        compareUnmatchedPaths[i].startingPoint.lat,
-        compareUnmatchedPaths[i].startingPoint.lng,
-        compareUnmatchedPaths[i].destinationPoint.lat,
-        compareUnmatchedPaths[i].destinationPoint.lng,
-        targetUnmatchedPath.destinationPoint.lat,
-        targetUnmatchedPath.destinationPoint.lng,
-      )
-      if (kakaoWaypointResponse.summary.fare.taxi < minFare) {
-        minFare = kakaoWaypointResponse.summary.fare.taxi
-      }
+    //     kakaoWaypointResponse = await this.kakaoMobilityService.getWaypointInfo(
+    //       targetUnmatchedPath.startingPoint.lat,
+    //       targetUnmatchedPath.startingPoint.lng,
+    //       compareUnmatchedPaths[i].startingPoint.lat,
+    //       compareUnmatchedPaths[i].startingPoint.lng,
+    //       compareUnmatchedPaths[i].destinationPoint.lat,
+    //       compareUnmatchedPaths[i].destinationPoint.lng,
+    //       targetUnmatchedPath.destinationPoint.lat,
+    //       targetUnmatchedPath.destinationPoint.lng,
+    //     )
+    //     if (kakaoWaypointResponse.summary.fare.taxi < minFare) {
+    //       minFare = kakaoWaypointResponse.summary.fare.taxi
+    //       matchedPath = kakaoWaypointResponse
+    //     }
 
-      console.log('세번째case:', minFare)
+    //     console.log('세번째case:', minFare)
 
-      kakaoWaypointResponse = await this.kakaoMobilityService.getWaypointInfo(
-        compareUnmatchedPaths[i].startingPoint.lat,
-        compareUnmatchedPaths[i].startingPoint.lng,
-        targetUnmatchedPath.startingPoint.lat,
-        targetUnmatchedPath.startingPoint.lng,
-        compareUnmatchedPaths[i].destinationPoint.lat,
-        compareUnmatchedPaths[i].destinationPoint.lng,
-        targetUnmatchedPath.destinationPoint.lat,
-        targetUnmatchedPath.destinationPoint.lng,
-      )
-      if (kakaoWaypointResponse.summary.fare.taxi < minFare) {
-        minFare = kakaoWaypointResponse.summary.fare.taxi
-      }
-      console.log('네번째case:', minFare)
-      minFareArray.push(minFare)
-      console.log('minFare:Array:', minFareArray)
-    }
-    const minFareAll = Math.min(...minFareArray)
-    const minIndex = minFareArray.indexOf(minFareAll)
+    //     kakaoWaypointResponse = await this.kakaoMobilityService.getWaypointInfo(
+    //       compareUnmatchedPaths[i].startingPoint.lat,
+    //       compareUnmatchedPaths[i].startingPoint.lng,
+    //       targetUnmatchedPath.startingPoint.lat,
+    //       targetUnmatchedPath.startingPoint.lng,
+    //       compareUnmatchedPaths[i].destinationPoint.lat,
+    //       compareUnmatchedPaths[i].destinationPoint.lng,
+    //       targetUnmatchedPath.destinationPoint.lat,
+    //       targetUnmatchedPath.destinationPoint.lng,
+    //     )
+    //     if (kakaoWaypointResponse.summary.fare.taxi < minFare) {
+    //       minFare = kakaoWaypointResponse.summary.fare.taxi
+    //       matchedPath = kakaoWaypointResponse
+    //     }
+    //     console.log('네번째case:', minFare)
+    //     minFareArray.push(minFare)
+    //     console.log('minFare:Array:', minFareArray)
+    //   }
+    //   const minFareAll = Math.min(...minFareArray)
+    //   const minIndex = minFareArray.indexOf(minFareAll)
 
-    console.log('매칭성공', compareUnmatchedPaths[minIndex])
+    //   console.log('나의 기존 경로:', targetUnmatchedPath)
+    //   console.log('매칭된 다른 unmatched:', compareUnmatchedPaths[minIndex])
+    //   console.log('매칭된 경로:', matchedPath)
 
-    return compareUnmatchedPaths[minIndex]
+    //   return compareUnmatchedPaths[minIndex]
   }
 }

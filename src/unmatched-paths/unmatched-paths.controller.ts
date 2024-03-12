@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   Post,
   Render,
   Req,
@@ -15,6 +16,7 @@ import { UnmatchedPathDto } from './dto/unmatchedPath.dto'
 import { JwtAuthGuard } from 'src/users/jwt/jwt.guard'
 import axios from 'axios'
 import { CurrentUser } from 'src/common/decorators/current-user.decorator'
+import { userInfo } from 'os'
 
 @UseGuards(JwtAuthGuard)
 @Controller('unmatchedPath')
@@ -25,9 +27,10 @@ export class UnmatchedPathsController {
     private readonly unmatchedPathRepository: Repository<UnmatchedPathEntity>,
   ) {}
 
-  @Get('test')
-  async test() {
-    return
+  @Get('userId')
+  async test(@CurrentUser() user) {
+    console.log('user:', user)
+    return user
   }
 
   @Get()

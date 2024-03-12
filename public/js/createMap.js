@@ -1,3 +1,4 @@
+const socket = io('/')
 const currentAddressSettingButton = document.getElementById('sendButton')
 const destinationAddressInput = document.getElementById('destinationAddress')
 const searchDestinationButton = document.getElementById(
@@ -698,7 +699,7 @@ searchOriginButton.addEventListener('click', function () {
 const matchingButton = document.getElementById('matching')
 
 matchingButton.addEventListener('click', function () {
-  fetch('/unmatchedPath/setMatching', {
+  user = fetch('/unmatchedPath/userId', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -716,13 +717,14 @@ matchingButton.addEventListener('click', function () {
     .catch((error) => {
       console.error('Error:', error)
     })
+  socket.emit('test', user)
 })
 
 const logoutButton = document.getElementById('logout')
 
 logoutButton.addEventListener('click', function () {
   fetch('/signup/logout', {
-    method: 'POST',
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
