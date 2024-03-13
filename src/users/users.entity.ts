@@ -45,6 +45,9 @@ export class UserEntity extends CommonEntity {
   @Column({ type: 'boolean', default: false })
   isAdmin: boolean
 
+  @Column({ type: 'varchar', nullable: true })
+  socketId: string
+
   //* Relation */
 
   @OneToOne(() => UnmatchedPathEntity) // 단방향 연결, 양방향도 가능

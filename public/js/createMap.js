@@ -7,6 +7,7 @@ const originAddressInput = document.getElementById('originAddress')
 const searchOriginButton = document.getElementById('searchOriginButton')
 const setDestinationButton = document.getElementById('setDestinationButton')
 const setOriginButton = document.getElementById('setOriginButton')
+const socket = io('/')
 function sendPost(coordinateData) {
   fetch('/unmatchedPath', {
     method: 'POST',
@@ -712,6 +713,7 @@ matchingButton.addEventListener('click', function () {
     })
     .then((data) => {
       console.log('Successful:', data)
+      socket.emit('matching', data)
     })
     .catch((error) => {
       console.error('Error:', error)

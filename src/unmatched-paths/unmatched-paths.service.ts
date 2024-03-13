@@ -1,4 +1,5 @@
-import { CurrentUser } from 'src/common/decorators/current-user.decorator'
+import { TaxiDriverEntity } from './../taxi-driver/texiDrivers.entity'
+import { CurrentUser } from './../common/decorators/current-user.decorator'
 import { KakaoMobilityService } from './../common/kakaoMobilityService/kakao.mobility.service'
 import { UserEntity } from './../users/users.entity'
 import { Injectable } from '@nestjs/common'
@@ -184,7 +185,6 @@ export class UnmatchedPathsService {
         matchedUserUP.destinationPoint.lng,
       )
 
-
       let longerOne = currentUserUP
       let shorterOne = matchedUserUP
       if (kakaoResponse1.summary.distance < kakaoReponse2.summary.distance) {
@@ -201,7 +201,127 @@ export class UnmatchedPathsService {
         longerOne.destinationPoint.lat,
         longerOne.destinationPoint.lng,
       )
-      return
+
+      const longerOneUser = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
+        .where('user.unmatchedPath = :unmatchedPathId', {
+          unmatchedPathId: longerOne.id,
+        })
+        .getOne()
+
+      const shorterOneUser = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
+        .where('user.unmatchedPath = :unmatchedPathId', {
+          unmatchedPathId: shorterOne.id,
+        })
+        .getOne()
+
+      const shorterOneInfoWhenUnmatched =
+        await this.kakaoMobilityService.getInfo(
+          shorterOne.startingPoint.lat,
+          shorterOne.startingPoint.lng,
+          shorterOne.destinationPoint.lat,
+          shorterOne.destinationPoint.lng,
+        )
+
+      const longerOneInfoWhenUnmatched =
+        await this.kakaoMobilityService.getInfo(
+          longerOne.startingPoint.lat,
+          longerOne.startingPoint.lng,
+          longerOne.destinationPoint.lat,
+          longerOne.destinationPoint.lng,
+        )
+
+      const shorterOneDataWhenUnmatched = {
+        dbId: shorterOneUser.id,
+        socketId: shorterOneUser.socketId,
+        fare: {
+          taxi: shorterOneInfoWhenUnmatched.summary.fare.taxi,
+          toll: shorterOneInfoWhenUnmatched.summary.fare.toll,
+        },
+        duration: shorterOneInfoWhenUnmatched.summary.duration,
+      }
+
+      const longerOneDataWhenUnmatched = {
+        userDbId: longerOneUser.id,
+        userSocketId: longerOneUser.socketId,
+        fare: {
+          taxi: longerOneInfoWhenUnmatched.summary.fare.taxi,
+          toll: longerOneInfoWhenUnmatched.summary.fare.toll,
+        },
+        duration: longerOneInfoWhenUnmatched.summary.duration,
+      }
+
+      const whenMatchedInfo = kakaoReponse3
+
+      let shorterOneDataWhenMatched
+      let longerOneDataWhenMatched
+
+      if (shorterOneInfoWhenUnmatched.summary.fare.toll !== 0) {
+        shorterOneDataWhenMatched = {
+          userDbId: shorterOneUser.id,
+          userSocketId: shorterOneUser.socketId,
+          fare: {
+            taxi: shorterOneInfoWhenUnmatched.summary.fare.taxi / 2,
+            toll: shorterOneInfoWhenUnmatched.summary.fare.toll / 2,
+          },
+          duration: shorterOneInfoWhenUnmatched.summary.duration,
+        }
+      } else {
+        shorterOneDataWhenMatched = {
+          userDbId: shorterOneUser.id,
+          userSocketId: shorterOneUser.socketId,
+          fare: {
+            taxi: shorterOneInfoWhenUnmatched.summary.fare.taxi / 2,
+            toll: 0,
+          },
+          duration: shorterOneInfoWhenUnmatched.summary.duration,
+        }
+
+        if (
+          longerOneInfoWhenUnmatched.summary.fare.toll !== 0 &&
+          shorterOneDataWhenMatched.fare.toll !== 0
+        ) {
+          longerOneDataWhenMatched = {
+            userDbId: longerOneUser.id,
+            userSocketId: longerOneUser.socketId,
+            fare: {
+              taxi:
+                longerOneInfoWhenUnmatched.summary.fare.taxi -
+                shorterOneDataWhenMatched.fare.taxi,
+              fare:
+                longerOneInfoWhenUnmatched.summary.fare.toll -
+                shorterOneDataWhenMatched.fare.toll,
+            },
+            duration: longerOneInfoWhenUnmatched.summary.duration,
+          }
+        } else if (
+          longerOneInfoWhenUnmatched.summary.fare.toll === 0 ||
+          shorterOneDataWhenMatched.fare.toll === 0
+        ) {
+          longerOneDataWhenMatched = {
+            userDbId: longerOneUser.id,
+            userSocketId: longerOneUser.socketId,
+            fare: {
+              taxi:
+                longerOneInfoWhenUnmatched.summary.fare.taxi -
+                shorterOneDataWhenMatched.fare.taxi,
+              toll: longerOneInfoWhenUnmatched.summary.fare.toll,
+            },
+            duration: longerOneInfoWhenUnmatched.summary.duration,
+          }
+        }
+      }
+
+      const resData = {
+        shorterOneDataWhenMatched,
+        longerOneDataWhenMatched,
+        currentUserId: user.id,
+      }
+
+      return resData
     } else {
       return '에러'
     }

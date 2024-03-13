@@ -1,3 +1,4 @@
+import { IsUUID } from 'class-validator'
 import {
   Body,
   Controller,
