@@ -191,6 +191,7 @@ export class UnmatchedPathsService {
         longerOne = matchedUserUP
         shorterOne = currentUserUP
       }
+      const test = 1
       const kakaoReponse3 = await this.kakaoMobilityService.getInfo2(
         longerOne.startingPoint.lat,
         longerOne.startingPoint.lng,
