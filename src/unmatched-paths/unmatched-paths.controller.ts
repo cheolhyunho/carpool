@@ -29,7 +29,7 @@ export class UnmatchedPathsController {
 
   @Get('userId')
   async test(@CurrentUser() user) {
-    console.log('user:', user)
+    console.log('userId 획득')
     return user
   }
 

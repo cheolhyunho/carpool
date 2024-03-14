@@ -1,7 +1,7 @@
-import { CommonEntity } from './../common/entities/common.entity' // ormconfig.json에서 파싱 가능하도록 상대 경로로 지정
+import { CommonEntity } from '../common/entities/common.entity' // ormconfig.json에서 파싱 가능하도록 상대 경로로 지정
 import { Column, Entity, ManyToOne, OneToOne } from 'typeorm'
-import { MatchedPathEntity } from './../matched-paths/matchedPaths.entity'
-import { UserEntity } from './../users/users.entity'
+import { MatchedPathEntity } from '../matched-paths/matchedPaths.entity'
+import { UserEntity } from '../users/users.entity'
 import { text, uuid } from 'aws-sdk/clients/customerprofiles'
 
 @Entity({
