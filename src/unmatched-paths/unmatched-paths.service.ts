@@ -1,3 +1,5 @@
+import { TaxiDriverEntity } from './../taxi-driver/texiDrivers.entity'
+import { CurrentUser } from './../common/decorators/current-user.decorator'
 import { KakaoMobilityService } from './../common/kakaoMobilityService/kakao.mobility.service'
 import { UserEntity } from './../users/users.entity'
 import { Injectable } from '@nestjs/common'
@@ -5,6 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { getConnection, Repository, Transaction } from 'typeorm'
 import { UnmatchedPathEntity } from './unmatchedpaths.entity'
 import { UnmatchedPathDto } from './dto/unmatchedPath.dto'
+import { User } from 'aws-sdk/clients/budgets'
+import { userDetailListType } from 'aws-sdk/clients/iam'
 
 @Injectable()
 export class UnmatchedPathsService {
@@ -90,6 +94,12 @@ export class UnmatchedPathsService {
       savedTarget.destinationPoint.lat,
       savedTarget.destinationPoint.lng,
     )
+
+
+    if (kakaoResponse.result_code === 104) {
+      return '출발지와 목적지의 거리는 5m를 초과해야 합니다'
+    }
+
     savedTarget.fare = kakaoResponse.summary.fare.taxi
     savedTarget.distance = Math.floor(kakaoResponse.summary.distance / 1000)
     savedTarget.time = Math.floor(kakaoResponse.summary.duration / 60)
@@ -390,6 +400,7 @@ export class UnmatchedPathsService {
   }
 
   //  출발지 nkm 이내 배열에 담기
+
   async pushToTmpArray(savedTargetUnmatchedPath, tmpArray) {
     for (let i = 0; i < savedTargetUnmatchedPath.userIdArray.length; i++) {
       const targetUser = await this.userRepository
@@ -477,9 +488,11 @@ export class UnmatchedPathsService {
     }
     console.log('resultArray:', resultArray)
     return resultArray
+
   }
 
   async sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms))
+
   }
 }

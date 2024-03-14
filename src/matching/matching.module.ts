@@ -1,3 +1,4 @@
+
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { MatchingGateway } from './matching.gateway'
@@ -15,5 +16,6 @@ import { KakaoMobilityService } from 'src/common/kakaoMobilityService/kakao.mobi
     UnmatchedPathsModule,
   ],
   providers: [MatchingGateway, UnmatchedPathsService, KakaoMobilityService],
+
 })
 export class MatchingModule {}
