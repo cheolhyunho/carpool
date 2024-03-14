@@ -8,6 +8,8 @@ const originAddressInput = document.getElementById('originAddress')
 const searchOriginButton = document.getElementById('searchOriginButton')
 const setDestinationButton = document.getElementById('setDestinationButton')
 const setOriginButton = document.getElementById('setOriginButton')
+const matchingButton = document.getElementById('matching')
+const logoutButton = document.getElementById('logout')
 
 function sendPost(coordinateData) {
   fetch('/unmatchedPath', {
@@ -697,8 +699,6 @@ searchOriginButton.addEventListener('click', function () {
   setOriginPoint(originAddress)
 })
 
-const logoutButton = document.getElementById('logout')
-
 logoutButton.addEventListener('click', function () {
   fetch('/signup/logout', {
     method: 'GET',
@@ -720,8 +720,6 @@ logoutButton.addEventListener('click', function () {
       console.error('Error:', error)
     })
 })
-
-const matchingButton = document.getElementById('matching')
 
 matchingButton.addEventListener('click', function () {
   fetch('/unmatchedPath/userId', {

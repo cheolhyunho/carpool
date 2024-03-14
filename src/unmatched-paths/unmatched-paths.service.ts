@@ -7,8 +7,6 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { getConnection, Repository, Transaction } from 'typeorm'
 import { UnmatchedPathEntity } from './unmatchedpaths.entity'
 import { UnmatchedPathDto } from './dto/unmatchedPath.dto'
-import { User } from 'aws-sdk/clients/budgets'
-import { userDetailListType } from 'aws-sdk/clients/iam'
 
 @Injectable()
 export class UnmatchedPathsService {
@@ -95,7 +93,6 @@ export class UnmatchedPathsService {
       savedTarget.destinationPoint.lng,
     )
 
-
     if (kakaoResponse.result_code === 104) {
       return '출발지와 목적지의 거리는 5m를 초과해야 합니다'
     }
@@ -124,25 +121,7 @@ export class UnmatchedPathsService {
 
     targetUnmatchedPath.userIdArray = []
 
-    async function fetchUnmatchedPaths(userId) {
-      const queryBuilder = getConnection()
-        .getRepository(UserEntity)
-        .createQueryBuilder('user')
-        .leftJoin('user.unmatchedPath', 'unmatchedPath')
-        .where(
-          'unmatchedPath.id IS NOT NULL  AND user.id <> :userId AND user.socketId IS NOT NULL',
-          {
-            userId,
-          },
-        )
-        .getMany()
-
-      const userArray = await queryBuilder
-
-      return userArray
-    }
-
-    const userArray = await fetchUnmatchedPaths(user.id)
+    const userArray = await this.fetchUnmatchedPaths(user.id)
 
     const userIdArray = userArray.map((user) => user.id)
 
@@ -293,6 +272,23 @@ export class UnmatchedPathsService {
       currentDistance,
       matchedDistance,
     ]
+  }
+  async fetchUnmatchedPaths(userId) {
+    const queryBuilder = getConnection()
+      .getRepository(UserEntity)
+      .createQueryBuilder('user')
+      .leftJoin('user.unmatchedPath', 'unmatchedPath')
+      .where(
+        'unmatchedPath.id IS NOT NULL  AND user.id <> :userId AND user.socketId IS NOT NULL',
+        {
+          userId,
+        },
+      )
+      .getMany()
+
+    const userArray = await queryBuilder
+
+    return userArray
   }
 
   async findMatchedCase(currentUserUP, matchedUserUP) {
@@ -488,11 +484,9 @@ export class UnmatchedPathsService {
     }
     console.log('resultArray:', resultArray)
     return resultArray
-
   }
 
   async sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms))
-
   }
 }
