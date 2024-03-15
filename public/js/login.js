@@ -14,7 +14,7 @@ function sendLoginInfo(loginInfo) {
     })
     .then((data) => {
       console.log('로그인성공:', data)
-      window.location.href = '/home'
+      window.location.href = '/unmatchedPath'
     })
     .catch((error) => {
       console.error('Error:', error)

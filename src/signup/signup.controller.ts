@@ -1,5 +1,4 @@
 import { RequestDto } from './signup.request.dto'
-
 import { SignupService } from './signup.service'
 import { UserLogInDTO } from 'src/users/dtos/user-login.dto'
 import {
@@ -25,11 +24,6 @@ export class SignupController {
     return
   }
 
-  // @Post('login')
-  // async loginUser(@Body() userloginDto: UserLogInDTO) {
-  //   return await this.signupService.loginUser(userloginDto)
-  // }
-
   @Post('login')
   async logIn(
     @Body() userLoginDTO: UserLogInDTO,
@@ -43,11 +37,10 @@ export class SignupController {
     return user
   }
 
-  @Post('logout')
+  @Get('logout')
   async logOut(@Res({ passthrough: true }) response: Response) {
-    console.log('로그아웃')
-    response.clearCookie('jwt')
-    return '로그아웃'
+    response.clearCookie('jwt', { httpOnly: true, path: '/' })
+    return
   }
 
   @Post()

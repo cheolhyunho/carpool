@@ -14,7 +14,10 @@ import { MatchedPathEntity } from './matched-paths/matchedPaths.entity'
 import { TaxiDriverEntity } from './taxi-driver/texiDrivers.entity'
 import { SignupModule } from './signup/signup.module'
 import { JwtModule } from '@nestjs/jwt'
-import { MatchingModule } from './matching/matching.module';
+import { MatchingGateway } from './matching/matching.gateway'
+import { MatchingModule } from './matching/matching.module'
+import { UnmatchedPathsService } from './unmatched-paths/unmatched-paths.service'
+
 
 const typeOrmModuleOptions = {
   useFactory: async (
@@ -69,6 +72,6 @@ const typeOrmModuleOptions = {
     MatchingModule,
   ],
   controllers: [AppController],
-  providers: [UserEntity],
+  providers: [UserEntity, UnmatchedPathEntity],
 })
 export class AppModule {}

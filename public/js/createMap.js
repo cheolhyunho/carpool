@@ -1,3 +1,4 @@
+const socket = io('/')
 const currentAddressSettingButton = document.getElementById('sendButton')
 const destinationAddressInput = document.getElementById('destinationAddress')
 const searchDestinationButton = document.getElementById(
@@ -7,7 +8,9 @@ const originAddressInput = document.getElementById('originAddress')
 const searchOriginButton = document.getElementById('searchOriginButton')
 const setDestinationButton = document.getElementById('setDestinationButton')
 const setOriginButton = document.getElementById('setOriginButton')
-const socket = io('/')
+const matchingButton = document.getElementById('matching')
+const logoutButton = document.getElementById('logout')
+
 function sendPost(coordinateData) {
   fetch('/unmatchedPath', {
     method: 'POST',
@@ -696,35 +699,9 @@ searchOriginButton.addEventListener('click', function () {
   setOriginPoint(originAddress)
 })
 
-const matchingButton = document.getElementById('matching')
-
-matchingButton.addEventListener('click', function () {
-  fetch('/unmatchedPath/setMatching', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('')
-      }
-      return response.json()
-    })
-    .then((data) => {
-      console.log('Successful:', data)
-      socket.emit('matching', data)
-    })
-    .catch((error) => {
-      console.error('Error:', error)
-    })
-})
-
-const logoutButton = document.getElementById('logout')
-
 logoutButton.addEventListener('click', function () {
   fetch('/signup/logout', {
-    method: 'POST',
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -737,8 +714,38 @@ logoutButton.addEventListener('click', function () {
     })
     .then(() => {
       console.log('Successful')
+      window.location.href = '/'
     })
     .catch((error) => {
       console.error('Error:', error)
     })
+})
+
+matchingButton.addEventListener('click', function () {
+  fetch('/unmatchedPath/userId', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      socket.emit('test', data, (user) => {
+        console.log('수신완료:', user)
+      })
+    })
+    .catch((error) => {
+      console.error('UserId 가져오기 실패:', error)
+    })
+})
+
+//global
+socket.on('matching', (matchingPath) => {
+  console.log('매칭성공!')
+  console.log(matchingPath)
 })

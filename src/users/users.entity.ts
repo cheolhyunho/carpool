@@ -41,12 +41,12 @@ export class UserEntity extends CommonEntity {
   @Column({ type: 'varchar', unique: false, nullable: false })
   password: string
 
+  @Column({ type: 'varchar', nullable: true })
+  socketId: string
+
   @IsBoolean()
   @Column({ type: 'boolean', default: false })
   isAdmin: boolean
-
-  @Column({ type: 'varchar', nullable: true })
-  socketId: string
 
   //* Relation */
 
