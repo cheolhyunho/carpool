@@ -987,4 +987,20 @@ window.onload = function () {
   } else {
     console.error('testButton이 찾을 수 없습니다.')
   }
+
+  socket.on('wantLocation', function (data) {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(function (position) {
+        const latitude = position.coords.latitude
+        const longitude = position.coords.longitude
+        const data = {
+          lat: latitude,
+          lng: longitude,
+        }
+        socket.emit('hereIsLocation', data)
+      })
+    } else {
+      alert('이 브라우저에서는 Geolocation 을 지원하지 않습니다.')
+    }
+  })
 }

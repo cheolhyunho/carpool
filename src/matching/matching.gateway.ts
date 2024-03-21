@@ -14,6 +14,7 @@ import { Socket } from 'socket.io'
 import { MatchedPathEntity } from '../matched-paths/matchedPaths.entity'
 import { MatchedPathsService } from '../matched-paths/matched-paths.service'
 import { EntityManager } from 'typeorm'
+import { KakaoMobilityService } from 'src/common/kakaoMobilityService/kakao.mobility.service'
 
 @WebSocketGateway()
 export class MatchingGateway implements OnGatewayDisconnect {
@@ -25,6 +26,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     @InjectRepository(MatchedPathEntity)
     private readonly matchedPathRepository: Repository<MatchedPathEntity>,
     private readonly entityManager: EntityManager,
+    private readonly kakaoMobilityService: KakaoMobilityService,
   ) {}
 
   private logger = new Logger('gateway')
@@ -118,6 +120,30 @@ export class MatchingGateway implements OnGatewayDisconnect {
     )
     if (isAccepted && elapsedTime < timeoutLimit) {
       //택시기사매칭 로직
+      let inArrange = []
+      let inArrange2 = []
+      const drivers = await this.userRepository.find({
+        where: { isDriver: true },
+      })
+      for (const driver of drivers) {
+        socket.to(driver.socketId).emit('wantLocation')
+      }
+      socket.on('hereIsLocation', async function (data) {
+        const kakaoResponse = await this.KakaoMobilityService.getInfo(
+          matchedPath.origin.lat,
+          matchedPath.origin.lng,
+          data.lat,
+          data.lng,
+        )
+        if (kakaoResponse.summary.duration <= 300) {
+          inArrange.push(data.socketId)
+        } else if (kakaoResponse.summary.duration <= 600) {
+          inArrange.push(data.socketId)
+        }
+      })
+      for (const socketId of inArrange) {
+        socket.to(socketId).emit('letsDrive')
+      }
       return '매칭성공'
     } else {
       if (socket.id) {
