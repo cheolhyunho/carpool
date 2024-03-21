@@ -25,7 +25,7 @@ export class SignupService {
   ) {}
 
   async createUser(requestDto: RequestDto) {
-    console.log(requestDto)
+    console.log('requestDTo:', requestDto)
     const existingUser = await this.userRepository.findOne({
       where: { email: requestDto.email },
     })
@@ -44,6 +44,7 @@ export class SignupService {
       email: requestDto.email,
       password: requestDto.password,
     })
+    console.log(user)
     await this.userRepository.save(user)
     return user
   }

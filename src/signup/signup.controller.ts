@@ -21,7 +21,7 @@ export class SignupController {
   @Get()
   @Render('signup')
   tmp() {
-    return
+    
   }
 
   @Post('login')
