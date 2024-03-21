@@ -23,7 +23,7 @@ function sendPost(userInfo) {
 
 function init() {
   const form = document.getElementById('signup-form')
-  form.addEventListener('submit', function (event) {
+  form.addEventListener('submit', async function (event) {
     event.preventDefault()
     const username = document.getElementById('username').value
     const identityNumber = document.getElementById('identityNumber').value

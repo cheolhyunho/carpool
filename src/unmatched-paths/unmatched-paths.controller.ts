@@ -28,16 +28,39 @@ export class UnmatchedPathsController {
     private readonly unmatchedPathRepository: Repository<UnmatchedPathEntity>,
   ) {}
 
+  @Get('test')
+  @Render('test')
+  tmp() {
+    return
+  }
   @Get('userId')
   async test(@CurrentUser() user) {
     console.log('userId 획득')
     return user
   }
 
+  @Get('getUser')
+  async getUserInfo(@CurrentUser() user) {
+    const userId = user.id
+    return await this.unmatchedPathService.getUserInfo(userId)
+  }
+
+  @Post('changeMode')
+  async changMode(@CurrentUser() user) {
+    const userId = user.id
+    return await this.unmatchedPathService.changeMode(userId)
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard)
   @Render('map')
   map() {
+    return
+  }
+
+  @Get('driveMode')
+  @Render('home')
+  testtest() {
     return
   }
 

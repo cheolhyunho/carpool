@@ -10,6 +10,134 @@ const setDestinationButton = document.getElementById('setDestinationButton')
 const setOriginButton = document.getElementById('setOriginButton')
 const matchingButton = document.getElementById('matching')
 const logoutButton = document.getElementById('logout')
+const modeButton = document.getElementById('DriverMode')
+
+fetch('/unmatchedPath/getUser', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error('')
+    }
+    return response.json()
+  })
+  .then((data) => {
+    // 받아온 데이터에 따라 버튼 이름 설정
+    modeButton.innerText = data.isDriver ? 'Passenger Mode' : 'Driver Mode'
+  })
+  .catch((error) => {
+    console.error('Error:', error)
+  })
+
+modeButton.addEventListener('click', function () {
+  fetch('/unmatchedPath/changeMode', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      // 받아온 데이터에 따라 버튼 이름 설정
+      modeButton.innerText = data.isDriver ? 'Passenger Mode' : 'Driver Mode'
+
+      // 버튼이 'Driver Mode'인 경우
+      if (modeButton.innerText === 'Driver Mode') {
+        // 홈 화면을 렌더링하는 요청을 보냄
+        fetch('/unmatchedPath/driveMode', {
+          method: 'GET',
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch home page')
+            }
+            // 홈 화면을 렌더링하는 HTML을 받아옴
+            return response.text()
+          })
+          .then((html) => {
+            // 받아온 HTML을 페이지에 삽입
+            document.body.innerHTML = html
+          })
+          .catch((error) => {
+            console.error('Error fetching home page:', error)
+          })
+      }
+    })
+    .catch((error) => {
+      console.error('Error changing mode:', error)
+    })
+})
+
+// modeButton.addEventListener('click', function () {
+//   fetch('/unmatchedPath/changeMode', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//   })
+//     .then((response) => {
+//       if (!response.ok) {
+//         throw new Error('error')
+//       }
+//       return response.json()
+//     })
+//     .then((data) => {
+//       // 받아온 데이터에 따라 버튼 이름 설정
+//       modeButton.innerText = data.isDriver ? 'Passenger Mode' : 'Driver Mode'
+//     })
+//     .catch((error) => {
+//       console.error('Error:', error)
+//     })
+//   if (modeButton.innerText === 'Driver Mode') {
+//     fetch('/unmatchedPath/driveMode', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//     })
+//       .then((response) => {
+//         if (!response.ok) {
+//           throw new Error('error')
+//         }
+//         return response.json()
+//       })
+//       .then((data) => {
+//         console.log('드라이버 모드')
+//       })
+//       .catch((error) => {
+//         console.error('Error:', error)
+//       })
+//   }
+// })
+
+// modeButton.addEventListener('click', function () {
+//   fetch('/unmatchedPath/changeMode', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//   })
+//     .then((response) => {
+//       if (!response.ok) {
+//         throw new Error('error')
+//       }
+//       return response.json()
+//     })
+//     .then((data) => {
+//       console.log('create Successful:', data)
+//     })
+//     .catch((error) => {
+//       console.error('Error:', error)
+//     })
+// })
 
 function sendPost(coordinateData) {
   fetch('/unmatchedPath', {
@@ -738,6 +866,7 @@ matchingButton.addEventListener('click', function () {
     })
     .catch((error) => {
       console.error('UserId 가져오기 실패:', error)
+      console.log(error)
     })
 })
 
@@ -831,9 +960,7 @@ function handleReject() {
       return response.json()
     })
     .then((data) => {
-      socket.emit('reject', data, () => {
-        alert('매칭을 취소하셨습니다')
-      })
+      socket.emit('reject', data)
     })
     .catch((error) => {
       console.error('UserId 가져오기 실패:', error)
@@ -843,4 +970,21 @@ function handleReject() {
 // 모달 닫기 함수
 function closeModal(modal) {
   modal.remove()
+}
+
+window.onload = function () {
+  const testButton = document.getElementById('test')
+
+  if (testButton) {
+    testButton.addEventListener('click', function () {
+      Kakao.Navi.start({
+        name: '현대백화점 판교점',
+        x: 127.11205203011632,
+        y: 37.39279717586919,
+        coordType: 'wgs84',
+      })
+    })
+  } else {
+    console.error('testButton이 찾을 수 없습니다.')
+  }
 }

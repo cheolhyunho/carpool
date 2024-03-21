@@ -20,9 +20,7 @@ export class SignupController {
 
   @Get()
   @Render('signup')
-  tmp() {
-    return
-  }
+  tmp() {}
 
   @Post('login')
   async logIn(

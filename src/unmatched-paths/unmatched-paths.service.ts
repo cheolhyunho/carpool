@@ -18,6 +18,19 @@ export class UnmatchedPathsService {
     private readonly kakaoMobilityService: KakaoMobilityService,
   ) {}
 
+  async getUserInfo(userId) {
+    const user = await this.userRepository.findOne(userId)
+    return user
+  }
+
+  async changeMode(userId) {
+    const user = await this.userRepository.findOne(userId)
+    user.isDriver === true ? (user.isDriver = false) : (user.isDriver = true)
+    const savedUser = await this.userRepository.save(user)
+
+    return savedUser
+  }
+
   async createUnmatchedPath(
     unmatchedPathDto: UnmatchedPathDto,
     userId,

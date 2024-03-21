@@ -6,6 +6,8 @@ import { UserEntity } from './users.entity'
 import { PassportModule } from '@nestjs/passport'
 import { JwtModule } from '@nestjs/jwt'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { UsersService } from './users.service';
+import { UsersController } from './users.controller';
 
 @Module({
   imports: [
@@ -17,8 +19,8 @@ import { TypeOrmModule } from '@nestjs/typeorm'
       signOptions: { expiresIn: '1d' },
     }),
   ],
-  providers: [UserEntity],
-  controllers: [],
+  providers: [UserEntity, UsersService],
+  controllers: [UsersController],
   exports: [UserEntity],
 })
 export class UsersModule {}
