@@ -9,38 +9,42 @@ import { TaxiDriverEntity } from './../taxi-driver/texiDrivers.entity'
   name: 'MatchedPaths',
 }) // USER : 테이블 명
 export class MatchedPathEntity extends CommonEntity {
-  @Column({ type: 'varchar', nullable: false })
-  origin: string
+  @Column({ type: 'jsonb', nullable: false })
+  origin: { lat: number; lng: number }
 
-  @Column({ type: 'varchar', nullable: false })
-  waypoint1: string
+  @Column({ type: 'jsonb', nullable: true })
+  destinationPoint: { lat: number; lng: number }
 
-  @Column({ type: 'varchar', nullable: false })
-  waypoint2: string
+  @Column({ type: 'jsonb', nullable: false })
+  firstWayPoint: { lat: number; lng: number }
 
-  @Column({ type: 'varchar', nullable: false })
-  destination: string
+  @Column({ type: 'jsonb', nullable: true })
+  secondWayPoint: { lat: number; lng: number }
 
-  @Column({ type: 'int', nullable: false })
-  lessFare: number
+  @Column({ type: 'float', nullable: false })
+  firstFare: number
 
-  @Column({ type: 'int', nullable: false })
-  moreFare: number
+  @Column({ type: 'float', nullable: false })
+  secondFare: number
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'float', nullable: true })
   lessDuration: number
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'float', nullable: true })
   moreDuration: number
+
+  @Column({ type: 'int', nullable: false })
+  totalDistance: number
+
+  @Column({ type: 'int', nullable: false })
+  totalDuration: number
 
   @Column({ type: 'bool', nullable: false, default: false })
   isReal: boolean
 
   //* Relation */
 
-  @OneToMany(() => UserEntity, (user: UserEntity) => user.matchedPath, {
-    cascade: true,
-  })
+  @OneToMany(() => UserEntity, (user: UserEntity) => user.matchedPath, {})
   users: UserEntity[]
 
   @OneToMany(

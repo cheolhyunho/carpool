@@ -616,7 +616,7 @@ function setOriginPoint(originAddress) {
     },
   )
 }
-///////////test
+/////////test
 var mapContainer = document.getElementById('map'), // 지도를 표시할 div
   mapOption = {
     center: new kakao.maps.LatLng(37.2095934, 126.9817136), // 지도의 중심좌표
@@ -654,10 +654,8 @@ function init() {
     navigator.geolocation.getCurrentPosition(function (position) {
       var lat = position.coords.latitude, // 위도
         lon = position.coords.longitude // 경도
-
       var locPosition = new kakao.maps.LatLng(lat, lon), // 마커가 표시될 위치를 geolocation으로 얻어온 좌표로 생성합니다
         message = '<div style="padding:5px;">여기에 계신가요?!</div>' // 인포윈도우에 표시될 내용입니다
-
       // 마커와 인포윈도우를 표시합니다
       displayMarker(locPosition, message)
     })
@@ -665,7 +663,6 @@ function init() {
     // HTML5의 GeoLocation을 사용할 수 없을 때 마커 표시 위치와 인포윈도우 내용을 설정합니다
     var locPosition = new kakao.maps.LatLng(33.450701, 126.570667),
       message = 'geolocation을 사용할 수 없어요..'
-
     displayMarker(locPosition, message)
   }
 }
@@ -748,4 +745,102 @@ matchingButton.addEventListener('click', function () {
 socket.on('matching', (matchingPath) => {
   console.log('매칭성공!')
   console.log(matchingPath)
+  drawAccept()
 })
+socket.on('rejectMatching', () => {
+  alert('매칭이 취소되었습니다.')
+  location.reload()
+})
+
+function drawAccept() {
+  // 모달 창을 생성
+  const modal = document.createElement('div')
+  modal.classList.add('modal')
+
+  // 모달 내용 생성
+  modal.innerHTML = `
+    <div class="modal-content">
+      <p>수락하시겠습니까?</p>
+      <button id="acceptButton">수락</button>
+      <button id="rejectButton">거절</button>
+    </div>
+  `
+
+  // 스타일 설정 (예시)
+  modal.style.position = 'fixed'
+  modal.style.top = '50%'
+  modal.style.left = '50%'
+  modal.style.transform = 'translate(-50%, -50%)'
+  modal.style.backgroundColor = 'white'
+  modal.style.padding = '20px'
+  modal.style.border = '1px solid black'
+  modal.style.zIndex = '9999'
+
+  // 수락 버튼 이벤트 리스너 추가
+  modal.querySelector('#acceptButton').addEventListener('click', () => {
+    // closeModal(modal) // 모달 닫기
+
+    handleAccept() // 수락 버튼 클릭 시 처리할 함수 호출
+  })
+
+  // 거절 버튼 이벤트 리스너 추가
+  modal.querySelector('#rejectButton').addEventListener('click', () => {
+    handleReject()
+    closeModal(modal) // 모달 닫기
+  })
+
+  // 모달을 body에 추가
+  document.body.appendChild(modal)
+}
+
+// 수락 버튼 클릭 시 처리할 함수
+function handleAccept() {
+  fetch('/unmatchedPath/userId', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      socket.emit('accept', data, (message) => {
+        alert(message)
+      })
+    })
+    .catch((error) => {
+      console.error('UserId 가져오기 실패:', error)
+    })
+}
+
+function handleReject() {
+  fetch('/unmatchedPath/userId', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      socket.emit('reject', data, () => {
+        alert('매칭을 취소하셨습니다')
+      })
+    })
+    .catch((error) => {
+      console.error('UserId 가져오기 실패:', error)
+    })
+}
+
+// 모달 닫기 함수
+function closeModal(modal) {
+  modal.remove()
+}

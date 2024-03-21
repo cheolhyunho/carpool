@@ -263,15 +263,15 @@ export class UnmatchedPathsService {
 
     console.log('톨비정산 후 각각 요금 :', currentFare, matchedFare)
 
-    return [
-      currentUserUP,
-      matchedUserUP,
-      matchedPath,
-      currentFare,
-      matchedFare,
-      currentDistance,
-      matchedDistance,
-    ]
+    return {
+      currentUserUP: currentUserUP,
+      matchedUserUP: matchedUserUP,
+      matchedPath: matchedPath,
+      currentFare: currentFare,
+      matchedFare: matchedFare,
+      currentDistance: currentDistance,
+      matchedDistance: matchedDistance,
+    }
   }
   async fetchUnmatchedPaths(userId) {
     const queryBuilder = getConnection()
@@ -279,7 +279,7 @@ export class UnmatchedPathsService {
       .createQueryBuilder('user')
       .leftJoin('user.unmatchedPath', 'unmatchedPath')
       .where(
-        'unmatchedPath.id IS NOT NULL  AND user.id <> :userId AND user.socketId IS NOT NULL',
+        'unmatchedPath.id IS NOT NULL  AND user.id <> :userId AND user.socketId IS NOT NULL AND user.isAdmin IS FALSE',
         {
           userId,
         },

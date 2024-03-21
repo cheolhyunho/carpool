@@ -56,32 +56,42 @@ export class MatchedPathsService {
   //   )
   // }
 
-  async createMatchedPath(matchedPathDto: any, userId) {
+  async createMatchedPath(
+    matchedPathdto: any,
+    currentFare,
+    matchedFare,
+    user,
+    oppUser,
+  ) {
     const matchedPath = await this.matchedPathRepository.create({
-      origin: matchedPathDto.origin,
+      origin: {
+        lat: matchedPathdto.summary.origin.y,
+        lng: matchedPathdto.summary.origin.x,
+      },
+      destinationPoint: {
+        lat: matchedPathdto.summary.destination.y,
+        lng: matchedPathdto.summary.destination.x,
+      },
+      firstWayPoint: {
+        lat: matchedPathdto.summary.waypoints[0].y,
+        lng: matchedPathdto.summary.waypoints[0].x,
+      },
+      secondWayPoint: {
+        lat: matchedPathdto.summary.waypoints[1].y,
+        lng: matchedPathdto.summary.waypoints[1].x,
+      },
 
-      waypoint1: matchedPathDto.waypoint1,
+      firstFare: currentFare,
 
-      waypoint2: matchedPathDto.waypoint2,
+      secondFare: matchedFare,
 
-      destination: matchedPathDto.destination,
+      totalDistance: matchedPathdto.summary.distance,
 
-      lessFare: 0,
+      totalDuration: matchedPathdto.summary.duration,
 
-      moreFare: 1,
-
-      lessDuration: 2,
-
-      moreDuration: 3,
-
-      isReal: true,
+      users: [user, oppUser],
     })
     const savedMatchedPath = await this.matchedPathRepository.save(matchedPath)
-
-    const user = await this.userRepository.findOne(userId)
-
-    user.matchedPath = matchedPath
-    await this.userRepository.save(user)
 
     return savedMatchedPath
   }

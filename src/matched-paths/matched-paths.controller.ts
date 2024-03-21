@@ -12,20 +12,4 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator'
 @Controller('matchedPath')
 export class MatchedPathsController {
   constructor(private readonly matchedPathsService: MatchedPathsService) {}
-  @Post()
-  async createMatchedPath(
-    @Body() matchedPathDto: MatchedPathDto,
-    @CurrentUser() user,
-  ) {
-    const userId = user.id
-    return await this.matchedPathsService.createMatchedPath(
-      matchedPathDto,
-      userId,
-    )
-  }
-
-  // @Post()
-  // reqMatching(arg) {
-  //   return this.matchedPathsService.reqMatching(arg)
-  // }
 }
