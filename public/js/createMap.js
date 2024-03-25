@@ -12,68 +12,29 @@ const matchingButton = document.getElementById('matching')
 const logoutButton = document.getElementById('logout')
 const modeButton = document.getElementById('DriverMode')
 
-fetch('/unmatchedPath/getUser', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-  .then((response) => {
-    if (!response.ok) {
-      throw new Error('')
-    }
-    return response.json()
-  })
-  .then((data) => {
-    // 받아온 데이터에 따라 버튼 이름 설정
-    modeButton.innerText = data.isDriver ? 'Passenger Mode' : 'Driver Mode'
-  })
-  .catch((error) => {
-    console.error('Error:', error)
-  })
-
 modeButton.addEventListener('click', function () {
-  fetch('/unmatchedPath/changeMode', {
-    method: 'POST',
+  fetch('/unmatchedPath/userId', {
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
   })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
+    .then((reponse) => {
+      if (!reponse.ok) {
+        throw new Error('서버에러')
       }
-      return response.json()
+      return reponse.json()
     })
     .then((data) => {
-      // 받아온 데이터에 따라 버튼 이름 설정
-      modeButton.innerText = data.isDriver ? 'Passenger Mode' : 'Driver Mode'
-
-      // 버튼이 'Driver Mode'인 경우
-      if (modeButton.innerText === 'Driver Mode') {
-        // 홈 화면을 렌더링하는 요청을 보냄
-        fetch('/unmatchedPath/driveMode', {
-          method: 'GET',
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error('Failed to fetch home page')
-            }
-            // 홈 화면을 렌더링하는 HTML을 받아옴
-            return response.text()
-          })
-          .then((html) => {
-            // 받아온 HTML을 페이지에 삽입
-            document.body.innerHTML = html
-          })
-          .catch((error) => {
-            console.error('Error fetching home page:', error)
-          })
-      }
+      socket.emit('driverMode', data)
     })
     .catch((error) => {
-      console.error('Error changing mode:', error)
+      console.error(error)
     })
+})
+
+socket.on('renderDriverMode', ({ html }) => {
+  document.body.innerHTML = html
 })
 
 // modeButton.addEventListener('click', function () {
@@ -988,19 +949,54 @@ window.onload = function () {
     console.error('testButton이 찾을 수 없습니다.')
   }
 
-  socket.on('wantLocation', function (data) {
+  socket.on('wantLocation', function (matchedPath) {
     if ('geolocation' in navigator) {
+      console.log('wantLocation On 실행중')
       navigator.geolocation.getCurrentPosition(function (position) {
         const latitude = position.coords.latitude
         const longitude = position.coords.longitude
         const data = {
           lat: latitude,
           lng: longitude,
+          matchedPath: matchedPath,
         }
         socket.emit('hereIsLocation', data)
       })
     } else {
       alert('이 브라우저에서는 Geolocation 을 지원하지 않습니다.')
     }
+  })
+
+  socket.on('letsDrive', function (matchedPath) {
+    console.log('letsDrive 실행중')
+    const mapContainer = document.getElementById('mapForDriver')
+    mapOption = {
+      center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+      level: 3, // 지도의 확대 레벨
+    }
+    var map = new kakao.maps.Map(mapContainer, mapOption) // 지도를 생성합니다
+    const iwContent1 = '<div style="padding:5px;">제1 경유지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
+    const iwPosition1 = new kakao.maps.LatLng(
+      matchedPath.origin.lat,
+      matchedPath.origin.lng,
+    ) //인포윈도우 표시 위치입니다
+    const iwRemoveable = false // removeable 속성을 ture 로 설정하면 인포윈도우를 닫을 수 있는 x버튼이 표시됩니다
+
+    const iwContent2 = '<div style="padding:5px;">제2 경유지</div>'
+    const iwPosition2 = new kakao.maps.LatLng(matchedPath.lat, matchedPath.lng)
+
+    const infowindow1 = new kakao.maps.InfoWindow({
+      map: map, // 인포윈도우가 표시될 지도
+      position: iwPosition1,
+      content: iwContent1,
+      removable: iwRemoveable,
+    })
+
+    const infowindow2 = new kakao.maps.InfoWindow({
+      map: map, // 인포윈도우가 표시될 지도
+      position: iwPosition2,
+      content: iwContent2,
+      removable: iwRemoveable,
+    })
   })
 }

@@ -1,3 +1,4 @@
+import { CurrentUser } from './../common/decorators/current-user.decorator'
 import { Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import {
@@ -15,6 +16,7 @@ import { MatchedPathEntity } from '../matched-paths/matchedPaths.entity'
 import { MatchedPathsService } from '../matched-paths/matched-paths.service'
 import { EntityManager } from 'typeorm'
 import { KakaoMobilityService } from 'src/common/kakaoMobilityService/kakao.mobility.service'
+import * as fs from 'fs'
 
 @WebSocketGateway()
 export class MatchingGateway implements OnGatewayDisconnect {
@@ -120,30 +122,15 @@ export class MatchingGateway implements OnGatewayDisconnect {
     )
     if (isAccepted && elapsedTime < timeoutLimit) {
       //택시기사매칭 로직
-      let inArrange = []
-      let inArrange2 = []
+
       const drivers = await this.userRepository.find({
         where: { isDriver: true },
       })
       for (const driver of drivers) {
-        socket.to(driver.socketId).emit('wantLocation')
+        console.log('wantLocation 이벤트 실행중')
+        socket.to(driver.socketId).emit('wantLocation', matchedPath)
       }
-      socket.on('hereIsLocation', async function (data) {
-        const kakaoResponse = await this.KakaoMobilityService.getInfo(
-          matchedPath.origin.lat,
-          matchedPath.origin.lng,
-          data.lat,
-          data.lng,
-        )
-        if (kakaoResponse.summary.duration <= 300) {
-          inArrange.push(data.socketId)
-        } else if (kakaoResponse.summary.duration <= 600) {
-          inArrange.push(data.socketId)
-        }
-      })
-      for (const socketId of inArrange) {
-        socket.to(socketId).emit('letsDrive')
-      }
+
       return '매칭성공'
     } else {
       if (socket.id) {
@@ -152,6 +139,48 @@ export class MatchingGateway implements OnGatewayDisconnect {
       if (otherUser.socketId) {
         socket.to(otherUser.socketId).emit('rejectMatching')
       }
+    }
+  }
+
+  @SubscribeMessage('driverMode')
+  async handleDriverMode(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() user,
+  ) {
+    const currentUser = await this.userRepository.findOne(user.id)
+    currentUser.socketId = socket.id
+    currentUser.isDriver = true
+    await this.userRepository.save(currentUser)
+    try {
+      const htmlContent = fs.readFileSync(
+        '/Users/hyunho/coding/carpool/views/matchingWaitingForDriver.hbs',
+        'utf8',
+      )
+      socket.emit('renderDriverMode', { html: htmlContent })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  @SubscribeMessage('hereIsLocation')
+  async requestToDriver(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data,
+  ) {
+    console.log('hereIsLocation 실행중')
+    const kakaoResponse = await this.kakaoMobilityService.getInfo(
+      data.matchedPath.origin.lat,
+      data.matchedPath.origin.lng,
+      data.lat,
+      data.lng,
+    )
+    console.log(kakaoResponse.summary.duration)
+    if (kakaoResponse.summary.duration <= 1000000) {
+      console.log('11111111111')
+      console.log(socket.id)
+      console.log(data.matchedPath)
+      socket.to(socket.id).emit('letsDrive', data.matchedPath)
+      return
     }
   }
 
@@ -186,6 +215,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     if (user) {
       user.isAdmin = false
       user.socketId = null
+      user.isDriver = false
       await this.userRepository.save(user)
     }
     this.logger.log(`disconnected : ${socket.id} ${socket.nsp.name}`)

@@ -28,7 +28,7 @@ export class UnmatchedPathsService {
     user.isDriver === true ? (user.isDriver = false) : (user.isDriver = true)
     const savedUser = await this.userRepository.save(user)
 
-    return savedUser
+    return savedUser.isDriver
   }
 
   async createUnmatchedPath(
