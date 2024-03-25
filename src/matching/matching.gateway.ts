@@ -14,6 +14,7 @@ import { Socket } from 'socket.io'
 import { MatchedPathEntity } from '../matched-paths/matchedPaths.entity'
 import { MatchedPathsService } from '../matched-paths/matched-paths.service'
 import { EntityManager } from 'typeorm'
+import { KakaoMobilityService } from 'src/common/kakaoMobilityService/kakao.mobility.service'
 
 @WebSocketGateway()
 export class MatchingGateway implements OnGatewayDisconnect {
@@ -25,6 +26,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     @InjectRepository(MatchedPathEntity)
     private readonly matchedPathRepository: Repository<MatchedPathEntity>,
     private readonly entityManager: EntityManager,
+    private readonly kakaoMobilityService: KakaoMobilityService,
   ) {}
 
   private logger = new Logger('gateway')
@@ -41,7 +43,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
         matchFound = true
       } else {
         console.log('대기중')
-        await this.unmatchedPathService.sleep(1000) // 예: 1초 대기
+        await this.unmatchedPathService.sleep(1000)
       }
     }
     const matchedUserUP = response.matchedUserUP
@@ -53,15 +55,16 @@ export class MatchingGateway implements OnGatewayDisconnect {
       })
       .getOne()
 
-    const savedMatchedPath = await this.matchedPathService.createMatchedPath(
-      response.matchedPath,
-      response.currentFare,
-      response.matchedFare,
-      user,
-      oppUser,
-    )
+    if (user.socketId && oppUser.socketId) {
+      await this.matchedPathService.createMatchedPath(
+        response.matchedPath,
+        response.currentFare,
+        response.matchedFare,
+        user,
+        oppUser,
+      )
+    }
 
-    console.log('매창create:', savedMatchedPath)
     if (socket.id && oppUser.socketId) {
       socket.emit('matching', response)
       socket.to(oppUser.socketId).emit('matching', response)
@@ -75,7 +78,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
   @SubscribeMessage('accept')
   async handleAccept(@ConnectedSocket() socket: Socket, @MessageBody() user) {
     user.socketId = socket.id
-    user.isAdmin = true
+    user.isMatching = true
     await this.userRepository.save(user)
     const targetUser = await this.userRepository
       .createQueryBuilder('user')
@@ -96,7 +99,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     //수락대기 최대시간
     const timeoutLimit = 30
     while (!isAccepted && elapsedTime < timeoutLimit) {
-      if (matchedPath.users[0].isAdmin && matchedPath.users[1].isAdmin) {
+      if (matchedPath.users[0].isMatching && matchedPath.users[1].isMatching) {
         isAccepted = true
       } else {
         console.log('수락대기중')
@@ -118,7 +121,13 @@ export class MatchingGateway implements OnGatewayDisconnect {
     )
     if (isAccepted && elapsedTime < timeoutLimit) {
       //택시기사매칭 로직
-      return '매칭성공'
+      const drivers = await this.userRepository.find({
+        where: { isDriver: true },
+      })
+      for (const driver of drivers) {
+        socket.to(driver.socketId).emit('wantLocation', matchedPath)
+      }
+      return '기사찾는중'
     } else {
       if (socket.id) {
         socket.emit('rejectMatching')
@@ -154,11 +163,42 @@ export class MatchingGateway implements OnGatewayDisconnect {
     return
   }
 
+  @SubscribeMessage('hereIsLocation')
+  async handleLocation(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() payload,
+  ) {
+    const driverPos = payload.data
+    const matchedPath = payload.matchedPath
+    const kakaoResponse = await this.kakaoMobilityService.getInfo(
+      matchedPath.origin.lat,
+      matchedPath.origin.lng,
+      driverPos.lat,
+      driverPos.lng,
+    )
+    if (kakaoResponse.summary.duration <= 600) {
+      socket.emit('letsDrive', matchedPath)
+    }
+  }
+  @SubscribeMessage('imdriver')
+  async handleDriver(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() matchedPath,
+  ) {
+    if (matchedPath.isReal) {
+      socket.emit('alreadyMatched')
+    } else {
+      matchedPath.isReal = true
+      // 택시기사에게는 길찾기 띄워주기
+      // 승객들에게는 택시기사 위치? 띄어주면서 최종매칭완료 신호
+    }
+  }
+
   async handleDisconnect(@ConnectedSocket() socket: Socket) {
     const user = await this.userRepository.findOne({ socketId: socket.id })
     console.log('diconnect user:', user)
     if (user) {
-      user.isAdmin = false
+      user.isMatching = false
       user.socketId = null
       await this.userRepository.save(user)
     }

@@ -12,25 +12,25 @@ const matchingButton = document.getElementById('matching')
 const logoutButton = document.getElementById('logout')
 const modeButton = document.getElementById('DriverMode')
 
-fetch('/unmatchedPath/getUser', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-  .then((response) => {
-    if (!response.ok) {
-      throw new Error('')
-    }
-    return response.json()
-  })
-  .then((data) => {
-    // 받아온 데이터에 따라 버튼 이름 설정
-    modeButton.innerText = data.isDriver ? 'Passenger Mode' : 'Driver Mode'
-  })
-  .catch((error) => {
-    console.error('Error:', error)
-  })
+// fetch('/unmatchedPath/getUser', {
+//   method: 'POST',
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// })
+//   .then((response) => {
+//     if (!response.ok) {
+//       throw new Error('')
+//     }
+//     return response.json()
+//   })
+//   .then((data) => {
+//     // 받아온 데이터에 따라 버튼 이름 설정
+//     modeButton.innerText = data.isDriver ? 'Passenger Mode' : 'Driver Mode'
+//   })
+//   .catch((error) => {
+//     console.error('Error:', error)
+//   })
 
 modeButton.addEventListener('click', function () {
   fetch('/unmatchedPath/changeMode', {
@@ -870,17 +870,6 @@ matchingButton.addEventListener('click', function () {
     })
 })
 
-//global
-socket.on('matching', (matchingPath) => {
-  console.log('매칭성공!')
-  console.log(matchingPath)
-  drawAccept()
-})
-socket.on('rejectMatching', () => {
-  alert('매칭이 취소되었습니다.')
-  location.reload()
-})
-
 function drawAccept() {
   // 모달 창을 생성
   const modal = document.createElement('div')
@@ -972,19 +961,58 @@ function closeModal(modal) {
   modal.remove()
 }
 
-window.onload = function () {
-  const testButton = document.getElementById('test')
+// window.onload = function () {
+//   const testButton = document.getElementById('test')
 
-  if (testButton) {
-    testButton.addEventListener('click', function () {
-      Kakao.Navi.start({
-        name: '현대백화점 판교점',
-        x: 127.11205203011632,
-        y: 37.39279717586919,
-        coordType: 'wgs84',
-      })
+//   if (testButton) {
+//     testButton.addEventListener('click', function () {
+//       Kakao.Navi.start({
+//         name: '현대백화점 판교점',
+//         x: 127.11205203011632,
+//         y: 37.39279717586919,
+//         coordType: 'wgs84',
+//       })
+//     })
+//   } else {
+//     console.error('testButton이 찾을 수 없습니다.')
+//   }
+// }
+
+//global socketOn
+socket.on('matching', (matchingPath) => {
+  console.log('상대방찾기성공!')
+  console.log(matchingPath)
+  drawAccept()
+})
+socket.on('rejectMatching', () => {
+  alert('매칭이 취소되었습니다.')
+  location.reload()
+})
+socket.on('wantLocation', (matchedPath) => {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(function (position) {
+      const latitude = position.coords.latitude
+      const longitude = position.coords.longitude
+      const data = {
+        lat: latitude,
+        lng: longitude,
+      }
+      socket.emit('hereIsLocation', { data: data, matchedPath: matchedPath })
     })
   } else {
-    console.error('testButton이 찾을 수 없습니다.')
+    alert('이 브라우저에서는 Geolocation 을 지원하지 않습니다.')
   }
-}
+})
+socket.on('letsDrive', (matchedPath) => {
+  const matchedPathText = JSON.stringify(matchedPath, null, 2)
+  alert(`Matched Path: ${matchedPathText}`)
+
+  const confirmDecision = confirm('수락하시겠습니까?')
+  if (confirmDecision) {
+    socket.emit('imdriver', matchedPath)
+  } else {
+    // 거절하는 경우
+    // 서버에 거절을 알리는 로직을 구현할 수 있습니다.
+    // 예: socket.emit('reject', matchedPath);
+  }
+})
