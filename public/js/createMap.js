@@ -12,68 +12,29 @@ const matchingButton = document.getElementById('matching')
 const logoutButton = document.getElementById('logout')
 const modeButton = document.getElementById('DriverMode')
 
-// fetch('/unmatchedPath/getUser', {
-//   method: 'POST',
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-// })
-//   .then((response) => {
-//     if (!response.ok) {
-//       throw new Error('')
-//     }
-//     return response.json()
-//   })
-//   .then((data) => {
-//     // 받아온 데이터에 따라 버튼 이름 설정
-//     modeButton.innerText = data.isDriver ? 'Passenger Mode' : 'Driver Mode'
-//   })
-//   .catch((error) => {
-//     console.error('Error:', error)
-//   })
-
 modeButton.addEventListener('click', function () {
-  fetch('/unmatchedPath/changeMode', {
-    method: 'POST',
+  fetch('/unmatchedPath/userId', {
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
   })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
+    .then((reponse) => {
+      if (!reponse.ok) {
+        throw new Error('서버에러')
       }
-      return response.json()
+      return reponse.json()
     })
     .then((data) => {
-      // 받아온 데이터에 따라 버튼 이름 설정
-      modeButton.innerText = data.isDriver ? 'Passenger Mode' : 'Driver Mode'
-
-      // 버튼이 'Driver Mode'인 경우
-      if (modeButton.innerText === 'Driver Mode') {
-        // 홈 화면을 렌더링하는 요청을 보냄
-        fetch('/unmatchedPath/driveMode', {
-          method: 'GET',
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error('Failed to fetch home page')
-            }
-            // 홈 화면을 렌더링하는 HTML을 받아옴
-            return response.text()
-          })
-          .then((html) => {
-            // 받아온 HTML을 페이지에 삽입
-            document.body.innerHTML = html
-          })
-          .catch((error) => {
-            console.error('Error fetching home page:', error)
-          })
-      }
+      socket.emit('driverMode', data)
     })
     .catch((error) => {
-      console.error('Error changing mode:', error)
+      console.error(error)
     })
+})
+
+socket.on('renderDriverMode', ({ html }) => {
+  document.body.innerHTML = html
 })
 
 // modeButton.addEventListener('click', function () {
@@ -896,8 +857,7 @@ function drawAccept() {
 
   // 수락 버튼 이벤트 리스너 추가
   modal.querySelector('#acceptButton').addEventListener('click', () => {
-    // closeModal(modal) // 모달 닫기
-
+    closeModal(modal) // 모달 닫기
     handleAccept() // 수락 버튼 클릭 시 처리할 함수 호출
   })
 
@@ -988,31 +948,115 @@ socket.on('rejectMatching', () => {
   alert('매칭이 취소되었습니다.')
   location.reload()
 })
+
 socket.on('wantLocation', (matchedPath) => {
   if ('geolocation' in navigator) {
+    console.log('wantLocation On 실행중')
     navigator.geolocation.getCurrentPosition(function (position) {
       const latitude = position.coords.latitude
       const longitude = position.coords.longitude
       const data = {
         lat: latitude,
         lng: longitude,
+        matchedPath: matchedPath,
       }
-      socket.emit('hereIsLocation', { data: data, matchedPath: matchedPath })
+      socket.emit('hereIsLocation', data)
     })
   } else {
     alert('이 브라우저에서는 Geolocation 을 지원하지 않습니다.')
   }
 })
-socket.on('letsDrive', (matchedPath) => {
-  const matchedPathText = JSON.stringify(matchedPath, null, 2)
-  alert(`Matched Path: ${matchedPathText}`)
 
-  const confirmDecision = confirm('수락하시겠습니까?')
-  if (confirmDecision) {
-    socket.emit('imdriver', matchedPath)
-  } else {
-    // 거절하는 경우
-    // 서버에 거절을 알리는 로직을 구현할 수 있습니다.
-    // 예: socket.emit('reject', matchedPath);
+// socket.on('letsDrive', (matchedPath) => {
+//   const matchedPathText = JSON.stringify(matchedPath, null, 2)
+//   alert(`Matched Path: ${matchedPathText}`)
+
+//   const confirmDecision = confirm('수락하시겠습니까?')
+//   if (confirmDecision) {
+//     socket.emit('imdriver', matchedPath)
+//   } else {
+//     // 거절하는 경우
+//     // 서버에 거절을 알리는 로직을 구현할 수 있습니다.
+//     // 예: socket.emit('reject', matchedPath);
+//   }
+// })
+
+socket.on('letsDrive', function (matchedPath) {
+  console.log('letsDrive 실행중')
+  const mapContainer = document.createElement('div')
+  mapContainer.classList.add('mapContainer')
+
+  mapContainer.style.position = 'fixed'
+  mapContainer.style.top = '50%'
+  mapContainer.style.left = '50%'
+  mapContainer.style.transform = 'translate(-50%, -50%)'
+  mapContainer.style.backgroundColor = 'white'
+  mapContainer.style.padding = '20px'
+  mapContainer.style.border = '1px solid black'
+  mapContainer.style.zIndex = '9999'
+  mapContainer.style.width = '80%'
+  mapContainer.style.height = '80%'
+
+  document.body.appendChild(mapContainer)
+
+  mapOption = {
+    center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+    level: 11, // 지도의 확대 레벨
   }
+  var map = new kakao.maps.Map(mapContainer, mapOption) // 지도를 생성합니다
+
+  const iwContentOrigin = '<div style="padding:5px;">출발지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
+  const iwPositionOrigin = new kakao.maps.LatLng(
+    matchedPath.origin.lat,
+    matchedPath.origin.lng,
+  )
+  const iwContentDestinationPoint = '<div style="padding:5px;">도착지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
+  const iwPositionDestinationPoint = new kakao.maps.LatLng(
+    matchedPath.destinationPoint.lat,
+    matchedPath.destinationPoint.lng,
+  )
+  const iwContentWaypoint1 = '<div style="padding:5px;">제1 경유지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
+  const iwPositionWaypoint1 = new kakao.maps.LatLng(
+    matchedPath.firstWayPoint.lat,
+    matchedPath.firstWayPoint.lng,
+  )
+  const iwContentWaypoint2 = '<div style="padding:5px;">제2 경유지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
+  const iwPositionWaypoint2 = new kakao.maps.LatLng(
+    matchedPath.secondWayPoint.lat,
+    matchedPath.secondWayPoint.lng,
+  )
+
+  const infowindowOrigin = new kakao.maps.InfoWindow({
+    map: map, // 인포윈도우가 표시될 지도
+    position: iwPositionOrigin,
+    content: iwContentOrigin,
+    removable: false,
+  })
+
+  const infowindowDestination = new kakao.maps.InfoWindow({
+    map: map, // 인포윈도우가 표시될 지도
+    position: iwPositionDestinationPoint,
+    content: iwContentDestinationPoint,
+    removable: false,
+  })
+
+  const infowindowWayPoint1 = new kakao.maps.InfoWindow({
+    map: map, // 인포윈도우가 표시될 지도
+    position: iwPositionWaypoint1,
+    content: iwContentWaypoint1,
+    removable: false,
+  })
+
+  const infowindowWayPoint2 = new kakao.maps.InfoWindow({
+    map: map, // 인포윈도우가 표시될 지도
+    position: iwPositionWaypoint2,
+    content: iwContentWaypoint2,
+    removable: false,
+  })
+  var bounds = new kakao.maps.LatLngBounds()
+  bounds.extend(infowindowOrigin)
+  bounds.extend(infowindowDestination)
+  bounds.extend(infowindowWayPoint1)
+  bounds.extend(infowindowWayPoint2)
+  map.setBounds(bounds)
 })

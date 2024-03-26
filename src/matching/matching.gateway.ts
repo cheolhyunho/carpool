@@ -1,3 +1,4 @@
+import { CurrentUser } from './../common/decorators/current-user.decorator'
 import { Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import {
@@ -15,6 +16,7 @@ import { MatchedPathEntity } from '../matched-paths/matchedPaths.entity'
 import { MatchedPathsService } from '../matched-paths/matched-paths.service'
 import { EntityManager } from 'typeorm'
 import { KakaoMobilityService } from 'src/common/kakaoMobilityService/kakao.mobility.service'
+import * as fs from 'fs'
 
 @WebSocketGateway()
 export class MatchingGateway implements OnGatewayDisconnect {
@@ -121,13 +123,17 @@ export class MatchingGateway implements OnGatewayDisconnect {
     )
     if (isAccepted && elapsedTime < timeoutLimit) {
       //택시기사매칭 로직
+
       const drivers = await this.userRepository.find({
         where: { isDriver: true },
       })
       for (const driver of drivers) {
+        console.log('wantLocation 이벤트 실행중')
+        console.log('driver:', driver)
         socket.to(driver.socketId).emit('wantLocation', matchedPath)
       }
-      return '기사찾는중'
+
+      return '매칭성공'
     } else {
       if (socket.id) {
         socket.emit('rejectMatching')
@@ -163,23 +169,45 @@ export class MatchingGateway implements OnGatewayDisconnect {
     return
   }
 
+  // @SubscribeMessage('hereIsLocation')
+  // async handleLocation(
+  //   @ConnectedSocket() socket: Socket,
+  //   @MessageBody() payload,
+  // ) {
+  //   const driverPos = payload.data
+  //   const matchedPath = payload.matchedPath
+  //   console.log('인자전달: ', [driverPos, matchedPath])
+  //   const kakaoResponse = await this.kakaoMobilityService.getInfo(
+  //     matchedPath.origin.lat,
+  //     matchedPath.origin.lng,
+  //     driverPos.lat,
+  //     driverPos.lng,
+  //   )
+  //   if (kakaoResponse.summary.duration <= 600) {
+  //     socket.emit('letsDrive', matchedPath)
+  //   }
+  // }
+
   @SubscribeMessage('hereIsLocation')
-  async handleLocation(
+  async requestToDriver(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() payload,
+    @MessageBody() data,
   ) {
-    const driverPos = payload.data
-    const matchedPath = payload.matchedPath
+    console.log('hereIsLocation 실행중')
     const kakaoResponse = await this.kakaoMobilityService.getInfo(
-      matchedPath.origin.lat,
-      matchedPath.origin.lng,
-      driverPos.lat,
-      driverPos.lng,
+      data.matchedPath.origin.lat,
+      data.matchedPath.origin.lng,
+      data.lat,
+      data.lng,
     )
-    if (kakaoResponse.summary.duration <= 600) {
-      socket.emit('letsDrive', matchedPath)
+    console.log(kakaoResponse.summary.duration)
+    if (kakaoResponse.summary.duration <= 1000000) {
+      console.log('택시기사에게 send:', data.matchedPath)
+      socket.emit('letsDrive', data.matchedPath)
+      return
     }
   }
+
   @SubscribeMessage('imdriver')
   async handleDriver(
     @ConnectedSocket() socket: Socket,
@@ -194,12 +222,33 @@ export class MatchingGateway implements OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage('driverMode')
+  async handleDriverMode(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() user,
+  ) {
+    const currentUser = await this.userRepository.findOne(user.id)
+    currentUser.socketId = socket.id
+    currentUser.isDriver = true
+    await this.userRepository.save(currentUser)
+    try {
+      const htmlContent = fs.readFileSync(
+        '/Users/baecheolhyein/Desktop/Nestjs/carpooling/views/matchingWaitingForDriver.hbs',
+        'utf8',
+      )
+      socket.emit('renderDriverMode', { html: htmlContent })
+    } catch (error) {
+      console.error('rendering error:', error)
+    }
+  }
+
   async handleDisconnect(@ConnectedSocket() socket: Socket) {
     const user = await this.userRepository.findOne({ socketId: socket.id })
     console.log('diconnect user:', user)
     if (user) {
       user.isMatching = false
       user.socketId = null
+      user.isDriver = false
       await this.userRepository.save(user)
     }
     this.logger.log(`disconnected : ${socket.id} ${socket.nsp.name}`)
