@@ -999,13 +999,30 @@ socket.on('letsDrive', function (matchedPath) {
 
   document.body.appendChild(mapContainer)
 
+  let currentPosition
+
+  navigator.geolocation.getCurrentPosition(function (position) {
+    const latitude = position.coords.latitude
+    const longitude = position.coords.longitude
+    currentPosition = {
+      lat: latitude,
+      lng: longitude,
+    }
+  })
+
   mapOption = {
-    center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+    center: new kakao.maps.LatLng(currentPosition.lat, currentPosition.lng), // 지도의 중심좌표
     level: 11, // 지도의 확대 레벨
   }
   var map = new kakao.maps.Map(mapContainer, mapOption) // 지도를 생성합니다
 
-  const iwContentOrigin = '<div style="padding:5px;">출발지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
+  const iwContentCurrentPosition = '<div style="padding:5px;">현재위치</div>'
+  const iwPositionCurrent = new kakao.maps.LatLng(
+    currentPosition.lat,
+    currentPosition.lng,
+  )
+
+  const iwContentOrigin = '<div style="padding:5px;">제1 경유지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
   const iwPositionOrigin = new kakao.maps.LatLng(
     matchedPath.origin.lat,
     matchedPath.origin.lng,
@@ -1015,16 +1032,23 @@ socket.on('letsDrive', function (matchedPath) {
     matchedPath.destinationPoint.lat,
     matchedPath.destinationPoint.lng,
   )
-  const iwContentWaypoint1 = '<div style="padding:5px;">제1 경유지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
+  const iwContentWaypoint1 = '<div style="padding:5px;">제2 경유지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
   const iwPositionWaypoint1 = new kakao.maps.LatLng(
     matchedPath.firstWayPoint.lat,
     matchedPath.firstWayPoint.lng,
   )
-  const iwContentWaypoint2 = '<div style="padding:5px;">제2 경유지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
+  const iwContentWaypoint2 = '<div style="padding:5px;">제3 경유지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
   const iwPositionWaypoint2 = new kakao.maps.LatLng(
     matchedPath.secondWayPoint.lat,
     matchedPath.secondWayPoint.lng,
   )
+
+  const infowindowCurrent = new kakao.maps.InfoWindow({
+    map: map,
+    position: iwPositionCurrent,
+    content: iwContentCurrentPosition,
+    removable: false,
+  })
 
   const infowindowOrigin = new kakao.maps.InfoWindow({
     map: map, // 인포윈도우가 표시될 지도
@@ -1054,9 +1078,27 @@ socket.on('letsDrive', function (matchedPath) {
     removable: false,
   })
   var bounds = new kakao.maps.LatLngBounds()
+  bounds.extend(infowindowCurrent)
   bounds.extend(infowindowOrigin)
   bounds.extend(infowindowDestination)
   bounds.extend(infowindowWayPoint1)
   bounds.extend(infowindowWayPoint2)
   map.setBounds(bounds)
+
+  searchDetailAddrFromCoords(iwPositionOrigin, function (result, status) {
+    if (status === kakao.maps.services.Status.OK) {
+      const newDiv = document.createElement('div')
+      newDiv.id = 'ttmmpp'
+      var detailAddr = !!result[0].road_address
+        ? '<div>제 1경유지 도로명주소 : ' +
+          result[0].road_address.address_name +
+          '</div>'
+        : ''
+      detailAddr +=
+        '<div>제 1경유지 지번 주소 : ' +
+        result[0].address.address_name +
+        '</div>'
+      document.getElementById('ttmmpp').innerHTML = detailAddr
+    }
+  })
 })

@@ -233,7 +233,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     await this.userRepository.save(currentUser)
     try {
       const htmlContent = fs.readFileSync(
-        '/Users/baecheolhyein/Desktop/Nestjs/carpooling/views/matchingWaitingForDriver.hbs',
+        '/Users/hyunho/coding/carpool/views/matchingWaitingForDriver.hbs',
         'utf8',
       )
       socket.emit('renderDriverMode', { html: htmlContent })
