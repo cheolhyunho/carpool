@@ -886,9 +886,7 @@ function handleAccept() {
       return response.json()
     })
     .then((data) => {
-      socket.emit('accept', data, (message) => {
-        alert(message)
-      })
+      socket.emit('accept', data)
     })
     .catch((error) => {
       console.error('UserId 가져오기 실패:', error)
@@ -967,19 +965,27 @@ socket.on('wantLocation', (matchedPath) => {
   }
 })
 
-// socket.on('letsDrive', (matchedPath) => {
-//   const matchedPathText = JSON.stringify(matchedPath, null, 2)
-//   alert(`Matched Path: ${matchedPathText}`)
-
-// })
-
 socket.on('letsDrive', function (matchedPath) {
-  var mapContainer = document.createElement('div')
+  document.body.innerHTML = ''
+  const actionButtons = document.createElement('div')
+  actionButtons.classList.add('actionButtons')
+  actionButtons.style.display = 'flex'
+  actionButtons.style.justifyContent = 'center'
+  actionButtons.style.marginTop = '20px'
+
+  const rejectButton = document.createElement('button')
+  rejectButton.textContent = '거절'
+  const acceptButton = document.createElement('button')
+  acceptButton.textContent = '수락'
+  actionButtons.appendChild(acceptButton)
+  actionButtons.appendChild(rejectButton)
+
+  const mapContainer = document.createElement('div')
   mapContainer.classList.add('mapContainer')
   mapContainer.style.position = 'fixed'
-  mapContainer.style.top = '50%'
+  mapContainer.style.top = '10%' // 상단에서 10% 위치
   mapContainer.style.left = '50%'
-  mapContainer.style.transform = 'translate(-50%, -50%)'
+  mapContainer.style.transform = 'translateX(-50%)'
   mapContainer.style.backgroundColor = 'white'
   mapContainer.style.padding = '20px'
   mapContainer.style.border = '1px solid black'
@@ -987,20 +993,16 @@ socket.on('letsDrive', function (matchedPath) {
   mapContainer.style.width = '80%'
   mapContainer.style.height = '80%'
 
+  document.body.appendChild(actionButtons)
   document.body.appendChild(mapContainer)
 
   mapOption = {
     center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
     level: 11, // 지도의 확대 레벨
   }
+
   var map = new kakao.maps.Map(mapContainer, mapOption) // 지도를 생성합니다
   var geocoder = new kakao.maps.services.Geocoder()
-
-  // const iwContentCurrentPosition = '<div style="padding:5px;">현재위치</div>'
-  // const iwPositionCurrent = new kakao.maps.LatLng(
-  //   currentPosition.lat,
-  //   currentPosition.lng,
-  // )
 
   var positions = [
     {
@@ -1061,6 +1063,18 @@ socket.on('letsDrive', function (matchedPath) {
     }
   })
 
+  acceptButton.addEventListener('click', () => {
+    socket.emit('imDriver', matchedPath, (message) => {
+      alert(message)
+    })
+  })
+
+  rejectButton.addEventListener('click', () => {
+    // 거절 버튼을 클릭했을 때 수행할 동작 추가
+    actionButtons.remove()
+    mapContainer.remove()
+  })
+
   function updateInfowindowContent(index) {
     var marker = new kakao.maps.Marker({
       map: map, // 마커를 표시할 지도
@@ -1095,4 +1109,14 @@ socket.on('letsDrive', function (matchedPath) {
       callback,
     )
   }
+})
+
+socket.on('alreadyMatched', ({ html }) => {
+  alert('이미 택시가 매칭되었습니다')
+  document.body.innerHTML = html
+})
+
+socket.on('kakaoPay', (link) => {
+  //카카오페이결제 링크로 이동
+  window.location.href = link
 })

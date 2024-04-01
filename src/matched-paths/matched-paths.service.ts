@@ -95,4 +95,9 @@ export class MatchedPathsService {
 
     return savedMatchedPath
   }
+
+  async completedPay(user) {
+    user.isMatching = true
+    this.userRepository.save(user)
+  }
 }
