@@ -1011,7 +1011,7 @@ socket.on('letsDrive', function (matchedPath) {
   })
 
   mapOption = {
-    center: new kakao.maps.LatLng(currentPosition.lat, currentPosition.lng), // 지도의 중심좌표
+    center: new kakao.maps.LatLng(33.45071, 126.570667), // 지도의 중심좌표
     level: 11, // 지도의 확대 레벨
   }
   var map = new kakao.maps.Map(mapContainer, mapOption) // 지도를 생성합니다

@@ -201,7 +201,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
       data.lng,
     )
     console.log(kakaoResponse.summary.duration)
-    if (kakaoResponse.summary.duration <= 1000000) {
+    if (kakaoResponse.summary.duration <= 300) {
       console.log('택시기사에게 send:', data.matchedPath)
       socket.emit('letsDrive', data.matchedPath)
       return
