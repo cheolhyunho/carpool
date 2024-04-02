@@ -32,6 +32,26 @@ export class MatchingGateway implements OnGatewayDisconnect {
   ) {}
 
   private logger = new Logger('gateway')
+  @SubscribeMessage('driverMode')
+  async handleDriverMode(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() user,
+  ) {
+    const currentUser = await this.userRepository.findOne(user.id)
+    currentUser.socketId = socket.id
+    currentUser.isDriver = true
+    await this.userRepository.save(currentUser)
+    try {
+      const htmlContent = fs.readFileSync(
+        '/Users/hyunho/coding/carpool/views/matchingWaitingForDriver.hbs',
+        'utf8',
+      )
+      socket.emit('renderDriverMode', { html: htmlContent })
+    } catch (error) {
+      console.error('rendering error:', error)
+    }
+  }
+
   @SubscribeMessage('test')
   async handleSocket(@ConnectedSocket() socket: Socket, @MessageBody() user) {
     user.socketId = socket.id
@@ -133,7 +153,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
         socket.to(driver.socketId).emit('wantLocation', matchedPath)
       }
 
-      return '매칭성공'
+      return '기사매칭 대기중'
     } else {
       if (socket.id) {
         socket.emit('rejectMatching')
@@ -169,25 +189,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
     return
   }
 
-  // @SubscribeMessage('hereIsLocation')
-  // async handleLocation(
-  //   @ConnectedSocket() socket: Socket,
-  //   @MessageBody() payload,
-  // ) {
-  //   const driverPos = payload.data
-  //   const matchedPath = payload.matchedPath
-  //   console.log('인자전달: ', [driverPos, matchedPath])
-  //   const kakaoResponse = await this.kakaoMobilityService.getInfo(
-  //     matchedPath.origin.lat,
-  //     matchedPath.origin.lng,
-  //     driverPos.lat,
-  //     driverPos.lng,
-  //   )
-  //   if (kakaoResponse.summary.duration <= 600) {
-  //     socket.emit('letsDrive', matchedPath)
-  //   }
-  // }
-
   @SubscribeMessage('hereIsLocation')
   async requestToDriver(
     @ConnectedSocket() socket: Socket,
@@ -208,38 +209,102 @@ export class MatchingGateway implements OnGatewayDisconnect {
     }
   }
 
-  @SubscribeMessage('imdriver')
+  //택시기사가 수락했을때
+  @SubscribeMessage('imDriver')
   async handleDriver(
     @ConnectedSocket() socket: Socket,
     @MessageBody() matchedPath,
   ) {
+    //먼저 잡은 기사가 있을떄
     if (matchedPath.isReal) {
-      socket.emit('alreadyMatched')
+      try {
+        const htmlContent = fs.readFileSync(
+          '/Users/hyunho/coding/carpool/views/matchingWaitingForDriver.hbs',
+          'utf8',
+        )
+        socket.emit('alreadyMatched', { html: htmlContent })
+      } catch (error) {
+        console.error('rendering error:', error)
+      }
     } else {
       matchedPath.isReal = true
-      // 택시기사에게는 길찾기 띄워주기
-      // 승객들에게는 택시기사 위치? 띄어주면서 최종매칭완료 신호
+      await this.matchedPathRepository.save(matchedPath)
+      const firstUserUrl = await this.kakaoMobilityService.getPayment(
+        matchedPath.firstFare,
+      )
+      const secondUserUrl = await this.kakaoMobilityService.getPayment(
+        matchedPath.secondFare,
+      )
+      if (matchedPath.users[0].socketId && matchedPath.users[1].socketId) {
+        socket
+          .to(matchedPath.users[0].socketId)
+          .emit('kakaoPay', firstUserUrl.next_redirect_pc_url)
+        socket
+          .to(matchedPath.users[1].socketId)
+          .emit('kakaoPay', secondUserUrl.next_redirect_pc_url)
+
+        await this.unmatchedPathService.sleep(5000)
+
+        const updatedMatchedPath = await this.entityManager.findOne(
+          MatchedPathEntity,
+          {
+            where: { id: matchedPath.id },
+            relations: ['users'],
+          },
+        )
+        matchedPath = updatedMatchedPath
+
+        let isAccepted = false
+        //수락대기 경과시간
+        let elapsedTime = 0
+        //수락대기 최대시간
+        const timeoutLimit = 50
+        while (!isAccepted && elapsedTime < timeoutLimit) {
+          if (
+            matchedPath.users[0].isMatching &&
+            matchedPath.users[1].isMatching
+          ) {
+            isAccepted = true
+          } else {
+            console.log('수락대기중')
+            await this.unmatchedPathService.sleep(1000)
+            const updatedMatchedPath = await this.entityManager.findOne(
+              MatchedPathEntity,
+              {
+                where: { id: matchedPath.id },
+                relations: ['users'],
+              },
+            )
+            matchedPath = updatedMatchedPath
+            console.log(matchedPath.users)
+            elapsedTime += 1
+          }
+        }
+        if (isAccepted && elapsedTime < timeoutLimit) {
+          console.log('승객들 결제완료5555555555555555')
+          return '승객들 결제완료'
+        } else {
+          //이미 결제된 사람있으면 환불 로직 추가
+          console.log('else문실행 555555555555555555555555')
+          if (matchedPath.users[0].socketId) {
+            socket.to(matchedPath.users[0].socketId).emit('failedPay')
+          }
+          if (matchedPath.users[1].socketId) {
+            socket.to(matchedPath.users[1].socketId).emit('failedPay')
+          }
+        }
+      }
     }
   }
 
-  @SubscribeMessage('driverMode')
-  async handleDriverMode(
+  @SubscribeMessage('socketIdSave')
+  async handleCompletedPay(
     @ConnectedSocket() socket: Socket,
     @MessageBody() user,
   ) {
-    const currentUser = await this.userRepository.findOne(user.id)
-    currentUser.socketId = socket.id
-    currentUser.isDriver = true
-    await this.userRepository.save(currentUser)
-    try {
-      const htmlContent = fs.readFileSync(
-        '/Users/hyunho/coding/carpool/views/matchingWaitingForDriver.hbs',
-        'utf8',
-      )
-      socket.emit('renderDriverMode', { html: htmlContent })
-    } catch (error) {
-      console.error('rendering error:', error)
-    }
+    user.socketId = socket.id
+    user.isMatching = true
+    await this.userRepository.save(user)
   }
 
   async handleDisconnect(@ConnectedSocket() socket: Socket) {

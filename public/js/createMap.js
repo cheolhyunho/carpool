@@ -706,6 +706,7 @@ function setOriginPoint(originAddress) {
   )
 }
 /////////test
+
 var mapContainer = document.getElementById('map'), // 지도를 표시할 div
   mapOption = {
     center: new kakao.maps.LatLng(37.2095934, 126.9817136), // 지도의 중심좌표
@@ -886,9 +887,7 @@ function handleAccept() {
       return response.json()
     })
     .then((data) => {
-      socket.emit('accept', data, (message) => {
-        alert(message)
-      })
+      socket.emit('accept', data)
     })
     .catch((error) => {
       console.error('UserId 가져오기 실패:', error)
@@ -921,23 +920,6 @@ function closeModal(modal) {
   modal.remove()
 }
 
-// window.onload = function () {
-//   const testButton = document.getElementById('test')
-
-//   if (testButton) {
-//     testButton.addEventListener('click', function () {
-//       Kakao.Navi.start({
-//         name: '현대백화점 판교점',
-//         x: 127.11205203011632,
-//         y: 37.39279717586919,
-//         coordType: 'wgs84',
-//       })
-//     })
-//   } else {
-//     console.error('testButton이 찾을 수 없습니다.')
-//   }
-// }
-
 //global socketOn
 socket.on('matching', (matchingPath) => {
   console.log('상대방찾기성공!')
@@ -967,29 +949,27 @@ socket.on('wantLocation', (matchedPath) => {
   }
 })
 
-// socket.on('letsDrive', (matchedPath) => {
-//   const matchedPathText = JSON.stringify(matchedPath, null, 2)
-//   alert(`Matched Path: ${matchedPathText}`)
-
-//   const confirmDecision = confirm('수락하시겠습니까?')
-//   if (confirmDecision) {
-//     socket.emit('imdriver', matchedPath)
-//   } else {
-//     // 거절하는 경우
-//     // 서버에 거절을 알리는 로직을 구현할 수 있습니다.
-//     // 예: socket.emit('reject', matchedPath);
-//   }
-// })
-
 socket.on('letsDrive', function (matchedPath) {
-  console.log('letsDrive 실행중')
+  document.body.innerHTML = ''
+  const actionButtons = document.createElement('div')
+  actionButtons.classList.add('actionButtons')
+  actionButtons.style.display = 'flex'
+  actionButtons.style.justifyContent = 'center'
+  actionButtons.style.marginTop = '20px'
+
+  const rejectButton = document.createElement('button')
+  rejectButton.textContent = '거절'
+  const acceptButton = document.createElement('button')
+  acceptButton.textContent = '수락'
+  actionButtons.appendChild(acceptButton)
+  actionButtons.appendChild(rejectButton)
+
   const mapContainer = document.createElement('div')
   mapContainer.classList.add('mapContainer')
-
   mapContainer.style.position = 'fixed'
-  mapContainer.style.top = '50%'
+  mapContainer.style.top = '10%' // 상단에서 10% 위치
   mapContainer.style.left = '50%'
-  mapContainer.style.transform = 'translate(-50%, -50%)'
+  mapContainer.style.transform = 'translateX(-50%)'
   mapContainer.style.backgroundColor = 'white'
   mapContainer.style.padding = '20px'
   mapContainer.style.border = '1px solid black'
@@ -997,108 +977,133 @@ socket.on('letsDrive', function (matchedPath) {
   mapContainer.style.width = '80%'
   mapContainer.style.height = '80%'
 
+  document.body.appendChild(actionButtons)
   document.body.appendChild(mapContainer)
-
-  let currentPosition
-
-  navigator.geolocation.getCurrentPosition(function (position) {
-    const latitude = position.coords.latitude
-    const longitude = position.coords.longitude
-    currentPosition = {
-      lat: latitude,
-      lng: longitude,
-    }
-  })
 
   mapOption = {
     center: new kakao.maps.LatLng(33.45071, 126.570667), // 지도의 중심좌표
-    level: 11, // 지도의 확대 레벨
   }
+
   var map = new kakao.maps.Map(mapContainer, mapOption) // 지도를 생성합니다
+  var geocoder = new kakao.maps.services.Geocoder()
 
-  const iwContentCurrentPosition = '<div style="padding:5px;">현재위치</div>'
-  const iwPositionCurrent = new kakao.maps.LatLng(
-    currentPosition.lat,
-    currentPosition.lng,
-  )
-
-  const iwContentOrigin = '<div style="padding:5px;">제1 경유지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
-  const iwPositionOrigin = new kakao.maps.LatLng(
-    matchedPath.origin.lat,
-    matchedPath.origin.lng,
-  )
-  const iwContentDestinationPoint = '<div style="padding:5px;">도착지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
-  const iwPositionDestinationPoint = new kakao.maps.LatLng(
-    matchedPath.destinationPoint.lat,
-    matchedPath.destinationPoint.lng,
-  )
-  const iwContentWaypoint1 = '<div style="padding:5px;">제2 경유지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
-  const iwPositionWaypoint1 = new kakao.maps.LatLng(
-    matchedPath.firstWayPoint.lat,
-    matchedPath.firstWayPoint.lng,
-  )
-  const iwContentWaypoint2 = '<div style="padding:5px;">제3 경유지</div>' // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
-  const iwPositionWaypoint2 = new kakao.maps.LatLng(
-    matchedPath.secondWayPoint.lat,
-    matchedPath.secondWayPoint.lng,
-  )
-
-  const infowindowCurrent = new kakao.maps.InfoWindow({
-    map: map,
-    position: iwPositionCurrent,
-    content: iwContentCurrentPosition,
-    removable: false,
-  })
-
-  const infowindowOrigin = new kakao.maps.InfoWindow({
-    map: map, // 인포윈도우가 표시될 지도
-    position: iwPositionOrigin,
-    content: iwContentOrigin,
-    removable: false,
-  })
-
-  const infowindowDestination = new kakao.maps.InfoWindow({
-    map: map, // 인포윈도우가 표시될 지도
-    position: iwPositionDestinationPoint,
-    content: iwContentDestinationPoint,
-    removable: false,
-  })
-
-  const infowindowWayPoint1 = new kakao.maps.InfoWindow({
-    map: map, // 인포윈도우가 표시될 지도
-    position: iwPositionWaypoint1,
-    content: iwContentWaypoint1,
-    removable: false,
-  })
-
-  const infowindowWayPoint2 = new kakao.maps.InfoWindow({
-    map: map, // 인포윈도우가 표시될 지도
-    position: iwPositionWaypoint2,
-    content: iwContentWaypoint2,
-    removable: false,
-  })
-  var bounds = new kakao.maps.LatLngBounds()
-  bounds.extend(infowindowCurrent)
-  bounds.extend(infowindowOrigin)
-  bounds.extend(infowindowDestination)
-  bounds.extend(infowindowWayPoint1)
-  bounds.extend(infowindowWayPoint2)
-  map.setBounds(bounds)
-
-  searchDetailAddrFromCoords(iwPositionOrigin, function (result, status) {
+  var positions = [
+    {
+      content: '<div>승객1 승차</div>',
+      latlng: new kakao.maps.LatLng(
+        matchedPath.origin.lat,
+        matchedPath.origin.lng,
+      ),
+    },
+    {
+      content: '<div>승객 하차</div>',
+      latlng: new kakao.maps.LatLng(
+        matchedPath.destinationPoint.lat,
+        matchedPath.destinationPoint.lng,
+      ),
+    },
+    {
+      content: '<div>승객2 승차</div>',
+      latlng: new kakao.maps.LatLng(
+        matchedPath.firstWayPoint.lat,
+        matchedPath.firstWayPoint.lng,
+      ),
+    },
+    {
+      content: '<div>승객 하차</div>',
+      latlng: new kakao.maps.LatLng(
+        matchedPath.secondWayPoint.lat,
+        matchedPath.secondWayPoint.lng,
+      ),
+    },
+  ]
+  searchDetailAddrFromCoords(positions[0], function (result, status) {
     if (status === kakao.maps.services.Status.OK) {
-      const newDiv = document.createElement('div')
-      newDiv.id = 'ttmmpp'
-      var detailAddr = !!result[0].road_address
-        ? '<div>제 1경유지 도로명주소 : ' +
-          result[0].road_address.address_name +
-          '</div>'
-        : ''
-      detailAddr +=
-        '<div>제 1경유지 지번 주소 : ' +
-        result[0].address.address_name +
-        '</div>'
-      document.getElementById('ttmmpp').innerHTML = detailAddr
+      positions[0].content +=
+        '<div>지번 주소 : ' + result[0].address.address_name + '</div>'
+      updateInfowindowContent(0)
     }
   })
+  searchDetailAddrFromCoords(positions[1], function (result, status) {
+    if (status === kakao.maps.services.Status.OK) {
+      positions[1].content +=
+        '<div>지번 주소 : ' + result[0].address.address_name + '</div>'
+      updateInfowindowContent(1)
+    }
+  })
+  searchDetailAddrFromCoords(positions[2], function (result, status) {
+    if (status === kakao.maps.services.Status.OK) {
+      positions[2].content +=
+        '<div>지번 주소 : ' + result[0].address.address_name + '</div>'
+      updateInfowindowContent(2)
+    }
+  })
+  searchDetailAddrFromCoords(positions[3], function (result, status) {
+    if (status === kakao.maps.services.Status.OK) {
+      positions[3].content +=
+        '<div>지번 주소 : ' + result[0].address.address_name + '</div>'
+      updateInfowindowContent(3)
+    }
+  })
+
+  acceptButton.addEventListener('click', () => {
+    socket.emit('imDriver', matchedPath, (message) => {
+      alert(message)
+    })
+  })
+
+  rejectButton.addEventListener('click', () => {
+    // 거절 버튼을 클릭했을 때 수행할 동작 추가
+    actionButtons.remove()
+    mapContainer.remove()
+  })
+
+  function updateInfowindowContent(index) {
+    var marker = new kakao.maps.Marker({
+      map: map, // 마커를 표시할 지도
+      position: positions[index].latlng, // 마커의 위치
+      status: true,
+    })
+
+    // 마커에 표시할 인포윈도우를 생성합니다
+    var infowindow = new kakao.maps.InfoWindow({
+      content: positions[index].content, // 인포윈도우에 표시할 내용
+    })
+
+    infowindow.open(map, marker)
+
+    kakao.maps.event.addListener(marker, 'click', function () {
+      // 마커에 마우스오버 이벤트가 발생하면 인포윈도우를 마커위에 표시합니다
+      if (marker.status == true) {
+        infowindow.open(map, marker)
+        marker.status = false
+      } else {
+        infowindow.close()
+        marker.status = true
+      }
+    })
+  }
+
+  function searchDetailAddrFromCoords(coords, callback) {
+    // 좌표로 법정동 상세 주소 정보를 요청합니다
+    geocoder.coord2Address(
+      coords.latlng.getLng(),
+      coords.latlng.getLat(),
+      callback,
+    )
+  }
+})
+
+const navi = document.getElementById('test.hbs')
+socket.on('IwillgiveYouLocation', () => {
+  document.body.innerHTML = navi
+})
+socket.on('alreadyMatched', () => {
+  alert('이미 택시가 매칭되었습니다')
+  document.body.innerHTML = navi
+})
+
+socket.on('kakaoPay', (link) => {
+  //카카오페이결제 링크로 이동
+  window.location.href = link
 })

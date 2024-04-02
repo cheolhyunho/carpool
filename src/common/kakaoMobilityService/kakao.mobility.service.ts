@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import axios from 'axios'
+import * as https from 'https'
+import * as crypto from 'crypto'
 
 @Injectable()
 export class KakaoMobilityService {
@@ -75,6 +77,52 @@ export class KakaoMobilityService {
       console.log('reponse.data:', response.data.routes[0].result_code)
 
       return response.data.routes[0]
+    } catch (error) {
+      throw new Error(`Failed to fetch directions: ${error.message}`)
+    }
+  }
+
+  async getPayment(fare): Promise<any> {
+    const allowLegacyRenegotiationforNodeJsOptions = {
+      httpsAgent: new https.Agent({
+        // for self signed you could also add
+        // rejectUnauthorized: false,
+        // allow legacy server
+        secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT,
+      }),
+    }
+    const SECRET_KEY_PAYMENT = process.env.SECRET_KEY_PAYMENT
+
+    const url = 'https://open-api.kakaopay.com/online/v1/payment/ready'
+
+    try {
+      const response = await axios({
+        url,
+        method: 'POST',
+        headers: {
+          Authorization: `SECRET_KEY ${SECRET_KEY_PAYMENT}`,
+          'Content-Type': 'application/json',
+        },
+        data: {
+          cid: 'TC0ONETIME',
+          partner_order_id: 'partner_order_id',
+          partner_user_id: 'partner_user_id',
+          item_name: '택시요금',
+          quantity: '1',
+          total_amount: fare,
+          tax_free_amount: '0',
+          approval_url: 'http://localhost:5000/matchedPath',
+          fail_url: 'http://localhost:5000/unmatchedPath',
+          cancel_url: 'http://localhost:5000/unmatchedPathl',
+        },
+        httpsAgent: new https.Agent({
+          secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT,
+        }),
+      })
+
+      console.log(response)
+
+      return response.data
     } catch (error) {
       throw new Error(`Failed to fetch directions: ${error.message}`)
     }
