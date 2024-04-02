@@ -96,8 +96,12 @@ export class MatchedPathsService {
     return savedMatchedPath
   }
 
-  async completedPay(user) {
+  async completedPay(payload) {
+    const user = payload.user
+    const token = payload.pgToken
     user.isMatching = true
+    user.pgToken = token
+
     this.userRepository.save(user)
   }
 }

@@ -44,6 +44,9 @@ export class UserEntity extends CommonEntity {
   @Column({ type: 'varchar', nullable: true })
   socketId: string
 
+  @Column({ type: 'varchar', nullable: true })
+  pgToken: string
+
   @IsBoolean()
   @Column({ type: 'boolean', default: false })
   isAdmin: boolean
