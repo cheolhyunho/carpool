@@ -7,5 +7,7 @@ import { JwtAuthGuard } from 'src/users/jwt/jwt.guard'
 export class TaxiDriverController {
   @Get()
   @Render('mapForDriver')
-  driver() {}
+  driver() {
+    return
+  }
 }

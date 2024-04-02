@@ -41,18 +41,9 @@ export class MatchingGateway implements OnGatewayDisconnect {
     currentUser.socketId = socket.id
     currentUser.isDriver = true
     await this.userRepository.save(currentUser)
-    try {
-      const htmlContent = fs.readFileSync(
-        '/Users/baecheolhyein/Desktop/carpooling/views/matchingWaitingForDriver.hbs',
-        'utf8',
-      )
-      socket.emit('renderDriverMode', { html: htmlContent })
-    } catch (error) {
-      console.error('rendering error:', error)
-    }
   }
 
-  @SubscribeMessage('test')
+  @SubscribeMessage('doMatch')
   async handleSocket(@ConnectedSocket() socket: Socket, @MessageBody() user) {
     user.socketId = socket.id
     await this.userRepository.save(user)
@@ -147,13 +138,20 @@ export class MatchingGateway implements OnGatewayDisconnect {
       const drivers = await this.userRepository.find({
         where: { isDriver: true },
       })
-      for (const driver of drivers) {
-        console.log('wantLocation 이벤트 실행중')
-        console.log('driver:', driver)
-        socket.to(driver.socketId).emit('wantLocation', matchedPath)
-      }
+      if (user.isMatching == true) {
+        for (const driver of drivers) {
+          console.log('wantLocation 이벤트 실행중')
+          console.log('driver:', driver)
+          socket.to(driver.socketId).emit('wantLocation', matchedPath)
+        }
 
-      return '기사매칭 대기중'
+        user.isMatching = false
+        otherUser.isMatching = false
+        await this.userRepository.save(user)
+        await this.userRepository.save(otherUser)
+
+        return '기사매칭 대기중'
+      }
     } else {
       if (socket.id) {
         socket.emit('rejectMatching')
@@ -217,15 +215,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
   ) {
     //먼저 잡은 기사가 있을때
     if (matchedPath.isReal) {
-      try {
-        const htmlContent = fs.readFileSync(
-          '/Users/baecheolhyein/Desktop/carpooling/views/matchingWaitingForDriver.hbs',
-          'utf8',
-        )
-        socket.emit('alreadyMatched', { html: htmlContent })
-      } catch (error) {
-        console.error('rendering error:', error)
-      }
+      socket.emit('alreadyMatched')
     } else {
       //카카오페이결제 링크 받아오기
       matchedPath.isReal = true
@@ -260,7 +250,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
         //수락대기 경과시간
         let elapsedTime = 0
         //수락대기 최대시간
-        const timeoutLimit = 10000
+        const timeoutLimit = 30
         console.log('pgToken:', matchedPath)
         while (!isAccepted && elapsedTime < timeoutLimit) {
           if (
@@ -304,7 +294,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
           if (matchedPath.users[1].socketId) {
             socket.to(matchedPath.users[1].socketId).emit('failedPay')
           }
-          return '결제문제로 매칭실패'
+          socket.emit('failedPay')
         }
       }
     }

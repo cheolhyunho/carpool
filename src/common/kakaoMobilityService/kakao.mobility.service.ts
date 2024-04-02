@@ -113,7 +113,7 @@ export class KakaoMobilityService {
           tax_free_amount: '0',
           approval_url: 'http://localhost:5000/matchedPath',
           fail_url: 'http://localhost:5000/unmatchedPath',
-          cancel_url: 'http://localhost:5000/unmatchedPathl',
+          cancel_url: 'http://localhost:5000/unmatchedPath',
         },
         httpsAgent: new https.Agent({
           secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT,

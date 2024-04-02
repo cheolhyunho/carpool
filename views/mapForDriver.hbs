@@ -1,14 +1,36 @@
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <title>인포윈도우 생성하기</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>드라이버모드</title>
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link href="css/driver.css" rel="stylesheet" />
     <script
       type="text/javascript"
       src="//dapi.kakao.com/v2/maps/sdk.js?appkey=15484ca530f93575a407402650b6a032&libraries=services"
     ></script>
   </head>
   <body>
-    <div id="mapForDriver" style="width:100%;height:350px;"></div>
+    <header id="header-content">
+      <h1>승객과 매칭중입니다</h1>
+      <p>잠시만 기다려주세요...</p>
+    </header>
+    <button id="passenger-button">승객모드</button>
+
+    <div id="mapContainer" style="display: none; width: 100%; height: 80%;">
+      <!-- Kakao map will be displayed here -->
+    </div>
+
+    <div id="buttons" style="display: none;">
+      <button id="acceptButton">Accept</button>
+      <button id="rejectButton">Reject</button>
+    </div>
+
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script
       src="https://polyfill.io/v3/polyfill.min.js?features=default%2Ces2015%2Ces20s16%2Ces2017%2Ces2018%2Ces2019"
@@ -18,6 +40,6 @@
       integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh"
       crossorigin="anonymous"
     ></script>
-    <script src="js/createMap.js" defer></script>
+    <script src="js/driver.js" defer></script>
   </body>
 </html>
