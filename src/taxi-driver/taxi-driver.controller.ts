@@ -1,5 +1,11 @@
-import { Controller, Post } from '@nestjs/common'
+import { Controller, Get, Post, Render, UseGuards } from '@nestjs/common'
 import { TaxiDriverService } from './taxi-driver.service'
+import { JwtAuthGuard } from 'src/users/jwt/jwt.guard'
 
-@Controller('taxi-driver')
-export class TaxiDriverController {}
+@UseGuards(JwtAuthGuard)
+@Controller('driver')
+export class TaxiDriverController {
+  @Get()
+  @Render('mapForDriver')
+  driver() {}
+}

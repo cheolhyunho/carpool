@@ -263,20 +263,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
         const timeoutLimit = 10000
         console.log('pgToken:', matchedPath)
         while (!isAccepted && elapsedTime < timeoutLimit) {
-          // let resApprove1: { status?: number } = {}
-          // let resApprove2: { status?: number } = {}
-          // if (matchedPath.users[0].pgToken) {
-          //   resApprove1 = await this.kakaoMobilityService.getApprove(
-          //     firstUserUrl.tid,
-          //     matchedPath.users[0].pgToken,
-          //   )
-          // }
-          // if (matchedPath.users[1].pgToken) {
-          //   resApprove2 = await this.kakaoMobilityService.getApprove(
-          //     firstUserUrl.tid,
-          //     matchedPath.users[1].pgToken,
-          //   )
-          // }
           if (
             matchedPath.users[0].pgToken !== null &&
             matchedPath.users[1].pgToken !== null
@@ -299,30 +285,26 @@ export class MatchingGateway implements OnGatewayDisconnect {
             elapsedTime += 1
           }
         }
+
         if (isAccepted && elapsedTime < timeoutLimit) {
+          await this.kakaoMobilityService.getApprove(
+            firstUserUrl.tid,
+            matchedPath.users[0].pgToken,
+          )
+          await this.kakaoMobilityService.getApprove(
+            secondUserUrl.tid,
+            matchedPath.users[1].pgToken,
+          )
           //user에게 택시가사위치, taxi기사에게 네비게이션이동 로직 추가
           return '승객들 결제완료'
         } else {
-          console.log('first:', firstUserUrl)
-          console.log('second:', secondUserUrl)
-          if (matchedPath.users[0].pgToken) {
-            await this.kakaoMobilityService.cancelPay(
-              firstUserUrl.tid,
-              Math.floor(matchedPath.firstFare),
-            )
-          }
-          if (matchedPath.users[1].pgToken) {
-            await this.kakaoMobilityService.cancelPay(
-              secondUserUrl.tid,
-              Math.floor(matchedPath.secondFare),
-            )
-          }
           if (matchedPath.users[0].socketId) {
             socket.to(matchedPath.users[0].socketId).emit('failedPay')
           }
           if (matchedPath.users[1].socketId) {
             socket.to(matchedPath.users[1].socketId).emit('failedPay')
           }
+          return '결제문제로 매칭실패'
         }
       }
     }

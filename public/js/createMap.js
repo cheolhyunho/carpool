@@ -919,23 +919,6 @@ function closeModal(modal) {
   modal.remove()
 }
 
-// window.onload = function () {
-//   const testButton = document.getElementById('test')
-
-//   if (testButton) {
-//     testButton.addEventListener('click', function () {
-//       Kakao.Navi.start({
-//         name: '현대백화점 판교점',
-//         x: 127.11205203011632,
-//         y: 37.39279717586919,
-//         coordType: 'wgs84',
-//       })
-//     })
-//   } else {
-//     console.error('testButton이 찾을 수 없습니다.')
-//   }
-// }
-
 //global socketOn
 socket.on('matching', (matchingPath) => {
   console.log('상대방찾기성공!')
@@ -1119,4 +1102,8 @@ socket.on('alreadyMatched', ({ html }) => {
 socket.on('kakaoPay', (link) => {
   //카카오페이결제 링크로 이동
   window.location.href = link
+})
+
+socket.on('failedPay', () => {
+  alert('상대방 결제문제로 매칭이 취소되었습니다.')
 })

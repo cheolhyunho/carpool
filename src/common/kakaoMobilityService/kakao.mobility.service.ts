@@ -120,7 +120,7 @@ export class KakaoMobilityService {
         }),
       })
 
-      console.log(response)
+      console.log(response.data)
 
       return response.data
     } catch (error) {
@@ -162,7 +162,7 @@ export class KakaoMobilityService {
         }),
       })
 
-      console.log(response)
+      console.log(response.data)
 
       return response
     } catch (error) {
@@ -206,7 +206,7 @@ export class KakaoMobilityService {
 
       return response
     } catch (error) {
-      throw new Error(`Failed to fetch directions: ${error.code}`)
+      throw new Error(`Failed to fetch directions: ${error.error_code}`)
     }
   }
 }
