@@ -118,6 +118,7 @@ socket.on('letsDrive', function (matchedPath) {
   })
 
   acceptButton.addEventListener('click', () => {
+    buttons.style.display = 'none'
     socket.emit('imDriver', matchedPath, (message) => {
       alert(message)
     })
@@ -205,11 +206,9 @@ script.onload = function () {
     })
   }
 }
-
 document.body.appendChild(script)
-
 socket.on('navigation', (matchedPath) => {
-  console.log('qwerasdfzxcv')
+  console.log('navigation event on')
   window.startNavigation(matchedPath)
 })
 

@@ -129,7 +129,7 @@ export class KakaoMobilityService {
   }
 
   async getApprove(tid, pgToken): Promise<any> {
-    console.log('tid:', tid, pgToken)
+    console.log('getApprove:', tid, pgToken)
     const allowLegacyRenegotiationforNodeJsOptions = {
       httpsAgent: new https.Agent({
         // for self signed you could also add

@@ -88,6 +88,21 @@ export class MatchingGateway implements OnGatewayDisconnect {
     this.userRepository.save(oppUser)
   }
 
+  isAlreadySentMap = new Map()
+
+  async sendWantLocationEvent(matchedPath, socket) {
+    const drivers = await this.userRepository.find({
+      where: { isDriver: true },
+    })
+    console.log('드라이버', drivers)
+
+    for (const driver of drivers) {
+      console.log('wantLocation 이벤트 실행중')
+      console.log('driver:', driver)
+      socket.to(driver.socketId).emit('wantLocation', matchedPath)
+    }
+  }
+
   @SubscribeMessage('accept')
   async handleAccept(@ConnectedSocket() socket: Socket, @MessageBody() user) {
     user.socketId = socket.id
@@ -105,6 +120,9 @@ export class MatchingGateway implements OnGatewayDisconnect {
       where: { id: targetUser.matchedPath.id },
       relations: ['users'],
     })
+    const otherUser = matchedPath.users.find(
+      (oppUser) => oppUser.id !== user.id,
+    )
 
     let isAccepted = false
     //수락대기 경과시간
@@ -129,22 +147,21 @@ export class MatchingGateway implements OnGatewayDisconnect {
         elapsedTime += 1
       }
     }
-    const otherUser = matchedPath.users.find(
-      (oppUser) => oppUser.id !== user.id,
-    )
+
     if (isAccepted && elapsedTime < timeoutLimit) {
       //택시기사매칭 로직
-
       const drivers = await this.userRepository.find({
         where: { isDriver: true },
       })
-
-      for (const driver of drivers) {
-        console.log('wantLocation 이벤트 실행중')
-        console.log('driver:', driver)
-        socket.to(driver.socketId).emit('wantLocation', matchedPath)
+      console.log('드라이버', drivers)
+      if (!this.isAlreadySentMap.get(matchedPath.id)) {
+        for (const driver of drivers) {
+          console.log('wantLocation 이벤트 실행중')
+          await this.sendWantLocationEvent(matchedPath, socket)
+        }
+        this.isAlreadySentMap.set(matchedPath.id, true)
       }
-
+      console.log(this.isAlreadySentMap)
       return '기사매칭 대기중'
     } else {
       if (socket.id) {
@@ -194,6 +211,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
       data.lng,
     )
     console.log(kakaoResponse.summary.duration)
+
     if (kakaoResponse.summary.duration <= 300) {
       console.log('택시기사에게 send:', data.matchedPath)
       socket.emit('letsDrive', data.matchedPath)
@@ -229,6 +247,8 @@ export class MatchingGateway implements OnGatewayDisconnect {
           .to(matchedPath.users[1].socketId)
           .emit('kakaoPay', secondUserUrl.next_redirect_pc_url)
 
+        console.log('tid:', firstUserUrl.tid, secondUserUrl.tid)
+
         await this.unmatchedPathService.sleep(5000)
 
         const updatedMatchedPath = await this.entityManager.findOne(
@@ -244,8 +264,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
         //수락대기 경과시간
         let elapsedTime = 0
         //수락대기 최대시간
-
-        const timeoutLimit = 120
+        const timeoutLimit = 100
         console.log('pgToken:', matchedPath)
         while (!isAccepted && elapsedTime < timeoutLimit) {
           if (
@@ -272,22 +291,21 @@ export class MatchingGateway implements OnGatewayDisconnect {
         }
 
         if (isAccepted && elapsedTime < timeoutLimit) {
-          console.log('matchedPath.users[1]:', matchedPath.users[1])
-          // await this.kakaoMobilityService.getApprove(
-          //   firstUserUrl.tid,
-          //   matchedPath.users[0].pgToken,
-          // )
-          // await this.kakaoMobilityService.getApprove(
-          //   secondUserUrl.tid,
-          //   matchedPath.users[1].pgToken,
-          // )
-          //user에게 택시가사위치, taxi기사에게 네비게이션이동 로직 추가
+          await this.kakaoMobilityService.getApprove(
+            firstUserUrl.tid,
+            matchedPath.users[0].pgToken,
+          )
+          await this.kakaoMobilityService.getApprove(
+            secondUserUrl.tid,
+            matchedPath.users[1].pgToken,
+          )
           socket.emit('navigation', matchedPath)
           setInterval(() => {
             console.log('setInterval실행중666666666666666666666')
             socket.emit('updateLocation', matchedPath)
           }, 5000)
           return '승객들 결제완료'
+          //user에게 택시가사위치, taxi기사에게 네비게이션이동 로직 추가
         } else {
           if (matchedPath.users[0].socketId) {
             socket.to(matchedPath.users[0].socketId).emit('failedPay')
@@ -336,6 +354,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
       user.socketId = null
       user.isDriver = false
       user.pgToken = null
+      user.isAdmin = false
 
       await this.userRepository.save(user)
     }
