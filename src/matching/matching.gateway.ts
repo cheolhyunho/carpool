@@ -283,6 +283,10 @@ export class MatchingGateway implements OnGatewayDisconnect {
           // )
           //user에게 택시가사위치, taxi기사에게 네비게이션이동 로직 추가
           socket.emit('navigation', matchedPath)
+          setInterval(() => {
+            console.log('setInterval실행중666666666666666666666')
+            socket.emit('updateLocation', matchedPath)
+          }, 5000)
           return '승객들 결제완료'
         } else {
           if (matchedPath.users[0].socketId) {
@@ -305,6 +309,23 @@ export class MatchingGateway implements OnGatewayDisconnect {
     user.socketId = socket.id
     user.isMatching = true
     await this.userRepository.save(user)
+  }
+
+  @SubscribeMessage('realTimeLocation')
+  async handleRealTimeLocation(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data,
+  ) {
+    console.log(
+      'data.matchedPath.users[0].socketId:',
+      data.matchedPath.users[0].socketId,
+    )
+    socket
+      .to(data.matchedPath.users[0].socketId)
+      .emit('hereIsRealTimeLocation', data)
+    socket
+      .to(data.matchedPath.users[1].socketId)
+      .emit('hereIsRealTimeLocation', data)
   }
 
   async handleDisconnect(@ConnectedSocket() socket: Socket) {
