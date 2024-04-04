@@ -211,3 +211,22 @@ socket.on('navigation', (matchedPath) => {
   console.log('navigation event on')
   window.startNavigation(matchedPath)
 })
+
+socket.on('updateLocation', (matchedPath) => {
+  try {
+    console.log('updateLocation 실행중')
+    navigator.geolocation.getCurrentPosition(function (position) {
+      const latitude = position.coords.latitude
+      const longitude = position.coords.longitude
+      const data = {
+        lat: latitude,
+        lng: longitude,
+        matchedPath: matchedPath,
+      }
+      console.log(matchedPath)
+      socket.emit('realTimeLocation', data)
+    })
+  } catch (error) {
+    console.error(error)
+  }
+})

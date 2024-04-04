@@ -300,6 +300,10 @@ export class MatchingGateway implements OnGatewayDisconnect {
             matchedPath.users[1].pgToken,
           )
           socket.emit('navigation', matchedPath)
+          setInterval(() => {
+            console.log('setInterval실행중666666666666666666666')
+            socket.emit('updateLocation', matchedPath)
+          }, 10000)
           return '승객들 결제완료'
           //user에게 택시가사위치, taxi기사에게 네비게이션이동 로직 추가
         } else {
@@ -323,6 +327,48 @@ export class MatchingGateway implements OnGatewayDisconnect {
     user.socketId = socket.id
     user.isMatching = true
     await this.userRepository.save(user)
+    const drivers = await this.userRepository.find({
+      where: { isDriver: true },
+    })
+    console.log('드라이버', drivers)
+
+    const targetUser = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.matchedPath', 'matchedPath')
+      .where('user.id = :userId', {
+        userId: user.id,
+      })
+      .getOne()
+    const matchedPath = await this.matchedPathRepository.findOne({
+      where: { id: targetUser.matchedPath.id },
+      relations: ['users'],
+    })
+
+    for (const driver of drivers) {
+      console.log('wantLocation 이벤트 실행중')
+
+      console.log('driver:', driver)
+
+      setInterval(() => {
+        console.log('setInterval실행중666666666666666666666')
+        socket.to(driver.socketId).emit('updateLocation', matchedPath)
+      }, 10000)
+    }
+  }
+
+  @SubscribeMessage('realTimeLocation')
+  async handleRealTimeLocation(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data,
+  ) {
+    console.log('realTimeLocation 실행중')
+    console.log(data)
+    socket
+      .to(data.matchedPath.users[0].socketId)
+      .emit('hereIsRealTimeLocation', data)
+    socket
+      .to(data.matchedPath.users[1].socketId)
+      .emit('hereIsRealTimeLocation', data)
   }
 
   async handleDisconnect(@ConnectedSocket() socket: Socket) {
