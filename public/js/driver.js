@@ -123,7 +123,6 @@ socket.on('letsDrive', function (matchedPath) {
       alert(message)
     })
   })
-
   rejectButton.addEventListener('click', () => {
     location.reload()
   })
@@ -172,4 +171,43 @@ socket.on('alreadyMatched', () => {
 socket.on('failedPay', () => {
   alert('결제문제로 매칭이 취소되었습니다.')
   location.reload()
+})
+
+var script = document.createElement('script')
+script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.1/kakao.min.js'
+script.onload = function () {
+  // 스크립트가 로드된 후에 Kakao를 초기화합니다.
+  Kakao.init('e2e6aaff52c5209242360a7098c2d078')
+
+  // Kakao 초기화 후에 startNavigation 함수를 설정합니다.
+  window.startNavigation = function (matchedPath) {
+    Kakao.Navi.start({
+      name: '도착지',
+      x: matchedPath.destinationPoint.lng,
+      y: matchedPath.destinationPoint.lat,
+      coordType: 'wgs84',
+      viaPoints: [
+        {
+          name: '경유지1',
+          x: matchedPath.origin.lng,
+          y: matchedPath.origin.lat,
+        },
+        {
+          name: '경유지2',
+          x: matchedPath.firstWayPoint.lng,
+          y: matchedPath.firstWayPoint.lat,
+        },
+        {
+          name: '경유지3',
+          x: matchedPath.secondWayPoint.lng,
+          y: matchedPath.secondWayPoint.lat,
+        },
+      ],
+    })
+  }
+}
+document.body.appendChild(script)
+socket.on('navigation', (matchedPath) => {
+  console.log('navigation event on')
+  window.startNavigation(matchedPath)
 })

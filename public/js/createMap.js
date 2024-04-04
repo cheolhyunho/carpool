@@ -626,6 +626,7 @@ function setOriginPoint(originAddress) {
   )
 }
 /////////test
+
 var mapContainer = document.getElementById('map'), // 지도를 표시할 div
   mapOption = {
     center: new kakao.maps.LatLng(37.2095934, 126.9817136), // 지도의 중심좌표
@@ -806,6 +807,7 @@ function handleAccept() {
       return response.json()
     })
     .then((data) => {
+      console.log(data)
       socket.emit('accept', data)
     })
     .catch((error) => {
@@ -849,6 +851,42 @@ socket.on('rejectMatching', () => {
   alert('매칭이 취소되었습니다.')
   location.reload()
 })
+
+var script = document.createElement('script')
+script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.1/kakao.min.js'
+script.onload = function () {
+  // 스크립트가 로드된 후에 Kakao를 초기화합니다.
+  Kakao.init('e2e6aaff52c5209242360a7098c2d078')
+
+  // Kakao 초기화 후에 startNavigation 함수를 설정합니다.
+  function startNavigation() {
+    Kakao.Navi.start({
+      name: '도착지',
+      x: matchedPath.destinationPoint.lng,
+      y: matchedPath.destinationPoint.lat,
+      coordType: 'wgs84',
+      viaPoints: [
+        {
+          name: '경유지1',
+          x: matchedPath.origin.lng,
+          y: matchedPath.origin.lat,
+        },
+        {
+          name: '경유지2',
+          x: matchedPath.firstWayPoint.lng,
+          y: matchedPath.firstWayPoint.lat,
+        },
+        {
+          name: '경유지3',
+          x: matchedPath.secondWayPoint.lng,
+          y: matchedPath.secondWayPoint.lat,
+        },
+      ],
+    })
+  }
+
+  // startNavigation 함수를 클릭 이벤트에 연결합니다.
+}
 
 socket.on('kakaoPay', (link) => {
   //카카오페이결제 링크로 이동
