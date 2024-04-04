@@ -13,7 +13,7 @@ const logoutButton = document.getElementById('logout')
 const modeButton = document.getElementById('DriverMode')
 
 modeButton.addEventListener('click', function () {
-  window.location.href = 'http://localhost:5000/driver'
+  window.location.href = window.location.origin + '/driver'
 })
 
 socket.on('renderDriverMode', ({ html }) => {

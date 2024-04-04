@@ -26,7 +26,7 @@ fetch('/unmatchedPath/userId', {
   })
 
 passangerButton.addEventListener('click', function () {
-  window.location.href = 'http://localhost:5000/unmatchedPath'
+  window.location.href = window.location.origin + '/unmatchedPath'
 })
 
 socket.on('wantLocation', (matchedPath) => {
@@ -118,6 +118,7 @@ socket.on('letsDrive', function (matchedPath) {
   })
 
   acceptButton.addEventListener('click', () => {
+    buttons.style.display = 'none'
     socket.emit('imDriver', matchedPath, (message) => {
       alert(message)
     })
