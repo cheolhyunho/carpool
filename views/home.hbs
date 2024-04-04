@@ -1,34 +1,44 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Welcome to Our Website</title>
-    <link rel="stylesheet" href="css/home.css" />
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>택시매칭페이지</title>
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link href="css/styles.css" rel="stylesheet" />
+    <script
+      type="text/javascript"
+      src="//dapi.kakao.com/v2/maps/sdk.js?appkey=15484ca530f93575a407402650b6a032&libraries=services"
+    ></script>
   </head>
   <body>
-    <header>
-      <h1>Welcome to Our Website</h1>
-    </header>
-    <nav>
-      <ul>
-        <li><a href="#">Home</a></li>
-        <li><a href="#">About</a></li>
-        <li><a href="#">Services</a></li>
-        <li><a href="#">Contact</a></li>
-        <li><button id="logoutButton">Logout</button></li>
-      </ul>
-    </nav>
-    <section class="main-content">
-      <h2>About Us</h2>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vitae
-        nisi ut eros tincidunt interdum.</p>
-      <p>Sed dictum fringilla dui, sit amet convallis metus mollis et.</p>
-    </section>
-    <footer>
-      <p>&copy; 2024 Your Website. All rights reserved.</p>
-    </footer>
+    <div class="map_wrap">
+      <div
+        id="map"
+        style="width:70%;height:70%;position:relative;overflow:hidden;"
+      ></div>
+      <div id="menu_wrap" class="bg_white">
+        <div class="option">
+          <div>
+
+          </div>
+        </div>
+        <hr />
+        <ul id="placesList"></ul>
+        <div id="pagination"></div>
+      </div>
+    </div>
+    <div style="overscroll-behavior: none">
+      <div
+        id="map"
+        style="font-family: arial; margin: 100px; width: 500px; height: 500px;"
+      ></div>
+    </div>
+
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script
       src="https://polyfill.io/v3/polyfill.min.js?features=default%2Ces2015%2Ces20s16%2Ces2017%2Ces2018%2Ces2019"
@@ -38,7 +48,6 @@
       integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh"
       crossorigin="anonymous"
     ></script>
-    <script src="js/matched.js"></script>
-
+    <script src="js/matched.js" defer></script>
   </body>
 </html>
