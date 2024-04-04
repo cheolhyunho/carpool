@@ -344,6 +344,14 @@ export class MatchingGateway implements OnGatewayDisconnect {
       relations: ['users'],
     })
 
+    const unmatchedUser = await this.userRepository.findOne({
+      where: { id: user.id },
+      relations: ['unmatchedPath'],
+    })
+    console.log(unmatchedUser.unmatchedPath)
+
+    socket.emit('location', unmatchedUser.unmatchedPath)
+
     for (const driver of drivers) {
       console.log('wantLocation 이벤트 실행중')
 
