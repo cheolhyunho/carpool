@@ -13,92 +13,12 @@ const logoutButton = document.getElementById('logout')
 const modeButton = document.getElementById('DriverMode')
 
 modeButton.addEventListener('click', function () {
-  fetch('/unmatchedPath/userId', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((reponse) => {
-      if (!reponse.ok) {
-        throw new Error('서버에러')
-      }
-      return reponse.json()
-    })
-    .then((data) => {
-      socket.emit('driverMode', data)
-    })
-    .catch((error) => {
-      console.error(error)
-    })
+  window.location.href = window.location.origin + '/driver'
 })
 
 socket.on('renderDriverMode', ({ html }) => {
   document.body.innerHTML = html
 })
-
-// modeButton.addEventListener('click', function () {
-//   fetch('/unmatchedPath/changeMode', {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//     },
-//   })
-//     .then((response) => {
-//       if (!response.ok) {
-//         throw new Error('error')
-//       }
-//       return response.json()
-//     })
-//     .then((data) => {
-//       // 받아온 데이터에 따라 버튼 이름 설정
-//       modeButton.innerText = data.isDriver ? 'Passenger Mode' : 'Driver Mode'
-//     })
-//     .catch((error) => {
-//       console.error('Error:', error)
-//     })
-//   if (modeButton.innerText === 'Driver Mode') {
-//     fetch('/unmatchedPath/driveMode', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     })
-//       .then((response) => {
-//         if (!response.ok) {
-//           throw new Error('error')
-//         }
-//         return response.json()
-//       })
-//       .then((data) => {
-//         console.log('드라이버 모드')
-//       })
-//       .catch((error) => {
-//         console.error('Error:', error)
-//       })
-//   }
-// })
-
-// modeButton.addEventListener('click', function () {
-//   fetch('/unmatchedPath/changeMode', {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//     },
-//   })
-//     .then((response) => {
-//       if (!response.ok) {
-//         throw new Error('error')
-//       }
-//       return response.json()
-//     })
-//     .then((data) => {
-//       console.log('create Successful:', data)
-//     })
-//     .catch((error) => {
-//       console.error('Error:', error)
-//     })
-// })
 
 function sendPost(coordinateData) {
   fetch('/unmatchedPath', {
@@ -822,7 +742,7 @@ matchingButton.addEventListener('click', function () {
       return response.json()
     })
     .then((data) => {
-      socket.emit('test', data, (user) => {
+      socket.emit('doMatch', data, (user) => {
         console.log('수신완료:', user)
       })
     })
@@ -887,6 +807,7 @@ function handleAccept() {
       return response.json()
     })
     .then((data) => {
+      console.log(data)
       socket.emit('accept', data)
     })
     .catch((error) => {
@@ -931,221 +852,41 @@ socket.on('rejectMatching', () => {
   location.reload()
 })
 
-socket.on('wantLocation', (matchedPath) => {
-  if ('geolocation' in navigator) {
-    console.log('wantLocation On 실행중')
-    navigator.geolocation.getCurrentPosition(function (position) {
-      const latitude = position.coords.latitude
-      const longitude = position.coords.longitude
-      const data = {
-        lat: latitude,
-        lng: longitude,
-        matchedPath: matchedPath,
-      }
-      socket.emit('hereIsLocation', data)
-    })
-  } else {
-    alert('이 브라우저에서는 Geolocation 을 지원하지 않습니다.')
-  }
-})
+var script = document.createElement('script')
+script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.1/kakao.min.js'
+script.onload = function () {
+  // 스크립트가 로드된 후에 Kakao를 초기화합니다.
+  Kakao.init('e2e6aaff52c5209242360a7098c2d078')
 
-socket.on('letsDrive', function (matchedPath) {
-  document.body.innerHTML = ''
-  const actionButtons = document.createElement('div')
-  actionButtons.classList.add('actionButtons')
-  actionButtons.style.display = 'flex'
-  actionButtons.style.justifyContent = 'center'
-  actionButtons.style.marginTop = '20px'
-
-  const rejectButton = document.createElement('button')
-  rejectButton.textContent = '거절'
-  const acceptButton = document.createElement('button')
-  acceptButton.textContent = '수락'
-  actionButtons.appendChild(acceptButton)
-  actionButtons.appendChild(rejectButton)
-
-  const mapContainer = document.createElement('div')
-  mapContainer.classList.add('mapContainer')
-  mapContainer.style.position = 'fixed'
-  mapContainer.style.top = '10%' // 상단에서 10% 위치
-  mapContainer.style.left = '50%'
-  mapContainer.style.transform = 'translateX(-50%)'
-  mapContainer.style.backgroundColor = 'white'
-  mapContainer.style.padding = '20px'
-  mapContainer.style.border = '1px solid black'
-  mapContainer.style.zIndex = '9999'
-  mapContainer.style.width = '80%'
-  mapContainer.style.height = '80%'
-
-  document.body.appendChild(actionButtons)
-  document.body.appendChild(mapContainer)
-
-  mapOption = {
-    center: new kakao.maps.LatLng(33.45071, 126.570667), // 지도의 중심좌표
-  }
-
-  var map = new kakao.maps.Map(mapContainer, mapOption) // 지도를 생성합니다
-  var geocoder = new kakao.maps.services.Geocoder()
-
-  var positions = [
-    {
-      content: '<div>승객1 승차</div>',
-      latlng: new kakao.maps.LatLng(
-        matchedPath.origin.lat,
-        matchedPath.origin.lng,
-      ),
-    },
-    {
-      content: '<div>승객 하차</div>',
-      latlng: new kakao.maps.LatLng(
-        matchedPath.destinationPoint.lat,
-        matchedPath.destinationPoint.lng,
-      ),
-    },
-    {
-      content: '<div>승객2 승차</div>',
-      latlng: new kakao.maps.LatLng(
-        matchedPath.firstWayPoint.lat,
-        matchedPath.firstWayPoint.lng,
-      ),
-    },
-    {
-      content: '<div>승객 하차</div>',
-      latlng: new kakao.maps.LatLng(
-        matchedPath.secondWayPoint.lat,
-        matchedPath.secondWayPoint.lng,
-      ),
-    },
-  ]
-  searchDetailAddrFromCoords(positions[0], function (result, status) {
-    if (status === kakao.maps.services.Status.OK) {
-      positions[0].content +=
-        '<div>지번 주소 : ' + result[0].address.address_name + '</div>'
-      updateInfowindowContent(0)
-    }
-  })
-  searchDetailAddrFromCoords(positions[1], function (result, status) {
-    if (status === kakao.maps.services.Status.OK) {
-      positions[1].content +=
-        '<div>지번 주소 : ' + result[0].address.address_name + '</div>'
-      updateInfowindowContent(1)
-    }
-  })
-  searchDetailAddrFromCoords(positions[2], function (result, status) {
-    if (status === kakao.maps.services.Status.OK) {
-      positions[2].content +=
-        '<div>지번 주소 : ' + result[0].address.address_name + '</div>'
-      updateInfowindowContent(2)
-    }
-  })
-  searchDetailAddrFromCoords(positions[3], function (result, status) {
-    if (status === kakao.maps.services.Status.OK) {
-      positions[3].content +=
-        '<div>지번 주소 : ' + result[0].address.address_name + '</div>'
-      updateInfowindowContent(3)
-    }
-  })
-
-  var script = document.createElement('script')
-  script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.1/kakao.min.js'
-  script.onload = function () {
-    // 스크립트가 로드된 후에 Kakao를 초기화합니다.
-    Kakao.init('e2e6aaff52c5209242360a7098c2d078')
-
-    // Kakao 초기화 후에 startNavigation 함수를 설정합니다.
-    function startNavigation() {
-      Kakao.Navi.start({
-        name: '도착지',
-        x: matchedPath.destinationPoint.lng,
-        y: matchedPath.destinationPoint.lat,
-        coordType: 'wgs84',
-        viaPoints: [
-          {
-            name: '경유지1',
-            x: matchedPath.origin.lng,
-            y: matchedPath.origin.lat,
-          },
-          {
-            name: '경유지2',
-            x: matchedPath.firstWayPoint.lng,
-            y: matchedPath.firstWayPoint.lat,
-          },
-          {
-            name: '경유지3',
-            x: matchedPath.secondWayPoint.lng,
-            y: matchedPath.secondWayPoint.lat,
-          },
-        ],
-      })
-    }
-
-    // startNavigation 함수를 클릭 이벤트에 연결합니다.
-
-    acceptButton.addEventListener('click', function () {
-      startNavigation()
-      socket.emit('imDriver', matchedPath, function (message) {
-        alert(message)
-      })
-    })
-  }
-  document.head.appendChild(script)
-  // acceptButton.addEventListener('click', () => {
-  //   startNavigation()
-  //   socket.emit('imDriver', matchedPath, (message) => {
-  //     alert(message)
-  //   })
-  // })
-
-  rejectButton.addEventListener('click', () => {
-    // 거절 버튼을 클릭했을 때 수행할 동작 추가
-    actionButtons.remove()
-    mapContainer.remove()
-  })
-
-  function updateInfowindowContent(index) {
-    var marker = new kakao.maps.Marker({
-      map: map, // 마커를 표시할 지도
-      position: positions[index].latlng, // 마커의 위치
-      status: true,
-    })
-
-    // 마커에 표시할 인포윈도우를 생성합니다
-    var infowindow = new kakao.maps.InfoWindow({
-      content: positions[index].content, // 인포윈도우에 표시할 내용
-    })
-
-    infowindow.open(map, marker)
-
-    kakao.maps.event.addListener(marker, 'click', function () {
-      // 마커에 마우스오버 이벤트가 발생하면 인포윈도우를 마커위에 표시합니다
-      if (marker.status == true) {
-        infowindow.open(map, marker)
-        marker.status = false
-      } else {
-        infowindow.close()
-        marker.status = true
-      }
+  // Kakao 초기화 후에 startNavigation 함수를 설정합니다.
+  function startNavigation() {
+    Kakao.Navi.start({
+      name: '도착지',
+      x: matchedPath.destinationPoint.lng,
+      y: matchedPath.destinationPoint.lat,
+      coordType: 'wgs84',
+      viaPoints: [
+        {
+          name: '경유지1',
+          x: matchedPath.origin.lng,
+          y: matchedPath.origin.lat,
+        },
+        {
+          name: '경유지2',
+          x: matchedPath.firstWayPoint.lng,
+          y: matchedPath.firstWayPoint.lat,
+        },
+        {
+          name: '경유지3',
+          x: matchedPath.secondWayPoint.lng,
+          y: matchedPath.secondWayPoint.lat,
+        },
+      ],
     })
   }
 
-  function searchDetailAddrFromCoords(coords, callback) {
-    // 좌표로 법정동 상세 주소 정보를 요청합니다
-    geocoder.coord2Address(
-      coords.latlng.getLng(),
-      coords.latlng.getLat(),
-      callback,
-    )
-  }
-})
-
-const navi = document.getElementById('test.hbs')
-socket.on('IwillgiveYouLocation', () => {
-  document.body.innerHTML = navi
-})
-socket.on('alreadyMatched', () => {
-  alert('이미 택시가 매칭되었습니다')
-  document.body.innerHTML = navi
-})
+  // startNavigation 함수를 클릭 이벤트에 연결합니다.
+}
 
 socket.on('kakaoPay', (link) => {
   //카카오페이결제 링크로 이동

@@ -18,44 +18,6 @@ export class MatchedPathsService {
     private readonly kakaoMobilityService: KakaoMobilityService,
   ) {}
 
-  // async reqMatching(arg) {
-  //   const currentUser = await this.userRepository
-  //     .createQueryBuilder('user')
-  //     .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
-  //     .where('user.id = :userId', {
-  //       userId: arg.currentUserId,
-  //     })
-  //     .getOne()
-  //   const matchedUser = await this.userRepository
-  //     .createQueryBuilder('user')
-  //     .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
-  //     .where('user.id = :userId', {
-  //       userId: arg.matchedUserId,
-  //     })
-  //     .getOne()
-
-  //   const currentUserUP = await this.unmatchedPathRepository.findOne(
-  //     currentUser.unmatchedPath.id,
-  //   )
-  //   const matchedUserUP = await this.unmatchedPathRepository.findOne(
-  //     matchedUser.unmatchedPath.id,
-  //   )
-
-  //   const kakaoResponse1 = await this.kakaoMobilityService.getInfo(
-  //     currentUserUP.startingPoint.lat,
-  //     currentUserUP.startingPoint.lng,
-  //     currentUserUP.destinationPoint.lat,
-  //     currentUserUP.destinationPoint.lng,
-  //   )
-
-  //   const kakaoResponse2 = await this.kakaoMobilityService.getInfo(
-  //     matchedUserUP.startingPoint.lat,
-  //     matchedUserUP.startingPoint.lng,
-  //     matchedUserUP.destinationPoint.lat,
-  //     matchedUserUP.destinationPoint.lng,
-  //   )
-  // }
-
   async createMatchedPath(
     matchedPathdto: any,
     currentFare,
@@ -96,8 +58,12 @@ export class MatchedPathsService {
     return savedMatchedPath
   }
 
-  async completedPay(user) {
+  async completedPay(payload) {
+    const user = payload.user
+    const token = payload.pgToken
     user.isMatching = true
+    user.pgToken = token
+
     this.userRepository.save(user)
   }
 }

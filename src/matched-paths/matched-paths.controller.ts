@@ -1,18 +1,14 @@
-import { MatchedPathDto } from './dto/matchedPath.dto'
 import {
   Body,
   Controller,
   Get,
-  Injectable,
+  Param,
   Post,
+  Query,
   Render,
   UseGuards,
 } from '@nestjs/common'
 import { MatchedPathsService } from './matched-paths.service'
-import { InjectRepository } from '@nestjs/typeorm'
-import { UnmatchedPathEntity } from 'src/unmatched-paths/unmatchedpaths.entity'
-import { MatchedPathEntity } from './matchedPaths.entity'
-import { Repository } from 'typeorm'
 import { JwtAuthGuard } from 'src/users/jwt/jwt.guard'
 import { CurrentUser } from 'src/common/decorators/current-user.decorator'
 import { KakaoMobilityService } from 'src/common/kakaoMobilityService/kakao.mobility.service'
@@ -25,9 +21,9 @@ export class MatchedPathsController {
     private readonly kakaoMobilityService: KakaoMobilityService,
   ) {}
 
-  @Get('/')
+  @Get()
   @Render('home')
-  async matched(@CurrentUser() user) {
-    await this.matchedPathsService.completedPay(user)
+  async matched(@CurrentUser() user, @Query('pg_token') pgToken: string) {
+    await this.matchedPathsService.completedPay({ user, pgToken })
   }
 }

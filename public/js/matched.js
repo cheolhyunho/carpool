@@ -17,3 +17,7 @@ fetch('/unmatchedPath/userId', {
   .catch((error) => {
     console.error('UserId 가져오기 실패:', error)
   })
+
+socket.on('failedPay', () => {
+  alert('상대방 결제문제로 매칭이 취소되었습니다.')
+})

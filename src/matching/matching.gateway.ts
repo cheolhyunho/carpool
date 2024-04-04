@@ -41,18 +41,9 @@ export class MatchingGateway implements OnGatewayDisconnect {
     currentUser.socketId = socket.id
     currentUser.isDriver = true
     await this.userRepository.save(currentUser)
-    try {
-      const htmlContent = fs.readFileSync(
-        '/Users/hyunho/coding/carpool/views/matchingWaitingForDriver.hbs',
-        'utf8',
-      )
-      socket.emit('renderDriverMode', { html: htmlContent })
-    } catch (error) {
-      console.error('rendering error:', error)
-    }
   }
 
-  @SubscribeMessage('test')
+  @SubscribeMessage('doMatch')
   async handleSocket(@ConnectedSocket() socket: Socket, @MessageBody() user) {
     user.socketId = socket.id
     await this.userRepository.save(user)
@@ -119,7 +110,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     //수락대기 경과시간
     let elapsedTime = 0
     //수락대기 최대시간
-    const timeoutLimit = 30
+    const timeoutLimit = 60
     while (!isAccepted && elapsedTime < timeoutLimit) {
       if (matchedPath.users[0].isMatching && matchedPath.users[1].isMatching) {
         isAccepted = true
@@ -147,6 +138,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
       const drivers = await this.userRepository.find({
         where: { isDriver: true },
       })
+
       for (const driver of drivers) {
         console.log('wantLocation 이벤트 실행중')
         console.log('driver:', driver)
@@ -215,26 +207,20 @@ export class MatchingGateway implements OnGatewayDisconnect {
     @ConnectedSocket() socket: Socket,
     @MessageBody() matchedPath,
   ) {
-    //먼저 잡은 기사가 있을떄
+    //먼저 잡은 기사가 있을때
     if (matchedPath.isReal) {
-      try {
-        const htmlContent = fs.readFileSync(
-          '/Users/hyunho/coding/carpool/views/matchingWaitingForDriver.hbs',
-          'utf8',
-        )
-        socket.emit('alreadyMatched', { html: htmlContent })
-      } catch (error) {
-        console.error('rendering error:', error)
-      }
+      socket.emit('alreadyMatched')
     } else {
+      //카카오페이결제 링크 받아오기
       matchedPath.isReal = true
       await this.matchedPathRepository.save(matchedPath)
       const firstUserUrl = await this.kakaoMobilityService.getPayment(
-        matchedPath.firstFare,
+        Math.floor(matchedPath.firstFare),
       )
       const secondUserUrl = await this.kakaoMobilityService.getPayment(
-        matchedPath.secondFare,
+        Math.floor(matchedPath.secondFare),
       )
+
       if (matchedPath.users[0].socketId && matchedPath.users[1].socketId) {
         socket
           .to(matchedPath.users[0].socketId)
@@ -258,11 +244,15 @@ export class MatchingGateway implements OnGatewayDisconnect {
         //수락대기 경과시간
         let elapsedTime = 0
         //수락대기 최대시간
-        const timeoutLimit = 50
+
+        const timeoutLimit = 120
+        console.log('pgToken:', matchedPath)
         while (!isAccepted && elapsedTime < timeoutLimit) {
           if (
-            matchedPath.users[0].isMatching &&
-            matchedPath.users[1].isMatching
+            matchedPath.users[0].pgToken !== null &&
+            matchedPath.users[1].pgToken !== null
+            // resApprove1.status === 200 &&
+            // resApprove2.status === 200
           ) {
             isAccepted = true
           } else {
@@ -280,18 +270,28 @@ export class MatchingGateway implements OnGatewayDisconnect {
             elapsedTime += 1
           }
         }
+
         if (isAccepted && elapsedTime < timeoutLimit) {
-          console.log('승객들 결제완료5555555555555555')
+          console.log('matchedPath.users[1]:', matchedPath.users[1])
+          // await this.kakaoMobilityService.getApprove(
+          //   firstUserUrl.tid,
+          //   matchedPath.users[0].pgToken,
+          // )
+          // await this.kakaoMobilityService.getApprove(
+          //   secondUserUrl.tid,
+          //   matchedPath.users[1].pgToken,
+          // )
+          //user에게 택시가사위치, taxi기사에게 네비게이션이동 로직 추가
+          socket.emit('navigation', matchedPath)
           return '승객들 결제완료'
         } else {
-          //이미 결제된 사람있으면 환불 로직 추가
-          console.log('else문실행 555555555555555555555555')
           if (matchedPath.users[0].socketId) {
             socket.to(matchedPath.users[0].socketId).emit('failedPay')
           }
           if (matchedPath.users[1].socketId) {
             socket.to(matchedPath.users[1].socketId).emit('failedPay')
           }
+          socket.emit('failedPay')
         }
       }
     }
@@ -314,6 +314,8 @@ export class MatchingGateway implements OnGatewayDisconnect {
       user.isMatching = false
       user.socketId = null
       user.isDriver = false
+      user.pgToken = null
+
       await this.userRepository.save(user)
     }
     this.logger.log(`disconnected : ${socket.id} ${socket.nsp.name}`)
