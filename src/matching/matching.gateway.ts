@@ -270,8 +270,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
           if (
             matchedPath.users[0].pgToken !== null &&
             matchedPath.users[1].pgToken !== null
-            // resApprove1.status === 200 &&
-            // resApprove2.status === 200
           ) {
             isAccepted = true
           } else {
@@ -299,6 +297,23 @@ export class MatchingGateway implements OnGatewayDisconnect {
             secondUserUrl.tid,
             matchedPath.users[1].pgToken,
           )
+
+          const firstUser = await this.entityManager.findOne(UserEntity, {
+            where: { id: matchedPath.users[0].id },
+            relations: ['unmatchedPath'],
+          })
+          const secondUser = await this.entityManager.findOne(UserEntity, {
+            where: { id: matchedPath.users[1].id },
+            relations: ['unmatchedPath'],
+          })
+          console.log(firstUser.unmatchedPath, secondUser.unmatchedPath)
+          socket
+            .to(firstUser.socketId)
+            .emit('location', firstUser.unmatchedPath)
+          socket
+            .to(secondUser.socketId)
+            .emit('location', secondUser.unmatchedPath)
+
           socket.emit('navigation', matchedPath)
           setInterval(() => {
             console.log('setInterval실행중666666666666666666666')
@@ -327,6 +342,12 @@ export class MatchingGateway implements OnGatewayDisconnect {
     user.socketId = socket.id
     user.isMatching = true
     await this.userRepository.save(user)
+
+    // const unmatchedUser = await this.userRepository.findOne({
+    //   where: { id: user.id },
+    //   relations: ['unmatchedPath'],
+    // })
+    // console.log(unmatchedUser.unmatchedPath)
   }
 
   @SubscribeMessage('realTimeLocation')
@@ -335,10 +356,11 @@ export class MatchingGateway implements OnGatewayDisconnect {
     @MessageBody() data,
   ) {
     console.log('realTimeLocation 실행중')
-    console.log(data)
+    console.log(data.matchedPath.users)
     socket
       .to(data.matchedPath.users[0].socketId)
       .emit('hereIsRealTimeLocation', data)
+
     socket
       .to(data.matchedPath.users[1].socketId)
       .emit('hereIsRealTimeLocation', data)
