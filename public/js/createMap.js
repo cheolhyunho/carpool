@@ -57,7 +57,11 @@ function handleButtonClick(event) {
   }
 }
 
-function handleButtonClick2(event) {
+function handleButtonClick2(
+  event,
+  places_road_address_name,
+  places_addres_name,
+) {
   // 클릭된 버튼의 부모 요소인 리스트 아이템을 찾습니다
   var listItem = event.target.closest('.item')
   // 리스트 아이템에서 주소 정보를 찾습니다

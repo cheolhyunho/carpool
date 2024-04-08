@@ -112,6 +112,7 @@ export class KakaoMobilityService {
           quantity: '1',
           total_amount: fare,
           tax_free_amount: '0',
+
           approval_url: 'http://localhost:5000/matchedPath',
           fail_url: 'http://localhost:5000/unmatchedPath',
           cancel_url: 'http://localhost:5000/unmatchedPath',

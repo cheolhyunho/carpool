@@ -89,3 +89,8 @@ socket.on('hereIsRealTimeLocation', (data) => {
   clusterer.clear()
   clusterer.addMarker(marker)
 })
+
+socket.on('finishTracking', () => {
+  console.log('finishTracking 실행중')
+  window.location.href = window.location.origin + '/unmatchedPath'
+})

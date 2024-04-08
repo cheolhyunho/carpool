@@ -326,11 +326,21 @@ export class MatchingGateway implements OnGatewayDisconnect {
             .emit('location', secondUser.unmatchedPath)
 
           socket.emit('navigation', updatedMatchedPath)
-          setInterval(() => {
-            console.log('setInterval실행중666666666666666666666')
+          let setInt
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars, prefer-const
+          setInt = setInterval(() => {
             socket.emit('updateLocation', updatedMatchedPath)
           }, 10000)
-
+          socket.on('finishDrive', () => {
+            console.log('finishDrive 실행중')
+            clearInterval(setInt)
+            socket
+              .to(updatedMatchedPath.users[0].socketId)
+              .emit('finishTracking')
+            socket
+              .to(updatedMatchedPath.users[1].socketId)
+              .emit('finishTracking')
+          })
           return '승객들 결제완료'
           //user에게 택시가사위치, taxi기사에게 네비게이션이동 로직 추가
         } else {
