@@ -297,7 +297,13 @@ export class MatchingGateway implements OnGatewayDisconnect {
             secondUserUrl.tid,
             matchedPath.users[1].pgToken,
           )
-
+          const updatedMatchedPath = await this.entityManager.findOne(
+            MatchedPathEntity,
+            {
+              where: { id: matchedPath.id },
+              relations: ['users'],
+            },
+          )
           const firstUser = await this.entityManager.findOne(UserEntity, {
             where: { id: matchedPath.users[0].id },
             relations: ['unmatchedPath'],
@@ -306,18 +312,22 @@ export class MatchingGateway implements OnGatewayDisconnect {
             where: { id: matchedPath.users[1].id },
             relations: ['unmatchedPath'],
           })
-          console.log(firstUser.unmatchedPath, secondUser.unmatchedPath)
+          console.log(
+            'imdriver',
+            firstUser.unmatchedPath,
+            secondUser.unmatchedPath,
+          )
           socket
-            .to(firstUser.socketId)
+            .to(updatedMatchedPath.users[0].socketId)
             .emit('location', firstUser.unmatchedPath)
           socket
-            .to(secondUser.socketId)
+            .to(updatedMatchedPath.users[1].socketId)
             .emit('location', secondUser.unmatchedPath)
 
-          socket.emit('navigation', matchedPath)
+          socket.emit('navigation', updatedMatchedPath)
           setInterval(() => {
             console.log('setInterval실행중666666666666666666666')
-            socket.emit('updateLocation', matchedPath)
+            socket.emit('updateLocation', updatedMatchedPath)
           }, 10000)
           return '승객들 결제완료'
           //user에게 택시가사위치, taxi기사에게 네비게이션이동 로직 추가
@@ -342,12 +352,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
     user.socketId = socket.id
     user.isMatching = true
     await this.userRepository.save(user)
-
-    // const unmatchedUser = await this.userRepository.findOne({
-    //   where: { id: user.id },
-    //   relations: ['unmatchedPath'],
-    // })
-    // console.log(unmatchedUser.unmatchedPath)
   }
 
   @SubscribeMessage('realTimeLocation')
@@ -355,14 +359,18 @@ export class MatchingGateway implements OnGatewayDisconnect {
     @ConnectedSocket() socket: Socket,
     @MessageBody() data,
   ) {
-    console.log('realTimeLocation 실행중')
-    console.log(data.matchedPath.users)
+    const matchedPath = await this.entityManager.findOne(MatchedPathEntity, {
+      where: { id: data.matchedPath.id },
+      relations: ['users'],
+    })
+    console.log('realTimeLocation 실행중', matchedPath.users)
+
     socket
-      .to(data.matchedPath.users[0].socketId)
+      .to(matchedPath.users[0].socketId)
       .emit('hereIsRealTimeLocation', data)
 
     socket
-      .to(data.matchedPath.users[1].socketId)
+      .to(matchedPath.users[1].socketId)
       .emit('hereIsRealTimeLocation', data)
   }
 

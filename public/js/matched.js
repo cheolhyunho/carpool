@@ -28,6 +28,25 @@ mapOption = {
   level: 3, // 지도의 확대 레벨
 }
 var map = new kakao.maps.Map(mapContainer, mapOption) // 지도를 생성합니다
+var markers = []
+var clusterer = new kakao.maps.MarkerClusterer({
+  map: map,
+  markers: markers,
+  gridSize: 35,
+  averageCenter: true,
+  minLevel: 6,
+  disableClickZoom: true,
+  styles: [
+    {
+      width: '53px',
+      height: '52px',
+      background: 'url(cluster.png) no-repeat',
+      color: '#fff',
+      textAlign: 'center',
+      lineHeight: '54px',
+    },
+  ],
+})
 
 socket.on('location', (unmatchedPath) => {
   var markerPosition = new kakao.maps.LatLng(
@@ -66,6 +85,6 @@ socket.on('hereIsRealTimeLocation', (data) => {
     position: markerPosition,
     image: markerImage,
   })
-
-  marker.setMap(map)
+  clusterer.clear()
+  clusterer.addMarker(marker)
 })
