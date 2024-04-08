@@ -270,8 +270,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
           if (
             matchedPath.users[0].pgToken !== null &&
             matchedPath.users[1].pgToken !== null
-            // resApprove1.status === 200 &&
-            // resApprove2.status === 200
           ) {
             isAccepted = true
           } else {
@@ -299,11 +297,50 @@ export class MatchingGateway implements OnGatewayDisconnect {
             secondUserUrl.tid,
             matchedPath.users[1].pgToken,
           )
-          socket.emit('navigation', matchedPath)
-          setInterval(() => {
-            console.log('setInterval실행중666666666666666666666')
-            socket.emit('updateLocation', matchedPath)
-          }, 5000)
+
+          const updatedMatchedPath = await this.entityManager.findOne(
+            MatchedPathEntity,
+            {
+              where: { id: matchedPath.id },
+              relations: ['users'],
+            },
+          )
+          const firstUser = await this.entityManager.findOne(UserEntity, {
+            where: { id: matchedPath.users[0].id },
+            relations: ['unmatchedPath'],
+          })
+          const secondUser = await this.entityManager.findOne(UserEntity, {
+            where: { id: matchedPath.users[1].id },
+            relations: ['unmatchedPath'],
+          })
+          console.log(
+            'imdriver',
+            firstUser.unmatchedPath,
+            secondUser.unmatchedPath,
+          )
+          socket
+            .to(updatedMatchedPath.users[0].socketId)
+            .emit('location', firstUser.unmatchedPath)
+          socket
+            .to(updatedMatchedPath.users[1].socketId)
+            .emit('location', secondUser.unmatchedPath)
+
+          socket.emit('navigation', updatedMatchedPath)
+          let setInt
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars, prefer-const
+          setInt = setInterval(() => {
+            socket.emit('updateLocation', updatedMatchedPath)
+          }, 10000)
+          socket.on('finishDrive', () => {
+            console.log('finishDrive 실행중')
+            clearInterval(setInt)
+            socket
+              .to(updatedMatchedPath.users[0].socketId)
+              .emit('finishTracking')
+            socket
+              .to(updatedMatchedPath.users[1].socketId)
+              .emit('finishTracking')
+          })
           return '승객들 결제완료'
           //user에게 택시가사위치, taxi기사에게 네비게이션이동 로직 추가
         } else {
@@ -334,15 +371,18 @@ export class MatchingGateway implements OnGatewayDisconnect {
     @ConnectedSocket() socket: Socket,
     @MessageBody() data,
   ) {
-    console.log(
-      'data.matchedPath.users[0].socketId:',
-      data.matchedPath.users[0].socketId,
-    )
+    const matchedPath = await this.entityManager.findOne(MatchedPathEntity, {
+      where: { id: data.matchedPath.id },
+      relations: ['users'],
+    })
+    console.log('realTimeLocation 실행중', matchedPath.users)
+
     socket
-      .to(data.matchedPath.users[0].socketId)
+      .to(matchedPath.users[0].socketId)
       .emit('hereIsRealTimeLocation', data)
+
     socket
-      .to(data.matchedPath.users[1].socketId)
+      .to(matchedPath.users[1].socketId)
       .emit('hereIsRealTimeLocation', data)
   }
 

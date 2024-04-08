@@ -74,7 +74,7 @@ export class KakaoMobilityService {
       // console.log(response.data.routes[0].summary.fare.taxi)
       // console.log(response.data.routes[0].summary.distance)
       // console.log(response.data.routes[0].summary.duration)
-      console.log('reponse.data:', response.data.routes[0].result_code)
+      console.log('response.data:', response.data.routes[0].result_code)
 
       return response.data.routes[0]
     } catch (error) {
@@ -92,6 +92,7 @@ export class KakaoMobilityService {
       }),
     }
     const SECRET_KEY_PAYMENT = process.env.SECRET_KEY_PAYMENT
+    console.log('getPayment:', fare, SECRET_KEY_PAYMENT)
 
     const url = 'https://open-api.kakaopay.com/online/v1/payment/ready'
 
@@ -111,9 +112,10 @@ export class KakaoMobilityService {
           quantity: '1',
           total_amount: fare,
           tax_free_amount: '0',
-          approval_url: 'https://9700-112-168-42-34.ngrok-free.app/matchedPath',
-          fail_url: 'https://9700-112-168-42-34.ngrok-free.app/unmatchedPath',
-          cancel_url: 'https://9700-112-168-42-34.ngrok-free.app/unmatchedPath',
+
+          approval_url: 'http://localhost:5000/matchedPath',
+          fail_url: 'http://localhost:5000/unmatchedPath',
+          cancel_url: 'http://localhost:5000/unmatchedPath',
         },
         httpsAgent: new https.Agent({
           secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT,

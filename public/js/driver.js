@@ -214,7 +214,7 @@ socket.on('navigation', (matchedPath) => {
   console.log('navigation event on')
   window.startNavigation(matchedPath)
 })
-
+const finishDriveButton = document.getElementById('finishDriveButton')
 socket.on('updateLocation', (matchedPath) => {
   try {
     console.log('updateLocation 실행중')
@@ -228,6 +228,10 @@ socket.on('updateLocation', (matchedPath) => {
       }
       console.log(matchedPath)
       socket.emit('realTimeLocation', data)
+    })
+    finishDriveButton.addEventListener('click', () => {
+      socket.emit('finishDrive')
+      window.location.href = window.location.origin + '/driver'
     })
   } catch (error) {
     console.error(error)
