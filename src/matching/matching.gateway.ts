@@ -297,6 +297,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
             secondUserUrl.tid,
             matchedPath.users[1].pgToken,
           )
+
           const updatedMatchedPath = await this.entityManager.findOne(
             MatchedPathEntity,
             {
@@ -329,6 +330,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
             console.log('setInterval실행중666666666666666666666')
             socket.emit('updateLocation', updatedMatchedPath)
           }, 10000)
+
           return '승객들 결제완료'
           //user에게 택시가사위치, taxi기사에게 네비게이션이동 로직 추가
         } else {
