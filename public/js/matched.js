@@ -91,5 +91,9 @@ socket.on('hereIsRealTimeLocation', (data) => {
 
 socket.on('finishTracking', () => {
   console.log('finishTracking 실행중')
+  socket.emit('deleteUnmatchedPathAndEtc')
+})
+
+socket.on('delteSocketIdAndEtc', () => {
   window.location.href = window.location.origin + '/unmatchedPath'
 })
