@@ -342,7 +342,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
               .emit('finishTracking')
           })
           return '승객들 결제완료'
-          //user에게 택시가사위치, taxi기사에게 네비게이션이동 로직 추가
         } else {
           if (matchedPath.users[0].socketId) {
             socket.to(matchedPath.users[0].socketId).emit('failedPay')
