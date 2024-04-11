@@ -385,6 +385,21 @@ export class MatchingGateway implements OnGatewayDisconnect {
       .emit('hereIsRealTimeLocation', data)
   }
 
+  @SubscribeMessage('deleteUnmatchedPathAndEtc')
+  async handleDbUpdate(@ConnectedSocket() socket: Socket) {
+    const user = await this.userRepository.findOne({
+      where: { socketId: socket.id },
+      relations: ['matchedPath', 'unmatchedPath'],
+    })
+    //isMatching 과 socketId handleDisconnect에서 처리
+    user.unmatchedPath = null
+    user.matchedPath = null
+
+    await this.userRepository.save(user)
+
+    socket.to(user.socketId).emit('delteSocketIdAndEtc')
+  }
+
   async handleDisconnect(@ConnectedSocket() socket: Socket) {
     const user = await this.userRepository.findOne({ socketId: socket.id })
     console.log('diconnect user:', user)
@@ -394,6 +409,8 @@ export class MatchingGateway implements OnGatewayDisconnect {
       user.isDriver = false
       user.pgToken = null
       user.isAdmin = false
+
+      //user.unmatchedPath = null
 
       await this.userRepository.save(user)
     }
