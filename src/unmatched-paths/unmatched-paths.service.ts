@@ -292,7 +292,7 @@ export class UnmatchedPathsService {
       .createQueryBuilder('user')
       .leftJoin('user.unmatchedPath', 'unmatchedPath')
       .where(
-        'unmatchedPath.id IS NOT NULL  AND user.id <> :userId AND user.socketId IS NOT NULL AND user.isAdmin IS FALSE',
+        'unmatchedPath.id IS NOT NULL  AND user.id <> :userId AND user.socketId IS NOT NULL AND user.isDriver IS FALSE AND user.matched_id IS NULL AND user.isMatching IS FALSE',
         {
           userId,
         },

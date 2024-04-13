@@ -846,11 +846,40 @@ function closeModal(modal) {
 }
 
 //global socketOn
+socket.on('oppAlreadyMatched', () => {
+  fetch('/unmatchedPath/userId', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      socket.emit('doMatch', data, (user) => {
+        console.log('수신완료:', user)
+      })
+    })
+    .catch((error) => {
+      console.error('UserId 가져오기 실패:', error)
+      console.log(error)
+    })
+})
+
+socket.on('noPeople', () => {
+  alert('매칭상대가 존재하지 않습니다, 잠시후 다시 시도해주세요')
+})
+
 socket.on('matching', (matchingPath) => {
   console.log('상대방찾기성공!')
   console.log(matchingPath)
   drawAccept()
 })
+
 socket.on('rejectMatching', () => {
   alert('매칭이 취소되었습니다.')
   location.reload()

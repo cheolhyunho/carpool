@@ -34,7 +34,6 @@ export class KakaoMobilityService {
     firstWaypointLng,
     SecondWaypointLat,
     SecondWaypointLng,
-
     destinationLat,
     destinationLng,
   ): Promise<any> {
