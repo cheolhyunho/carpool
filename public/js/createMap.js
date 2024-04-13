@@ -14,6 +14,27 @@ const modeButton = document.getElementById('DriverMode')
 
 modeButton.addEventListener('click', function () {
   window.location.href = window.location.origin + '/driver'
+  fetch('/unmatchedPath/userId', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      socket.emit('deleteMyUnmatchedPath', data, (user) => {
+        console.log('수신완료:', user)
+      })
+    })
+    .catch((error) => {
+      console.error('UserId 가져오기 실패:', error)
+      console.log(error)
+    })
 })
 
 socket.on('renderDriverMode', ({ html }) => {
@@ -859,4 +880,24 @@ socket.on('rejectMatching', () => {
 socket.on('kakaoPay', (link) => {
   //카카오페이결제 링크로 이동
   window.location.href = link
+})
+
+socket.on('oppUserDisconnected', () => {
+  alert('상대방이 연결을 끊었습니다.')
+  location.reload()
+})
+
+socket.on('youAreNotChosenOne', () => {
+  alert('상대방이 다른 유저와 매칭되었습니다.')
+  location.reload()
+})
+
+socket.on('timeoutMatching', () => {
+  alert('시간초과, 매칭을 취소하고 새로고침합니다')
+  location.reload()
+})
+
+socket.on('timeout', () => {
+  alert('매칭유저가 시간내에 수락을 하지 않았습니다.')
+  location.reload()
 })
