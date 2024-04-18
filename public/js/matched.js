@@ -67,6 +67,7 @@ socket.on('location', (unmatchedPath) => {
     content: iwContent,
   })
   infowindow.open(map, marker)
+  console.log('location 실행')
 })
 
 socket.on('hereIsRealTimeLocation', (data) => {

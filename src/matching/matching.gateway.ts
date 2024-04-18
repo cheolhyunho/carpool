@@ -42,14 +42,28 @@ export class MatchingGateway implements OnGatewayDisconnect {
     currentUser.isDriver = true
     await this.userRepository.save(currentUser)
   }
+  isAlreadySentMap = new Map()
 
   @SubscribeMessage('doMatch')
-  async handleSocket(@ConnectedSocket() socket: Socket, @MessageBody() user) {
+  async handleSocket(@ConnectedSocket() socket: Socket, @MessageBody() body) {
+    const user = await this.userRepository.findOne({
+      where: { id: body.id },
+      relations: ['matchedPath'],
+    })
+    if (user.unmatchedPath === null || user.unmatchedPath === undefined) {
+      socket.emit('noUnmatchedPath')
+      return
+    }
     user.socketId = socket.id
+    user.isDriver = false
+    user.isMatching = false
+    user.matchedPath = null
+    user.pgToken = null
     await this.userRepository.save(user)
 
     let response = null
     let matchFound = false
+    const startTime = Date.now()
     while (!matchFound) {
       response = await this.unmatchedPathService.setMatching(user)
       if (response !== null) {
@@ -58,37 +72,49 @@ export class MatchingGateway implements OnGatewayDisconnect {
         console.log('대기중')
         await this.unmatchedPathService.sleep(1000)
       }
+      if (Date.now() - startTime > 60000) {
+        break // 30초가 넘었다면 반복문 종료
+      }
     }
-    const matchedUserUP = response.matchedUserUP
-    const oppUser = await this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
-      .where('unmatchedPath.id = :unmatchedPathId', {
-        unmatchedPathId: matchedUserUP.id,
+    if (Date.now() - startTime <= 60000) {
+      const matchedUserUP = response.matchedUserUP
+      const oppUser = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
+        .leftJoinAndSelect('user.matchedPath', 'matchedPath')
+        .where('unmatchedPath.id = :unmatchedPathId', {
+          unmatchedPathId: matchedUserUP.id,
+        })
+        .getOne()
+
+      if (
+        oppUser.matchedPath == null &&
+        !this.isAlreadySentMap.get(response.matchedPath.summary.origin.x)
+      ) {
+        this.isAlreadySentMap.set(response.matchedPath.summary.origin.x, true)
+        await this.matchedPathService.createMatchedPath(
+          response.matchedPath,
+          response.currentFare,
+          response.matchedFare,
+          user,
+          oppUser,
+        )
+        socket.emit('matching', response)
+        socket.to(oppUser.socketId).emit('matching', response)
+      }
+
+      const updateUser = await this.userRepository.findOne({
+        where: { id: body.id },
+        relations: ['matchedPath'],
       })
-      .getOne()
 
-    if (
-      user.socketId &&
-      oppUser.socketId &&
-      (oppUser.matchedPath === null || oppUser.matchedPath === undefined)
-    ) {
-      await this.matchedPathService.createMatchedPath(
-        response.matchedPath,
-        response.currentFare,
-        response.matchedFare,
-        user,
-        oppUser,
-      )
+      if (updateUser.matchedPath == null) {
+        socket.emit('oppAlreadyMatched')
+      }
     } else {
-      return '상대방의 연결이 끊겼거나 다른 유저와 매칭되었습니다.'
+      socket.emit('noPeople')
     }
-
-    socket.emit('matching', response)
-    socket.to(oppUser.socketId).emit('matching', response)
   }
-
-  isAlreadySentMap = new Map()
 
   async sendWantLocationEvent(matchedPath, socket) {
     const drivers = await this.userRepository.find({
@@ -124,52 +150,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     const otherUser = matchedPath.users.find(
       (oppUser) => oppUser.id !== user.id,
     )
-    let tmpOppUser = otherUser
-
-    const startTime = Date.now()
-
-    while (true) {
-      console.log(
-        tmpOppUser.socketId,
-        tmpOppUser.isMatching,
-        tmpOppUser.matchedPath,
-        user.matchedPath,
-      )
-      if (Date.now() - startTime >= 60000) {
-        tmpOppUser.matchedPath = null
-        await this.userRepository.save(tmpOppUser)
-        socket.emit('timeout')
-        socket.to(tmpOppUser.socketId).emit('timeoutMatching')
-        break
-      }
-      if (
-        tmpOppUser.socketId !== null &&
-        tmpOppUser.isMatching &&
-        tmpOppUser.matchedPath === user.matchedPath
-      ) {
-        break
-      }
-      tmpOppUser = await this.userRepository.findOne(otherUser.id)
-      if (tmpOppUser.socketId === null) {
-        console.log('ppppppppp')
-        socket.emit('oppUserDisconnected')
-        tmpOppUser.matchedPath = null
-        user.matchedPath = null
-        await this.userRepository.save(tmpOppUser)
-        await this.userRepository.save(user)
-        return '상대방의 연결이 끊겼습니다'
-      }
-      if (
-        tmpOppUser.isMatching &&
-        tmpOppUser.matchedPath !== user.matchedPath
-      ) {
-        console.log('lllllllll')
-        socket.to(user.socketId).emit('youAreNotChosenOne')
-        user.matchedPath = null
-        this.userRepository.save(user)
-        return '상대방이 다른 유저와 매칭되었습니다'
-      }
-    }
+    const tmpOppUser = otherUser
 
     let isAccepted = false
     //수락대기 경과시간
@@ -398,7 +379,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
               .emit('finishTracking')
           })
           return '승객들 결제완료'
-          //user에게 택시가사위치, taxi기사에게 네비게이션이동 로직 추가
         } else {
           if (matchedPath.users[0].socketId) {
             socket.to(matchedPath.users[0].socketId).emit('failedPay')
@@ -410,6 +390,21 @@ export class MatchingGateway implements OnGatewayDisconnect {
         }
       }
     }
+  }
+
+  @SubscribeMessage('deleteUnmatchedPathAndEtc')
+  async handleDbUpdate(@ConnectedSocket() socket: Socket) {
+    const user = await this.userRepository.findOne({
+      where: { socketId: socket.id },
+      relations: ['matchedPath', 'unmatchedPath'],
+    })
+    //isMatching 과 socketId handleDisconnect에서 처리
+    user.unmatchedPath = null
+    user.matchedPath = null
+
+    await this.userRepository.save(user)
+
+    socket.to(user.socketId).emit('delteSocketIdAndEtc')
   }
 
   @SubscribeMessage('socketIdSave')
@@ -442,23 +437,11 @@ export class MatchingGateway implements OnGatewayDisconnect {
       .emit('hereIsRealTimeLocation', data)
   }
 
-  @SubscribeMessage('deleteUnmatchedPathAndEtc')
-  async handleDbUpdate(@ConnectedSocket() socket: Socket) {
+  async handleDisconnect(@ConnectedSocket() socket: Socket) {
     const user = await this.userRepository.findOne({
       where: { socketId: socket.id },
       relations: ['matchedPath', 'unmatchedPath'],
     })
-    //isMatching 과 socketId handleDisconnect에서 처리
-    user.unmatchedPath = null
-    user.matchedPath = null
-
-    await this.userRepository.save(user)
-
-    socket.to(user.socketId).emit('delteSocketIdAndEtc')
-  }
-
-  async handleDisconnect(@ConnectedSocket() socket: Socket) {
-    const user = await this.userRepository.findOne({ socketId: socket.id })
     console.log('diconnect user:', user)
     if (user) {
       user.isMatching = false
@@ -466,9 +449,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
       user.isDriver = false
       user.pgToken = null
       user.isAdmin = false
-
-      //user.unmatchedPath = null
-
       await this.userRepository.save(user)
     }
     this.logger.log(`disconnected : ${socket.id} ${socket.nsp.name}`)

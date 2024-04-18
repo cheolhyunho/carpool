@@ -34,7 +34,6 @@ export class KakaoMobilityService {
     firstWaypointLng,
     SecondWaypointLat,
     SecondWaypointLng,
-
     destinationLat,
     destinationLng,
   ): Promise<any> {
@@ -113,9 +112,9 @@ export class KakaoMobilityService {
           total_amount: fare,
           tax_free_amount: '0',
 
-          approval_url: 'https://3265-112-168-42-34.ngrok-free.app/matchedPath',
-          fail_url: 'https://3265-112-168-42-34.ngrok-free.app/unmatchedPath',
-          cancel_url: 'https://3265-112-168-42-34.ngrok-free.app/unmatchedPath',
+          approval_url: 'http://localhost:5000/matchedPath',
+          fail_url: 'http://localhost:5000/unmatchedPath',
+          cancel_url: 'http://localhost:5000/unmatchedPath',
         },
         httpsAgent: new https.Agent({
           secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT,

@@ -5,78 +5,210 @@ body {
 .bg_nest_color {
   background-color: rgb(217, 19, 70);
 }
+#boxAndButton {
+  position: fixed;
+  top: 0%;
+  /* Frame 12 */
+  z-index: 1;
+  /* Auto layout */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 48px;
+  gap: 48px;
+
+  width: 586px;
+  height: 100%;
+
+  background: #f0f3f5;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+#hi {
+  position: fixed;
+  top: 12%;
+  left: 3.5%;
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 130%;
+  /* or 42px */
+  letter-spacing: -0.02em;
+
+  color: #000a3d;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+}
+#whereAreYouGoing {
+  position: fixed;
+  top: 17%;
+  left: 3.5%;
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 130%;
+  /* or 42px */
+  letter-spacing: -0.02em;
+
+  color: #000a3d;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+}
 
 #originAddress {
-  position: absolute;
-  top: 67%;
-  width: 300px;
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 10px;
+  /* Frame 20 */
+  border-radius: 12px;
+  position: fixed;
+  top: 29%;
+  /* Auto layout */
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 12px;
+
+  width: 350px;
+  height: 56px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
 }
+
 #searchOriginButton {
-  position: absolute;
-  top: 67%;
-  left: 30%;
+  position: fixed;
+  top: 30.5%;
+  left: 21.5%;
+  background-image: url('./free-icon-magnifier-2319177.png');
+  background-size: 30px;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 6;
   width: 121px;
   padding: 15px;
 }
+
 #setOriginButton {
-  position: absolute;
-  top: 67%;
-  left: 42%;
-  width: 121px;
-  padding: 15px;
+  /* Frame 6 */
+  position: fixed;
+  top: 29%;
+  left: 27.8%;
+  box-sizing: border-box;
+  color: #007fc9;
+  /* Auto layout */
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  gap: 10px;
+
+  width: 130px;
+  height: 56px;
+
+  background: #ffffff;
+  /* Primary Blue */
+  border: 1px solid #2b8cff;
+  border-radius: 12px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 }
 #sendButton {
-  position: absolute;
-  top: 67%;
-  right: 23%;
+  background-image: url('./free-icon-gps-484149.png');
+  background-size: 30px;
+  background-repeat: no-repeat;
+  background-position: center;
+  left: 315px;
+  position: fixed;
+  top: 30.5%;
   padding: 10px 20px;
-  background-color: #4caf50;
+
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-}
-
-#sendButton:hover {
-  background-color: #45a049;
-}
-
-#w-destination-wrapper {
-  position: fixed;
-  top: 0;
-  right: 0;
-  transform: translate(-100%, 0);
+  z-index: 1;
+  height: 28px;
 }
 
 #destinationAddress {
-  position: absolute;
-  top: 74%;
-  width: 300px;
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 10px;
+  /* Frame 20 */
+  border-radius: 12px;
+  position: fixed;
+  top: 37%;
+  /* Auto layout */
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 12px;
+
+  width: 350px;
+  height: 56px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
 }
 #searchDestinationButton {
-  position: absolute;
-  top: 74%;
-  left: 30%;
+  position: fixed;
+  background-image: url('./free-icon-magnifier-2319177.png');
+  background-size: 30px;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: fixed;
+  top: 38.5%;
+  left: 21.5%;
   width: 121px;
   padding: 15px;
+  z-index: 1;
 }
 #setDestinationButton {
-  position: absolute;
-  top: 74%;
-  left: 42%;
-  width: 121px; /* 버튼 너비 */
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 15px;
-  cursor: pointer;
+  position: fixed;
+  top: 37%;
+  left: 27.8%;
+  box-sizing: border-box;
+  color: #007fc9;
+  /* Auto layout */
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  gap: 10px;
+
+  width: 130px;
+  height: 56px;
+
+  background: #ffffff;
+  /* Primary Blue */
+  border: 1px solid #2b8cff;
+  border-radius: 12px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 }
 
 #setDestinationButton:hover {
@@ -101,16 +233,15 @@ body {
   height: 500px;
 }
 #menu_wrap {
-  position: absolute;
-  top: 0;
+  position: fixed;
+  top: 50%;
   left: 0;
-  bottom: 0;
-  width: 250px;
+  width: 573px;
   margin: 10px 0 30px 10px;
   padding: 5px;
   overflow-y: auto;
   background: rgba(255, 255, 255, 0.7);
-  z-index: 1;
+  z-index: 2;
   font-size: 12px;
   border-radius: 10px;
 }
@@ -135,13 +266,16 @@ body {
 }
 #placesList li {
   list-style: none;
+  z-index: 2;
 }
+
 #placesList .item {
   position: relative;
   border-bottom: 1px solid #888;
   overflow: hidden;
   cursor: pointer;
   min-height: 65px;
+  z-index: 2;
 }
 #placesList .item span {
   display: block;
@@ -236,8 +370,22 @@ body {
 }
 
 #arriveButton {
-  background-color: #4caf50;
-  color: white;
+  border: 1px solid #2b8cff;
+  background: #ffffff;
+  box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 300;
+  font-size: 18px;
+  line-height: 21px;
+  text-align: center;
+  letter-spacing: -0.02em;
+
+  color: #2b8cff;
+  float: right;
+
   border: none;
   border-radius: 5px;
   padding: 10px 20px;
@@ -246,11 +394,121 @@ body {
 }
 
 #startButton {
-  background-color: #4caf50;
-  color: white;
+  border: 1px solid #2b8cff;
+  background: #ffffff;
+  box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 300;
+  font-size: 18px;
+  line-height: 21px;
+  text-align: center;
+  letter-spacing: -0.02em;
+
+  color: #2b8cff;
+  float: right;
+
   border: none;
   border-radius: 5px;
   padding: 10px 20px;
   margin-top: 10px; /* 원하는 만큼의 상단 여백 설정 */
   cursor: pointer;
+}
+
+#matching {
+  position: fixed;
+  left: 3%;
+  top: 45%;
+  border-radius: 12px;
+  width: 355px;
+  background-color: #3b82f6; /* 파란색 배경 설정 */
+  color: white; /* 글자색을 흰색으로 설정 */
+  border: none; /* 기본 버튼 테두리를 제거 */
+  padding: 10px 20px; /* 버튼 내부의 여백 설정 */
+  text-align: center; /* 텍스트를 중앙으로 정렬 */
+  text-decoration: none; /* 텍스트 밑줄 제거 */
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer; /* 마우스를 올렸을 때 커서 모양 변경 */
+}
+
+#logout {
+  position: fixed;
+  right: -145%;
+  z-index: 1;
+  /* Frame 26 */
+
+  /* Auto layout */
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0px 20px;
+  gap: 10px;
+
+  position: absolute;
+  width: 95px;
+  height: 40px;
+  left: 20%px;
+  top: 33px;
+
+  background: #ffffff;
+  box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 21px;
+  text-align: center;
+  letter-spacing: -0.02em;
+
+  color: #2b8cff;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+#DriverMode {
+  z-index: 1;
+  /* Frame 26 */
+
+  /* Auto layout */
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0px 20px;
+  gap: 10px;
+
+  position: absolute;
+  width: 100px;
+  height: 40px;
+  right: -146%;
+  bottom: 3%;
+
+  background: #ffffff;
+  box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 21px;
+  text-align: center;
+  letter-spacing: -0.02em;
+
+  color: #2b8cff;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 }

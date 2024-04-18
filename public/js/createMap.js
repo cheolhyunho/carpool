@@ -867,11 +867,40 @@ function closeModal(modal) {
 }
 
 //global socketOn
+socket.on('oppAlreadyMatched', () => {
+  fetch('/unmatchedPath/userId', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      socket.emit('doMatch', data, (user) => {
+        console.log('수신완료:', user)
+      })
+    })
+    .catch((error) => {
+      console.error('UserId 가져오기 실패:', error)
+      console.log(error)
+    })
+})
+
+socket.on('noPeople', () => {
+  alert('매칭상대가 존재하지 않습니다, 잠시후 다시 시도해주세요')
+})
+
 socket.on('matching', (matchingPath) => {
   console.log('상대방찾기성공!')
   console.log(matchingPath)
   drawAccept()
 })
+
 socket.on('rejectMatching', () => {
   alert('매칭이 취소되었습니다.')
   location.reload()
@@ -882,22 +911,6 @@ socket.on('kakaoPay', (link) => {
   window.location.href = link
 })
 
-socket.on('oppUserDisconnected', () => {
-  alert('상대방이 연결을 끊었습니다.')
-  location.reload()
-})
-
-socket.on('youAreNotChosenOne', () => {
-  alert('상대방이 다른 유저와 매칭되었습니다.')
-  location.reload()
-})
-
-socket.on('timeoutMatching', () => {
-  alert('시간초과, 매칭을 취소하고 새로고침합니다')
-  location.reload()
-})
-
-socket.on('timeout', () => {
-  alert('매칭유저가 시간내에 수락을 하지 않았습니다.')
-  location.reload()
+socket.on('noUnmatchedPath', () => {
+  alert('출발지와 목적지를 설정하고 매칭을 시도해주세요')
 })
