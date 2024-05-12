@@ -18,7 +18,7 @@ body {
   gap: 48px;
 
   width: 586px;
-  height: 100%;
+  height: 1024px;
 
   background: #f0f3f5;
 
@@ -88,6 +88,7 @@ body {
   order: 0;
   align-self: stretch;
   flex-grow: 0;
+  box-sizing: border-box;
 }
 
 #searchOriginButton {
@@ -169,6 +170,7 @@ body {
   order: 0;
   align-self: stretch;
   flex-grow: 0;
+  box-sizing: border-box;
 }
 #searchDestinationButton {
   position: fixed;
@@ -478,37 +480,4 @@ body {
 #DriverMode {
   z-index: 1;
   /* Frame 26 */
-
-  /* Auto layout */
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 0px 20px;
-  gap: 10px;
-
-  position: absolute;
-  width: 100px;
-  height: 40px;
-  right: -146%;
-  bottom: 3%;
-
-  background: #ffffff;
-  box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-
-  font-family: 'Pretendard';
-  font-style: normal;
-  font-weight: 700;
-  font-size: 18px;
-  line-height: 21px;
-  text-align: center;
-  letter-spacing: -0.02em;
-
-  color: #2b8cff;
-
-  /* Inside auto layout */
-  flex: none;
-  order: 0;
-  flex-grow: 0;
 }
