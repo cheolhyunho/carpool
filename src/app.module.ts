@@ -18,7 +18,6 @@ import { MatchingGateway } from './matching/matching.gateway'
 import { MatchingModule } from './matching/matching.module'
 import { UnmatchedPathsService } from './unmatched-paths/unmatched-paths.service'
 
-
 const typeOrmModuleOptions = {
   useFactory: async (
     configService: ConfigService,

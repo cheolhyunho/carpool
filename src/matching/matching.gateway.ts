@@ -48,7 +48,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
   async handleSocket(@ConnectedSocket() socket: Socket, @MessageBody() body) {
     const user = await this.userRepository.findOne({
       where: { id: body.id },
-      relations: ['matchedPath'],
+      relations: ['unmatchedPath', 'matchedPath'],
     })
     if (user.unmatchedPath === null || user.unmatchedPath === undefined) {
       socket.emit('noUnmatchedPath')
@@ -249,7 +249,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     )
     console.log(kakaoResponse.summary.duration)
 
-    if (kakaoResponse.summary.duration <= 300) {
+    if (kakaoResponse.summary.duration <= 100000) {
       console.log('택시기사에게 send:', data.matchedPath)
       socket.emit('letsDrive', data.matchedPath)
       return
