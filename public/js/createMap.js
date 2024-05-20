@@ -69,7 +69,7 @@ function handleButtonClick(event) {
   // 클릭된 버튼의 부모 요소인 리스트 아이템을 찾습니다
   var listItem = event.target.closest('.item')
   // 리스트 아이템에서 주소 정보를 찾습니다
-  var addressSpan = listItem.querySelector('.jibun.gray')
+  var addressSpan = listItem.querySelector('road')
   var destinationAddressInput = document.getElementById('destinationAddress')
 
   // 주소 정보가 있는 경우에만 처리합니다
