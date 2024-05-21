@@ -12,7 +12,8 @@ const matchingButton = document.getElementById('matching')
 const logoutButton = document.getElementById('logout')
 const modeButton = document.getElementById('DriverMode')
 const boxAndButton = document.getElementById('boxAndButton')
-
+const placesListBox = document.getElementById('placesList')
+const paginationBox = document.getElementById('pagination')
 modeButton.addEventListener('click', function () {
   window.location.href = window.location.origin + '/driver'
   fetch('/unmatchedPath/userId', {
@@ -99,7 +100,8 @@ function handleButtonClick(event) {
   // 리스트 아이템에서 주소 정보를 찾습니다
   var addressSpan = listItem.querySelector('.road')
   var destinationAddressInput = document.getElementById('destinationAddress')
-
+  placesListBox.innerHTML = ''
+  paginationBox.innerText = ''
   // 주소 정보가 있는 경우에만 처리합니다
   if (addressSpan) {
     // 주소 정보를 가져와서 인풋박스에 설정합니다
@@ -114,7 +116,8 @@ function handleButtonClick2(event) {
   // 리스트 아이템에서 주소 정보를 찾습니다
   var addressSpan = listItem.querySelector('.road')
   var originAddressInput = document.getElementById('originAddress')
-
+  placesListBox.innerHTML = ''
+  paginationBox.innerText = ''
   // 주소 정보가 있는 경우에만 처리합니다
   if (addressSpan) {
     // 주소 정보를 가져와서 인풋박스에 설정합니다
