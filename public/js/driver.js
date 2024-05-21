@@ -40,7 +40,9 @@ socket.on('wantLocation', (matchedPath) => {
         lng: longitude,
         matchedPath: matchedPath,
       }
+      console.log('hereIsLocation 이벤트 실행전')
       socket.emit('hereIsLocation', data)
+      console.log('hereIsLocation 이벤트 실행후')
     })
   } else {
     alert('이 브라우저에서는 Geolocation 을 지원하지 않습니다.')
@@ -48,6 +50,7 @@ socket.on('wantLocation', (matchedPath) => {
 })
 
 socket.on('letsDrive', function (matchedPath) {
+  console.log('letsDrive 이벤트 실행중')
   buttons.style.display = 'block'
   mapContainer.style.display = 'block'
   mapOption = {
@@ -174,16 +177,19 @@ socket.on('failedPay', () => {
 })
 
 var script = document.createElement('script')
+
 script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.1/kakao.min.js'
 script.integrity =
   'sha384-kDljxUXHaJ9xAb2AzRd59KxjrFjzHa5TAoFQ6GbYTCAG0bjM55XohjjDT7tDDC01'
 script.crossOrigin = 'anonymous'
+
 script.onload = function () {
   // 스크립트가 로드된 후에 Kakao를 초기화합니다.
   Kakao.init('86ae03c1d2c30d0b0a969db803f5a333')
-
+  console.log('Kakao:', Kakao)
   // Kakao 초기화 후에 startNavigation 함수를 설정합니다.
   window.startNavigation = function (matchedPath) {
+    console.log('startNavigation 함수 실행중')
     Kakao.Navi.start({
       name: '도착지',
       x: matchedPath.destinationPoint.lng,
@@ -209,6 +215,7 @@ script.onload = function () {
     })
   }
 }
+
 document.body.appendChild(script)
 socket.on('navigation', (matchedPath) => {
   console.log('navigation event on')

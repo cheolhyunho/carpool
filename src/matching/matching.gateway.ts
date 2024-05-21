@@ -235,24 +235,29 @@ export class MatchingGateway implements OnGatewayDisconnect {
     currentUser.unmatchedPath = null
     await this.userRepository.save(currentUser)
   }
+
   @SubscribeMessage('hereIsLocation')
   async requestToDriver(
     @ConnectedSocket() socket: Socket,
     @MessageBody() data,
   ) {
-    console.log('hereIsLocation 실행중')
-    const kakaoResponse = await this.kakaoMobilityService.getInfo(
-      data.matchedPath.origin.lat,
-      data.matchedPath.origin.lng,
-      data.lat,
-      data.lng,
-    )
-    console.log(kakaoResponse.summary.duration)
+    try {
+      console.log('hereIsLocation 실행중')
+      const kakaoResponse = await this.kakaoMobilityService.getInfo(
+        data.matchedPath.origin.lat,
+        data.matchedPath.origin.lng,
+        data.lat,
+        data.lng,
+      )
+      console.log(kakaoResponse.summary.duration)
 
-    if (kakaoResponse.summary.duration <= 100000) {
-      console.log('택시기사에게 send:', data.matchedPath)
-      socket.emit('letsDrive', data.matchedPath)
-      return
+      if (kakaoResponse.summary.duration <= 300) {
+        console.log('택시기사에게 send:', data.matchedPath)
+        socket.emit('letsDrive', data.matchedPath)
+        return
+      }
+    } catch (e) {
+      console.log(e, '121')
     }
   }
 
@@ -301,7 +306,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
         //수락대기 경과시간
         let elapsedTime = 0
         //수락대기 최대시간
-        const timeoutLimit = 100
+        const timeoutLimit = 1000
         console.log('pgToken:', matchedPath)
         while (!isAccepted && elapsedTime < timeoutLimit) {
           if (
@@ -326,6 +331,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
         }
 
         if (isAccepted && elapsedTime < timeoutLimit) {
+          console.log('결제완료')
           await this.kakaoMobilityService.getApprove(
             firstUserUrl.tid,
             matchedPath.users[0].pgToken,
@@ -361,8 +367,9 @@ export class MatchingGateway implements OnGatewayDisconnect {
           socket
             .to(updatedMatchedPath.users[1].socketId)
             .emit('location', secondUser.unmatchedPath)
-
+          console.log('navigation 이벤트 실행전')
           socket.emit('navigation', updatedMatchedPath)
+          console.log('navigation 이벤트 실행후')
           let setInt
           // eslint-disable-next-line @typescript-eslint/no-unused-vars, prefer-const
           setInt = setInterval(() => {
