@@ -87,6 +87,8 @@ export class MatchingGateway implements OnGatewayDisconnect {
         })
         .getOne()
 
+      console.log('선두주자:', this.isAlreadySentMap)
+
       if (
         oppUser.matchedPath == null &&
         !this.isAlreadySentMap.get(response.matchedPath.summary.origin.x)
@@ -100,6 +102,16 @@ export class MatchingGateway implements OnGatewayDisconnect {
           oppUser,
         )
         socket.emit('matching', response)
+        let temp = response.currentUserUP
+        response.currentUserUP = response.matchedUserUP
+        response.matchedUserUP = temp
+        temp = response.currentFare
+        response.currentFare = response.matchedFare
+        response.matchedFare = temp
+        temp = response.currentDistance
+        response.currentDistance = response.matchedDistance
+        response.matchedDistance = temp
+
         socket.to(oppUser.socketId).emit('matching', response)
       }
 
@@ -251,7 +263,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
       )
       console.log(kakaoResponse.summary.duration)
 
-      if (kakaoResponse.summary.duration <= 300) {
+      if (kakaoResponse.summary.duration <= 1000) {
         console.log('택시기사에게 send:', data.matchedPath)
         socket.emit('letsDrive', data.matchedPath)
         return

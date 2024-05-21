@@ -284,6 +284,7 @@ export class UnmatchedPathsService {
       matchedFare: matchedFare,
       currentDistance: currentDistance,
       matchedDistance: matchedDistance,
+      caseIndex: caseIndex,
     }
   }
   async fetchUnmatchedPaths(userId) {
