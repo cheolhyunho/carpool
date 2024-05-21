@@ -87,8 +87,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
         })
         .getOne()
 
-      console.log('선두주자:', this.isAlreadySentMap)
-
       if (
         oppUser.matchedPath == null &&
         !this.isAlreadySentMap.get(response.matchedPath.summary.origin.x)
@@ -101,7 +99,11 @@ export class MatchingGateway implements OnGatewayDisconnect {
           user,
           oppUser,
         )
-        socket.emit('matching', response)
+        socket.emit('matching', {
+          ...response,
+          username: user.username,
+          oppname: `${oppUser.username[0]}*${oppUser.username.slice(2)}`,
+        })
         let temp = response.currentUserUP
         response.currentUserUP = response.matchedUserUP
         response.matchedUserUP = temp
@@ -111,8 +113,13 @@ export class MatchingGateway implements OnGatewayDisconnect {
         temp = response.currentDistance
         response.currentDistance = response.matchedDistance
         response.matchedDistance = temp
+        response.caseIndex = 3 - response.caseIndex
 
-        socket.to(oppUser.socketId).emit('matching', response)
+        socket.to(oppUser.socketId).emit('matching', {
+          ...response,
+          username: oppUser.username,
+          oppname: `${user.username[0]}*${user.username.slice(2)}`,
+        })
       }
 
       const updateUser = await this.userRepository.findOne({

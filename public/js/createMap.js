@@ -70,7 +70,7 @@ function handleButtonClick(event) {
   // 클릭된 버튼의 부모 요소인 리스트 아이템을 찾습니다
   var listItem = event.target.closest('.item')
   // 리스트 아이템에서 주소 정보를 찾습니다
-  var addressSpan = listItem.querySelector('.jibun.gray')
+  var addressSpan = listItem.querySelector('.road')
   var destinationAddressInput = document.getElementById('destinationAddress')
 
   // 주소 정보가 있는 경우에만 처리합니다
@@ -81,11 +81,7 @@ function handleButtonClick(event) {
   }
 }
 
-function handleButtonClick2(
-  event,
-  places_road_address_name,
-  places_addres_name,
-) {
+function handleButtonClick2(event) {
   // 클릭된 버튼의 부모 요소인 리스트 아이템을 찾습니다
   var listItem = event.target.closest('.item')
   // 리스트 아이템에서 주소 정보를 찾습니다
@@ -564,7 +560,7 @@ function setOriginPoint(originAddress) {
 
           el.innerHTML = itemStr
           el.className = 'item'
-          console.log('el:', el)
+
           var startButton = el.querySelector('#startButton')
           startButton.addEventListener('click', handleButtonClick2)
 
@@ -691,6 +687,25 @@ function displayMarker(locPosition, message) {
 
 // init 함수 수정
 function init() {
+  fetch('/unmatchedPath/userId', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      document.getElementById('hi').innerHTML = `안녕하세요! ${data.username}님`
+    })
+    .catch((error) => {
+      console.error('UserId 가져오기 실패:', error)
+      console.log(error)
+    })
   if (navigator.geolocation) {
     // GeoLocation을 이용해서 접속 위치를 얻어옵니다
     navigator.geolocation.getCurrentPosition(function (position) {
@@ -907,37 +922,45 @@ socket.on('matching', (matchingPath) => {
   var placeName = []
   switch (matchingPath.caseIndex) {
     case 0:
-      placeName = ['승객1 승차', '승객2 승차', '승객1 하차', '승객2 하차']
+      placeName = [
+        matchingPath.username + '님 승차',
+        matchingPath.oppname + '님 승차',
+        matchingPath.username + '님 하차',
+        matchingPath.oppname + '님 하차',
+      ]
       break
     case 1:
-      placeName = ['승객2 승차', '승객1 승차', '승객1 하차', '승객2 하차']
+      placeName = [
+        matchingPath.oppname + '님 승차',
+        matchingPath.username + '님 승차',
+        matchingPath.username + '님 하차',
+        matchingPath.oppname + '님 하차',
+      ]
       break
     case 2:
-      placeName = ['승객1 승차', '승객2 승차', '승객2 하차', '승객1 하차']
+      placeName = [
+        matchingPath.username + '님 승차',
+        matchingPath.oppname + '님 승차',
+        matchingPath.oppname + '님 하차',
+        matchingPath.username + '님 하차',
+      ]
       break
     case 3:
-      placeName = ['승객2 승차', '승객1 승차', '승객2 하차', '승객1 하차']
+      placeName = [
+        matchingPath.oppname + '님 승차',
+        matchingPath.username + '님 승차',
+        matchingPath.oppname + '님 하차',
+        matchingPath.username + '님 하차',
+      ]
       break
   }
-  matchingPath.matchedPath.summary.origin.name = placeName[0]
-  matchingPath.matchedPath.summary.waypoints[0].name = placeName[1]
-  matchingPath.matchedPath.summary.waypoints[1].name = placeName[2]
-  matchingPath.matchedPath.summary.destination.name = placeName[3]
 
-  var places = [
-    matchingPath.matchedPath.summary.origin,
-    matchingPath.matchedPath.summary.waypoints[0],
-    matchingPath.matchedPath.summary.waypoints[1],
-    matchingPath.matchedPath.summary.destination,
-  ]
-  console.log('상대방찾기성공!')
-  console.log(matchingPath)
   var markers = []
 
   var mapContainer = document.getElementById('map'), // 지도를 표시할 div
     mapOption = {
       center: new kakao.maps.LatLng(37.566826, 126.9786567), // 지도의 중심좌표
-      level: 11, // 지도의 확대 레벨
+      level: 8, // 지도의 확대 레벨
     }
 
   // 지도를 생성합니다
@@ -945,8 +968,88 @@ socket.on('matching', (matchingPath) => {
 
   // 검색 결과 목록이나 마커를 클릭했을 때 장소명을 표출할 인포윈도우를 생성합니다
   var infowindow = new kakao.maps.InfoWindow({ zIndex: 1 })
+  var geocoder = new kakao.maps.services.Geocoder()
 
-  displayPlaces(places)
+  var marker = new kakao.maps.Marker(), // 클릭한 위치를 표시할 마커입니다
+    infowindow = new kakao.maps.InfoWindow({ zindex: 1 }) // 클릭한 위치에 대한 주소를 표시할 인포윈도우입니다
+
+  var places = [
+    matchingPath.matchedPath.summary.origin,
+    matchingPath.matchedPath.summary.waypoints[0],
+    matchingPath.matchedPath.summary.waypoints[1],
+    matchingPath.matchedPath.summary.destination,
+  ]
+  for (let i = 0; i < 4; i++) {
+    places[i].name = placeName[i]
+  }
+  let promises = []
+  for (let i = 0; i < 4; i++) {
+    let promise = searchDetailAddrFromCoords(places[i])
+      .then((result) => {
+        places[i].jibunAddr = result[0].address.address_name
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+    promises.push(promise)
+  }
+
+  Promise.all(promises).then(() => {
+    console.log(places)
+    displayPlaces(places)
+  })
+
+  sendButton.remove()
+  boxAndButton.innerHTML = `
+  <style>
+  td {
+    padding: 10px;
+    border: 1px solid black;
+  }
+  tr:first-child td {
+    color: skyblue;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  </style>
+  <table>
+    <tr>
+      <td>매칭전</td>
+      <td>매칭후</td>
+    </tr>
+    <tr>
+      <td>${matchingPath.currentUserUP.fare} (원)</td>
+      <td>${Math.floor(matchingPath.currentFare)} (원)</td>
+    </tr>
+    <tr>
+      <td>${matchingPath.currentUserUP.time} (분)</td>
+      <td>${Math.floor(matchingPath.matchedPath.summary.duration / 60)}(분)</td>
+    </tr>
+    <tr>
+      <td>${matchingPath.currentUserUP.distance} (km)</td>
+      <td>${Math.floor(matchingPath.currentDistance / 1000)} (km)</td>
+    </tr>
+  </table>
+`
+
+  drawAccept()
+
+  // 좌표로 주소가져오는 함수
+  function searchDetailAddrFromCoords(coords) {
+    // Promise를 반환합니다
+    return new Promise((resolve, reject) => {
+      // 좌표로 법정동 상세 주소 정보를 요청합니다
+      geocoder.coord2Address(coords.x, coords.y, (result, status) => {
+        if (status === kakao.maps.services.Status.OK) {
+          resolve(result)
+        } else {
+          reject(status)
+        }
+      })
+    })
+  }
 
   // 검색 결과 목록과 마커를 표출하는 함수입니다
   function displayPlaces(places) {
@@ -964,13 +1067,15 @@ socket.on('matching', (matchingPath) => {
 
     for (var i = 0; i < places.length; i++) {
       // 마커를 생성하고 지도에 표시합니다
+      console.log(places[i])
       var placePosition = new kakao.maps.LatLng(places[i].y, places[i].x),
         marker = addMarker(placePosition, i),
         itemEl = getListItem(i, places[i]) // 검색 결과 항목 Element를 생성합니다
 
+      bounds.extend(placePosition)
+
       // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
       // LatLngBounds 객체에 좌표를 추가합니다
-      bounds.extend(placePosition)
 
       // 마커와 검색결과 항목에 mouseover 했을때
       // 해당 장소에 인포윈도우에 장소명을 표시합니다
@@ -995,13 +1100,17 @@ socket.on('matching', (matchingPath) => {
 
       fragment.appendChild(itemEl)
     }
+    var locationMove = new kakao.maps.LatLng(37.5247192, 124.1142915)
+
+    bounds.extend(locationMove)
+
+    map.setBounds(bounds)
 
     // 검색결과 항목들을 검색결과 목록 Element에 추가합니다
     listEl.appendChild(fragment)
     menuEl.scrollTop = 0
 
     // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
-    map.setBounds(bounds)
   }
 
   // 검색결과 항목을 Element로 반환하는 함수입니다
@@ -1015,6 +1124,7 @@ socket.on('matching', (matchingPath) => {
         '   <h5>' +
         places.name +
         '</h5>'
+    itemStr += '<span>' + places.jibunAddr + '</span>'
 
     el.innerHTML = itemStr
     el.className = 'item'
@@ -1066,42 +1176,6 @@ socket.on('matching', (matchingPath) => {
       el.removeChild(el.lastChild)
     }
   }
-  sendButton.remove()
-  boxAndButton.innerHTML = `
-  <style>
-  td {
-    padding: 10px;
-    border: 1px solid black;
-  }
-  tr:first-child td {
-    color: skyblue;
-  }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  </style>
-  <table>
-    <tr>
-      <td>매칭전</td>
-      <td>매칭후</td>
-    </tr>
-    <tr>
-      <td>${matchingPath.currentUserUP.fare} (원)</td>
-      <td>${Math.floor(matchingPath.currentFare)} (원)</td>
-    </tr>
-    <tr>
-      <td>${matchingPath.currentUserUP.time} (분)</td>
-      <td>${Math.floor(matchingPath.matchedPath.summary.duration / 60)}(분)</td>
-    </tr>
-    <tr>
-      <td>${matchingPath.currentUserUP.distance} (km)</td>
-      <td>${Math.floor(matchingPath.currentDistance / 1000)} (km)</td>
-    </tr>
-  </table>
-`
-
-  drawAccept()
 })
 
 socket.on('rejectMatching', () => {
