@@ -69,7 +69,7 @@ function handleButtonClick(event) {
   // 클릭된 버튼의 부모 요소인 리스트 아이템을 찾습니다
   var listItem = event.target.closest('.item')
   // 리스트 아이템에서 주소 정보를 찾습니다
-  var addressSpan = listItem.querySelector('road')
+  var addressSpan = listItem.querySelector('.road')
   var destinationAddressInput = document.getElementById('destinationAddress')
 
   // 주소 정보가 있는 경우에만 처리합니다
@@ -80,11 +80,7 @@ function handleButtonClick(event) {
   }
 }
 
-function handleButtonClick2(
-  event,
-  places_road_address_name,
-  places_addres_name,
-) {
+function handleButtonClick2(event) {
   // 클릭된 버튼의 부모 요소인 리스트 아이템을 찾습니다
   var listItem = event.target.closest('.item')
   // 리스트 아이템에서 주소 정보를 찾습니다
@@ -283,7 +279,7 @@ function updateMapWithDestination(destinaitionAddress) {
               '    <span class="road">' +
               places.road_address_name +
               '</span>' +
-              '   <button id = "arriveButton"onclick=" handleButtonClick()">도착</button>' +
+              '   <button id = "arriveButton">도착</button>' +
               '   <span class="jibun gray">' +
               places.address_name +
               '</span>'
@@ -297,8 +293,9 @@ function updateMapWithDestination(destinaitionAddress) {
           el.innerHTML = itemStr
           el.className = 'item'
           var arriveButton = el.querySelector('#arriveButton')
-          arriveButton.addEventListener('click', handleButtonClick)
-
+          if (arriveButton) {
+            arriveButton.addEventListener('click', handleButtonClick)
+          }
           return el
         }
 
@@ -550,7 +547,7 @@ function setOriginPoint(originAddress) {
               '    <span class="road">' +
               places.road_address_name +
               '</span>' +
-              '   <button id = "startButton"onclick=" handleButtonClick2()">출발</button>' +
+              '   <button id = "startButton">출발</button>' +
               '   <span class="jibun gray">' +
               places.address_name +
               '</span>'
@@ -563,10 +560,10 @@ function setOriginPoint(originAddress) {
 
           el.innerHTML = itemStr
           el.className = 'item'
-          console.log('el:', el)
           var startButton = el.querySelector('#startButton')
-          startButton.addEventListener('click', handleButtonClick2)
-
+          if (startButton) {
+            startButton.addEventListener('click', handleButtonClick2)
+          }
           return el
         }
 
