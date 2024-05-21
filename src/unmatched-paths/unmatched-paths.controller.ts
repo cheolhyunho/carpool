@@ -35,7 +35,8 @@ export class UnmatchedPathsController {
   }
   @Get('userId')
   async test(@CurrentUser() user) {
-    console.log('userId 획득')
+    console.log('userId 획득', user)
+
     return user
   }
 

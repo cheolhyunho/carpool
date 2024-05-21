@@ -48,9 +48,13 @@ export class MatchingGateway implements OnGatewayDisconnect {
   async handleSocket(@ConnectedSocket() socket: Socket, @MessageBody() body) {
     const user = await this.userRepository.findOne({
       where: { id: body.id },
-      relations: ['matchedPath', 'unmatchedPath'],
+      relations: ['unmatchedPath', 'matchedPath'],
     })
-    if (user.unmatchedPath === null || user.unmatchedPath === undefined) {
+    if (
+      user.unmatchedPath === null ||
+      user.unmatchedPath === undefined ||
+      user.unmatchedPath.destinationPoint === null
+    ) {
       socket.emit('noUnmatchedPath')
       return
     }
@@ -99,8 +103,27 @@ export class MatchingGateway implements OnGatewayDisconnect {
           user,
           oppUser,
         )
-        socket.emit('matching', response)
-        socket.to(oppUser.socketId).emit('matching', response)
+        socket.emit('matching', {
+          ...response,
+          username: user.username,
+          oppname: `${oppUser.username[0]}*${oppUser.username.slice(2)}`,
+        })
+        let temp = response.currentUserUP
+        response.currentUserUP = response.matchedUserUP
+        response.matchedUserUP = temp
+        temp = response.currentFare
+        response.currentFare = response.matchedFare
+        response.matchedFare = temp
+        temp = response.currentDistance
+        response.currentDistance = response.matchedDistance
+        response.matchedDistance = temp
+        response.caseIndex = 3 - response.caseIndex
+
+        socket.to(oppUser.socketId).emit('matching', {
+          ...response,
+          username: oppUser.username,
+          oppname: `${user.username[0]}*${user.username.slice(2)}`,
+        })
       }
 
       const updateUser = await this.userRepository.findOne({
@@ -109,6 +132,8 @@ export class MatchingGateway implements OnGatewayDisconnect {
       })
 
       if (updateUser.matchedPath == null) {
+        console.log('Map', this.isAlreadySentMap)
+        this.isAlreadySentMap.set(response.matchedPath.summary.origin.x, false)
         socket.emit('oppAlreadyMatched')
       }
     } else {
@@ -150,7 +175,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
     const otherUser = matchedPath.users.find(
       (oppUser) => oppUser.id !== user.id,
     )
-    const tmpOppUser = otherUser
 
     let isAccepted = false
     //수락대기 경과시간
@@ -182,6 +206,9 @@ export class MatchingGateway implements OnGatewayDisconnect {
         where: { isDriver: true },
       })
       console.log('드라이버', drivers)
+      if (drivers.length === 0) {
+        socket.emit('noDriver')
+      }
       if (!this.isAlreadySentMap.get(matchedPath.id)) {
         for (const driver of drivers) {
           console.log('wantLocation 이벤트 실행중')
@@ -235,6 +262,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     currentUser.unmatchedPath = null
     await this.userRepository.save(currentUser)
   }
+
   @SubscribeMessage('hereIsLocation')
   async requestToDriver(
     @ConnectedSocket() socket: Socket,
@@ -250,7 +278,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
       )
       console.log(kakaoResponse.summary.duration)
 
-      if (kakaoResponse.summary.duration <= 300) {
+      if (kakaoResponse.summary.duration <= 1000) {
         console.log('택시기사에게 send:', data.matchedPath)
         socket.emit('letsDrive', data.matchedPath)
         return

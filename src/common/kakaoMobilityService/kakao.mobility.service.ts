@@ -113,7 +113,7 @@ export class KakaoMobilityService {
           tax_free_amount: '0',
 
           approval_url: 'http://localhost:5000/matchedPath',
-          fail_url: ' http://localhost:5000/matchedPath',
+          fail_url: 'http://localhost:5000/matchedPath',
           cancel_url: 'http://localhost:5000/matchedPath',
         },
         httpsAgent: new https.Agent({

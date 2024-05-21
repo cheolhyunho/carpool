@@ -11,6 +11,7 @@ const setOriginButton = document.getElementById('setOriginButton')
 const matchingButton = document.getElementById('matching')
 const logoutButton = document.getElementById('logout')
 const modeButton = document.getElementById('DriverMode')
+const boxAndButton = document.getElementById('boxAndButton')
 
 modeButton.addEventListener('click', function () {
   window.location.href = window.location.origin + '/driver'
@@ -37,10 +38,6 @@ modeButton.addEventListener('click', function () {
     })
 })
 
-socket.on('renderDriverMode', ({ html }) => {
-  document.body.innerHTML = html
-})
-
 function sendPost(coordinateData) {
   fetch('/unmatchedPath', {
     method: 'POST',
@@ -57,6 +54,7 @@ function sendPost(coordinateData) {
     })
     .then((data) => {
       console.log('create Successful:', data)
+      originAddressInput.style.backgroundColor = 'rgba(128, 128, 128, 0.5)'
       alert('출발지가 설정되었습니다.')
     })
     .catch((error) => {
@@ -64,6 +62,36 @@ function sendPost(coordinateData) {
       alert('문제가 발생했습니다. 다시 시도해주세요')
     })
 }
+function setDestination(destinationPoint) {
+  fetch('/unmatchedPath/setDes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(destinationPoint),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('unmatchedPath destinationPoint Fetch Fail')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      console.log('create Successful:', data)
+      destinationAddressInput.style.backgroundColor = 'rgba(128, 128, 128, 0.5)'
+      alert('목적지가 설정되었습니다.')
+    })
+    .catch((error) => {
+      console.error('Error:', error)
+      alert('혹시 출발지와의 거리가 너무 가까운가요? 다시 한번 시도해보세요')
+    })
+}
+originAddressInput.addEventListener('click', function () {
+  originAddressInput.style.backgroundColor = 'white'
+})
+destinationAddressInput.addEventListener('click', function () {
+  destinationAddressInput.style.backgroundColor = 'white'
+})
 
 function handleButtonClick(event) {
   // 클릭된 버튼의 부모 요소인 리스트 아이템을 찾습니다
@@ -93,30 +121,6 @@ function handleButtonClick2(event) {
     originAddressInput.value = addressSpan.textContent
     setOriginPoint(originAddressInput.value)
   }
-}
-
-function setDestination(destinationPoint) {
-  fetch('/unmatchedPath/setDes', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(destinationPoint),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('unmatchedPath destinationPoint Fetch Fail')
-      }
-      return response.json()
-    })
-    .then((data) => {
-      console.log('create Successful:', data)
-      alert('목적지가 설정되었습니다.')
-    })
-    .catch((error) => {
-      console.error('Error:', error)
-      alert('혹시 출발지와의 거리가 너무 가까운가요? 다시 한번 시도해보세요')
-    })
 }
 
 //주소로 목적지를 정하는 함수
@@ -560,6 +564,7 @@ function setOriginPoint(originAddress) {
 
           el.innerHTML = itemStr
           el.className = 'item'
+
           var startButton = el.querySelector('#startButton')
           if (startButton) {
             startButton.addEventListener('click', handleButtonClick2)
@@ -687,6 +692,25 @@ function displayMarker(locPosition, message) {
 
 // init 함수 수정
 function init() {
+  fetch('/unmatchedPath/userId', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      document.getElementById('hi').innerHTML = `안녕하세요! ${data.username}님`
+    })
+    .catch((error) => {
+      console.error('UserId 가져오기 실패:', error)
+      console.log(error)
+    })
   if (navigator.geolocation) {
     // GeoLocation을 이용해서 접속 위치를 얻어옵니다
     navigator.geolocation.getCurrentPosition(function (position) {
@@ -707,6 +731,7 @@ function init() {
 
 document.addEventListener('DOMContentLoaded', init)
 currentAddressSettingButton.addEventListener('click', function () {
+  originAddressInput.value = '     <현재위치로 출발지 설정됨>'
   navigator.geolocation.getCurrentPosition(function (position) {
     var lat = position.coords.latitude,
       lng = position.coords.longitude
@@ -770,6 +795,7 @@ matchingButton.addEventListener('click', function () {
       return response.json()
     })
     .then((data) => {
+      matchingButton.style.backgroundColor = 'rgba(128, 128, 128, 0.5)'
       socket.emit('doMatch', data, (user) => {
         console.log('수신완료:', user)
       })
@@ -899,13 +925,272 @@ socket.on('noPeople', () => {
 })
 
 socket.on('matching', (matchingPath) => {
-  console.log('상대방찾기성공!')
-  console.log(matchingPath)
+  var placeName = []
+  switch (matchingPath.caseIndex) {
+    case 0:
+      placeName = [
+        matchingPath.username + '님 승차',
+        matchingPath.oppname + '님 승차',
+        matchingPath.username + '님 하차',
+        matchingPath.oppname + '님 하차',
+      ]
+      break
+    case 1:
+      placeName = [
+        matchingPath.oppname + '님 승차',
+        matchingPath.username + '님 승차',
+        matchingPath.username + '님 하차',
+        matchingPath.oppname + '님 하차',
+      ]
+      break
+    case 2:
+      placeName = [
+        matchingPath.username + '님 승차',
+        matchingPath.oppname + '님 승차',
+        matchingPath.oppname + '님 하차',
+        matchingPath.username + '님 하차',
+      ]
+      break
+    case 3:
+      placeName = [
+        matchingPath.oppname + '님 승차',
+        matchingPath.username + '님 승차',
+        matchingPath.oppname + '님 하차',
+        matchingPath.username + '님 하차',
+      ]
+      break
+  }
+
+  var markers = []
+
+  var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+    mapOption = {
+      center: new kakao.maps.LatLng(37.566826, 126.9786567), // 지도의 중심좌표
+      level: 8, // 지도의 확대 레벨
+    }
+
+  // 지도를 생성합니다
+  var map = new kakao.maps.Map(mapContainer, mapOption)
+
+  // 검색 결과 목록이나 마커를 클릭했을 때 장소명을 표출할 인포윈도우를 생성합니다
+  var infowindow = new kakao.maps.InfoWindow({ zIndex: 1 })
+  var geocoder = new kakao.maps.services.Geocoder()
+
+  var marker = new kakao.maps.Marker(), // 클릭한 위치를 표시할 마커입니다
+    infowindow = new kakao.maps.InfoWindow({ zindex: 1 }) // 클릭한 위치에 대한 주소를 표시할 인포윈도우입니다
+
+  var places = [
+    matchingPath.matchedPath.summary.origin,
+    matchingPath.matchedPath.summary.waypoints[0],
+    matchingPath.matchedPath.summary.waypoints[1],
+    matchingPath.matchedPath.summary.destination,
+  ]
+  for (let i = 0; i < 4; i++) {
+    places[i].name = placeName[i]
+  }
+  let promises = []
+  for (let i = 0; i < 4; i++) {
+    let promise = searchDetailAddrFromCoords(places[i])
+      .then((result) => {
+        places[i].jibunAddr = result[0].address.address_name
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+    promises.push(promise)
+  }
+
+  Promise.all(promises).then(() => {
+    console.log(matchingPath)
+    displayPlaces(places)
+  })
+
+  sendButton.remove()
+  boxAndButton.innerHTML = `
+  <style>
+  td {
+    padding: 10px;
+    border: 1px solid black;
+  }
+  tr:first-child td {
+    color: skyblue;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  </style>
+  <table>
+    <tr>
+      <td>매칭전</td>
+      <td>매칭후</td>
+    </tr>
+    <tr>
+      <td>${matchingPath.currentUserUP.fare} (원)</td>
+      <td>${Math.floor(matchingPath.currentFare)} (원)</td>
+    </tr>
+    <tr>
+      <td>${matchingPath.currentUserUP.time} (분)</td>
+      <td>${Math.floor(matchingPath.matchedPath.summary.duration / 60)}(분)</td>
+    </tr>
+    <tr>
+      <td>${matchingPath.currentUserUP.distance} (km)</td>
+      <td>${Math.floor(matchingPath.currentDistance / 1000)} (km)</td>
+    </tr>
+  </table>
+`
+
   drawAccept()
+
+  // 좌표로 주소가져오는 함수
+  function searchDetailAddrFromCoords(coords) {
+    // Promise를 반환합니다
+    return new Promise((resolve, reject) => {
+      // 좌표로 법정동 상세 주소 정보를 요청합니다
+      geocoder.coord2Address(coords.x, coords.y, (result, status) => {
+        if (status === kakao.maps.services.Status.OK) {
+          resolve(result)
+        } else {
+          reject(status)
+        }
+      })
+    })
+  }
+
+  // 검색 결과 목록과 마커를 표출하는 함수입니다
+  function displayPlaces(places) {
+    var listEl = document.getElementById('placesList'),
+      menuEl = document.getElementById('menu_wrap'),
+      fragment = document.createDocumentFragment(),
+      bounds = new kakao.maps.LatLngBounds(),
+      listStr = ''
+
+    // 검색 결과 목록에 추가된 항목들을 제거합니다
+    removeAllChildNods(listEl)
+
+    // 지도에 표시되고 있는 마커를 제거합니다
+    removeMarker()
+
+    for (var i = 0; i < places.length; i++) {
+      // 마커를 생성하고 지도에 표시합니다
+
+      var placePosition = new kakao.maps.LatLng(places[i].y, places[i].x),
+        marker = addMarker(placePosition, i),
+        itemEl = getListItem(i, places[i]) // 검색 결과 항목 Element를 생성합니다
+
+      bounds.extend(placePosition)
+
+      // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
+      // LatLngBounds 객체에 좌표를 추가합니다
+
+      // 마커와 검색결과 항목에 mouseover 했을때
+      // 해당 장소에 인포윈도우에 장소명을 표시합니다
+      // mouseout 했을 때는 인포윈도우를 닫습니다
+      ;(function (marker, title) {
+        kakao.maps.event.addListener(marker, 'mouseover', function () {
+          displayInfowindow(marker, title)
+        })
+
+        kakao.maps.event.addListener(marker, 'mouseout', function () {
+          infowindow.close()
+        })
+
+        itemEl.onmouseover = function () {
+          displayInfowindow(marker, title)
+        }
+
+        itemEl.onmouseout = function () {
+          infowindow.close()
+        }
+      })(marker, places[i].name)
+
+      fragment.appendChild(itemEl)
+    }
+    var locationMove = new kakao.maps.LatLng(37.5247192, 124.1142915)
+
+    bounds.extend(locationMove)
+
+    map.setBounds(bounds)
+
+    // 검색결과 항목들을 검색결과 목록 Element에 추가합니다
+    listEl.appendChild(fragment)
+    menuEl.scrollTop = 0
+
+    // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
+  }
+
+  // 검색결과 항목을 Element로 반환하는 함수입니다
+  function getListItem(index, places) {
+    var el = document.createElement('li'),
+      itemStr =
+        '<span class="markerbg marker_' +
+        (index + 1) +
+        '"></span>' +
+        '<div class="info">' +
+        '   <h5>' +
+        places.name +
+        '</h5>'
+    itemStr += '<span>' + places.jibunAddr + '</span>'
+
+    el.innerHTML = itemStr
+    el.className = 'item'
+
+    return el
+  }
+
+  // 마커를 생성하고 지도 위에 마커를 표시하는 함수입니다
+  function addMarker(position, idx, title) {
+    var imageSrc =
+        'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png', // 마커 이미지 url, 스프라이트 이미지를 씁니다
+      imageSize = new kakao.maps.Size(36, 37), // 마커 이미지의 크기
+      imgOptions = {
+        spriteSize: new kakao.maps.Size(36, 691), // 스프라이트 이미지의 크기
+        spriteOrigin: new kakao.maps.Point(0, idx * 46 + 10), // 스프라이트 이미지 중 사용할 영역의 좌상단 좌표
+        offset: new kakao.maps.Point(13, 37), // 마커 좌표에 일치시킬 이미지 내에서의 좌표
+      },
+      markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions),
+      marker = new kakao.maps.Marker({
+        position: position, // 마커의 위치
+        image: markerImage,
+      })
+
+    marker.setMap(map) // 지도 위에 마커를 표출합니다
+    markers.push(marker) // 배열에 생성된 마커를 추가합니다
+
+    return marker
+  }
+
+  // 지도 위에 표시되고 있는 마커를 모두 제거합니다
+  function removeMarker() {
+    for (var i = 0; i < markers.length; i++) {
+      markers[i].setMap(null)
+    }
+    markers = []
+  }
+
+  // 인포윈도우에 장소명을 표시합니다
+  function displayInfowindow(marker, title) {
+    var content = '<div style="padding:5px;z-index:1;">' + title + '</div>'
+
+    infowindow.setContent(content)
+    infowindow.open(map, marker)
+  }
+
+  // 검색결과 목록의 자식 Element를 제거하는 함수입니다
+  function removeAllChildNods(el) {
+    while (el.hasChildNodes()) {
+      el.removeChild(el.lastChild)
+    }
+  }
 })
 
 socket.on('rejectMatching', () => {
   alert('매칭이 취소되었습니다.')
+  location.reload()
+})
+
+socket.on('noDriver', () => {
+  alert('대기중인 택시가 없습니다.')
   location.reload()
 })
 

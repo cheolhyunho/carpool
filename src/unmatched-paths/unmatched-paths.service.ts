@@ -135,6 +135,10 @@ export class UnmatchedPathsService {
     targetUnmatchedPath.userIdArray = []
 
     const userArray = await this.fetchUnmatchedPaths(user.id)
+    if (userArray == null) {
+      console.log('조건에 만족하는 유저 x')
+      return null
+    }
 
     const userIdArray = userArray.map((user) => user.id)
 
@@ -231,14 +235,21 @@ export class UnmatchedPathsService {
       matchedDistance,
     )
     //톨비 있으면 톨비까지 처리
+
     if (matchedPath.summary.fare.toll != 0) {
+      let firstSectionToll = 0
+      let secondSectionToll = 0
+      let thirdSectionToll = 0
+
       let sectionKakaoResponse = await this.kakaoMobilityService.getInfo(
         matchedPath.summary.origin.y,
         matchedPath.summary.origin.x,
         matchedPath.summary.waypoints[0].y,
         matchedPath.summary.waypoints[0].x,
       )
-      const firstSectionToll = sectionKakaoResponse.summary.fare.toll
+      if (sectionKakaoResponse.result_code != 104) {
+        firstSectionToll = sectionKakaoResponse.summary.fare.toll
+      }
 
       sectionKakaoResponse = await this.kakaoMobilityService.getInfo(
         matchedPath.summary.waypoints[0].y,
@@ -246,7 +257,9 @@ export class UnmatchedPathsService {
         matchedPath.summary.waypoints[1].y,
         matchedPath.summary.waypoints[1].x,
       )
-      const secondSectionToll = sectionKakaoResponse.summary.fare.toll
+      if (sectionKakaoResponse.result_code != 104) {
+        secondSectionToll = sectionKakaoResponse.summary.fare.toll
+      }
 
       sectionKakaoResponse = await this.kakaoMobilityService.getInfo(
         matchedPath.summary.waypoints[1].y,
@@ -254,7 +267,9 @@ export class UnmatchedPathsService {
         matchedPath.summary.destination.y,
         matchedPath.summary.destination.x,
       )
-      const thirdSectionToll = sectionKakaoResponse.summary.fare.toll
+      if (sectionKakaoResponse.result_code != 104) {
+        thirdSectionToll = sectionKakaoResponse.summary.fare.toll
+      }
 
       if (secondSectionToll != 0) {
         currentFare += secondSectionToll / 2
@@ -284,6 +299,7 @@ export class UnmatchedPathsService {
       matchedFare: matchedFare,
       currentDistance: currentDistance,
       matchedDistance: matchedDistance,
+      caseIndex: caseIndex,
     }
   }
   async fetchUnmatchedPaths(userId) {
@@ -300,6 +316,9 @@ export class UnmatchedPathsService {
       .getMany()
 
     const userArray = await queryBuilder
+    if (userArray.length === 0) {
+      return null
+    }
 
     return userArray
   }
@@ -488,8 +507,9 @@ export class UnmatchedPathsService {
         if (kakaoResponse1.result_code === 104) {
           resultArray.splice(0, 1)
           resultArray.push(tmpArray[i])
-        }
-        if (kakaoResponse1.summary.distance < kakaoResponse2.summary.distance) {
+        } else if (
+          kakaoResponse1.summary.distance < kakaoResponse2.summary.distance
+        ) {
           resultArray.splice(0, 1)
           resultArray.push(tmpArray[i])
         }
