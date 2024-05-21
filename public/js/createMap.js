@@ -280,7 +280,7 @@ function updateMapWithDestination(destinaitionAddress) {
               '    <span class="road">' +
               places.road_address_name +
               '</span>' +
-              '   <button id = "arriveButton"onclick=" handleButtonClick()">도착</button>' +
+              '   <button id = "arriveButton">도착</button>' +
               '   <span class="jibun gray">' +
               places.address_name +
               '</span>'
@@ -294,8 +294,9 @@ function updateMapWithDestination(destinaitionAddress) {
           el.innerHTML = itemStr
           el.className = 'item'
           var arriveButton = el.querySelector('#arriveButton')
-          arriveButton.addEventListener('click', handleButtonClick)
-
+          if (arriveButton) {
+            arriveButton.addEventListener('click', handleButtonClick)
+          }
           return el
         }
 
@@ -547,7 +548,7 @@ function setOriginPoint(originAddress) {
               '    <span class="road">' +
               places.road_address_name +
               '</span>' +
-              '   <button id = "startButton"onclick=" handleButtonClick2()">출발</button>' +
+              '   <button id = "startButton">출발</button>' +
               '   <span class="jibun gray">' +
               places.address_name +
               '</span>'
@@ -562,8 +563,9 @@ function setOriginPoint(originAddress) {
           el.className = 'item'
 
           var startButton = el.querySelector('#startButton')
-          startButton.addEventListener('click', handleButtonClick2)
-
+          if (startButton) {
+            startButton.addEventListener('click', handleButtonClick2)
+          }
           return el
         }
 
