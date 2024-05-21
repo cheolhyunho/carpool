@@ -38,10 +38,6 @@ modeButton.addEventListener('click', function () {
     })
 })
 
-socket.on('renderDriverMode', ({ html }) => {
-  document.body.innerHTML = html
-})
-
 function sendPost(coordinateData) {
   fetch('/unmatchedPath', {
     method: 'POST',
@@ -58,6 +54,7 @@ function sendPost(coordinateData) {
     })
     .then((data) => {
       console.log('create Successful:', data)
+      originAddressInput.style.backgroundColor = 'rgba(128, 128, 128, 0.5)'
       alert('출발지가 설정되었습니다.')
     })
     .catch((error) => {
@@ -65,6 +62,36 @@ function sendPost(coordinateData) {
       alert('문제가 발생했습니다. 다시 시도해주세요')
     })
 }
+function setDestination(destinationPoint) {
+  fetch('/unmatchedPath/setDes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(destinationPoint),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('unmatchedPath destinationPoint Fetch Fail')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      console.log('create Successful:', data)
+      destinationAddressInput.style.backgroundColor = 'rgba(128, 128, 128, 0.5)'
+      alert('목적지가 설정되었습니다.')
+    })
+    .catch((error) => {
+      console.error('Error:', error)
+      alert('혹시 출발지와의 거리가 너무 가까운가요? 다시 한번 시도해보세요')
+    })
+}
+originAddressInput.addEventListener('click', function () {
+  originAddressInput.style.backgroundColor = 'white'
+})
+destinationAddressInput.addEventListener('click', function () {
+  destinationAddressInput.style.backgroundColor = 'white'
+})
 
 function handleButtonClick(event) {
   // 클릭된 버튼의 부모 요소인 리스트 아이템을 찾습니다
@@ -94,30 +121,6 @@ function handleButtonClick2(event) {
     originAddressInput.value = addressSpan.textContent
     setOriginPoint(originAddressInput.value)
   }
-}
-
-function setDestination(destinationPoint) {
-  fetch('/unmatchedPath/setDes', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(destinationPoint),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('unmatchedPath destinationPoint Fetch Fail')
-      }
-      return response.json()
-    })
-    .then((data) => {
-      console.log('create Successful:', data)
-      alert('목적지가 설정되었습니다.')
-    })
-    .catch((error) => {
-      console.error('Error:', error)
-      alert('혹시 출발지와의 거리가 너무 가까운가요? 다시 한번 시도해보세요')
-    })
 }
 
 //주소로 목적지를 정하는 함수
@@ -728,6 +731,7 @@ function init() {
 
 document.addEventListener('DOMContentLoaded', init)
 currentAddressSettingButton.addEventListener('click', function () {
+  originAddressInput.value = '     <현재위치로 출발지 설정됨>'
   navigator.geolocation.getCurrentPosition(function (position) {
     var lat = position.coords.latitude,
       lng = position.coords.longitude
@@ -791,6 +795,7 @@ matchingButton.addEventListener('click', function () {
       return response.json()
     })
     .then((data) => {
+      matchingButton.style.backgroundColor = 'rgba(128, 128, 128, 0.5)'
       socket.emit('doMatch', data, (user) => {
         console.log('수신완료:', user)
       })
@@ -892,28 +897,27 @@ function closeModal(modal) {
 
 //global socketOn
 socket.on('oppAlreadyMatched', () => {
-  // fetch('/unmatchedPath/userId', {
-  //   method: 'GET',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  // })
-  //   .then((response) => {
-  //     if (!response.ok) {
-  //       throw new Error('')
-  //     }
-  //     return response.json()
-  //   })
-  //   .then((data) => {
-  //     socket.emit('doMatch', data, (user) => {
-  //       console.log('수신완료:', user)
-  //     })
-  //   })
-  //   .catch((error) => {
-  //     console.error('UserId 가져오기 실패:', error)
-  //     console.log(error)
-  //   })
-  alert('가장 적합한 상대방이 이미 매칭되었습니다, 다시 매칭해주십시오')
+  fetch('/unmatchedPath/userId', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('')
+      }
+      return response.json()
+    })
+    .then((data) => {
+      socket.emit('doMatch', data, (user) => {
+        console.log('수신완료:', user)
+      })
+    })
+    .catch((error) => {
+      console.error('UserId 가져오기 실패:', error)
+      console.log(error)
+    })
 })
 
 socket.on('noPeople', () => {
@@ -997,7 +1001,7 @@ socket.on('matching', (matchingPath) => {
   }
 
   Promise.all(promises).then(() => {
-    console.log(places)
+    console.log(matchingPath)
     displayPlaces(places)
   })
 
@@ -1069,7 +1073,7 @@ socket.on('matching', (matchingPath) => {
 
     for (var i = 0; i < places.length; i++) {
       // 마커를 생성하고 지도에 표시합니다
-      console.log(places[i])
+
       var placePosition = new kakao.maps.LatLng(places[i].y, places[i].x),
         marker = addMarker(placePosition, i),
         itemEl = getListItem(i, places[i]) // 검색 결과 항목 Element를 생성합니다
@@ -1182,6 +1186,11 @@ socket.on('matching', (matchingPath) => {
 
 socket.on('rejectMatching', () => {
   alert('매칭이 취소되었습니다.')
+  location.reload()
+})
+
+socket.on('noDriver', () => {
+  alert('대기중인 택시가 없습니다.')
   location.reload()
 })
 

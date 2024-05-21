@@ -50,7 +50,11 @@ export class MatchingGateway implements OnGatewayDisconnect {
       where: { id: body.id },
       relations: ['unmatchedPath', 'matchedPath'],
     })
-    if (user.unmatchedPath === null || user.unmatchedPath === undefined) {
+    if (
+      user.unmatchedPath === null ||
+      user.unmatchedPath === undefined ||
+      user.unmatchedPath.destinationPoint === null
+    ) {
       socket.emit('noUnmatchedPath')
       return
     }
@@ -128,6 +132,8 @@ export class MatchingGateway implements OnGatewayDisconnect {
       })
 
       if (updateUser.matchedPath == null) {
+        console.log('Map', this.isAlreadySentMap)
+        this.isAlreadySentMap.set(response.matchedPath.summary.origin.x, false)
         socket.emit('oppAlreadyMatched')
       }
     } else {
@@ -169,7 +175,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
     const otherUser = matchedPath.users.find(
       (oppUser) => oppUser.id !== user.id,
     )
-    const tmpOppUser = otherUser
 
     let isAccepted = false
     //수락대기 경과시간
@@ -201,6 +206,9 @@ export class MatchingGateway implements OnGatewayDisconnect {
         where: { isDriver: true },
       })
       console.log('드라이버', drivers)
+      if (drivers.length === 0) {
+        socket.emit('noDriver')
+      }
       if (!this.isAlreadySentMap.get(matchedPath.id)) {
         for (const driver of drivers) {
           console.log('wantLocation 이벤트 실행중')
