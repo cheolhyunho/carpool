@@ -8,6 +8,7 @@ const acceptButton = document.getElementById('acceptButton')
 var bufferingElement = document.querySelector('.buffering')
 var taxiIconElement = document.querySelector('.taxi-icon')
 const logoutButton = document.getElementById('logout')
+const finishDriveButton = document.getElementById('finishDriveButton')
 
 fetch('/unmatchedPath/userId', {
   method: 'GET',
@@ -227,7 +228,7 @@ socket.on('navigation', (matchedPath) => {
   console.log('navigation event on')
   window.startNavigation(matchedPath)
 })
-const finishDriveButton = document.getElementById('finishDriveButton')
+
 socket.on('updateLocation', (matchedPath) => {
   try {
     console.log('updateLocation 실행중')
