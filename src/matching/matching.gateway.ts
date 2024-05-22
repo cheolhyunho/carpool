@@ -93,7 +93,9 @@ export class MatchingGateway implements OnGatewayDisconnect {
 
       if (
         oppUser.matchedPath == null &&
-        !this.isAlreadySentMap.get(response.matchedPath.summary.origin.x)
+        !this.isAlreadySentMap.get(response.matchedPath.summary.origin.x) &&
+        response.currentFare < response.currentUserUP.fare &&
+        response.matchedFare < response.matchedUserUP.fare
       ) {
         this.isAlreadySentMap.set(response.matchedPath.summary.origin.x, true)
         await this.matchedPathService.createMatchedPath(

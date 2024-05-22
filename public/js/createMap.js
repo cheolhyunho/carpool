@@ -809,44 +809,100 @@ matchingButton.addEventListener('click', function () {
     })
 })
 
-function drawAccept() {
-  // 모달 창을 생성
-  const modal = document.createElement('div')
-  modal.classList.add('modal')
-
-  // 모달 내용 생성
-  modal.innerHTML = `
-    <div class="modal-content">
-      <p>수락하시겠습니까?</p>
-      <button id="acceptButton">수락</button>
-      <button id="rejectButton">거절</button>
-    </div>
-  `
-
-  // 스타일 설정 (예시)
-  modal.style.position = 'fixed'
-  modal.style.top = '50%'
-  modal.style.left = '50%'
-  modal.style.transform = 'translate(-50%, -50%)'
-  modal.style.backgroundColor = 'white'
-  modal.style.padding = '20px'
-  modal.style.border = '1px solid black'
-  modal.style.zIndex = '9999'
+function drawAccept(matchingPath) {
+  boxAndButton.innerHTML = `
+  <style>
+  td {
+    padding: 15px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  tr:first-child td {
+    background-color: skyblue;
+    color: white;
+    font-weight: bold;
+  }
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    margin-top: 40px;
+  }
+  .button-container {
+    position: relative;
+    width: 355px;
+    color: white; /* 글자색을 흰색으로 설정 */
+    border: none; /* 기본 버튼 테두리를 제거 */
+    padding: 10px 20px; /* 버튼 내부의 여백 설정 */
+    text-align: center; /* 텍스트를 중앙으로 정렬 */
+    text-decoration: none; /* 텍스트 밑줄 제거 */
+    display: inline-block;
+    font-size: 16px;
+    margin: 20px 60px;
+    cursor: pointer; /* 마우스를 올렸을 때 커서 모양 변경 */
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 32px;
+    font-family: Arial, sans-serif; /* Add this line */
+    cursor: pointer;
+  }
+  #accept-button {
+    border-radius: 12px;
+    background-color: hsl(197, 71%, 50%);
+   
+  }
+  #reject-button {
+    border-radius: 12px;
+    background-color: skyblue;
+  }
+  </style>
+  <table>
+    <tr>
+      <td>매칭전</td>
+      <td>매칭후</td>
+    </tr>
+    <tr>
+      <td>${matchingPath.currentUserUP.fare} (원)</td>
+      <td>${Math.floor(matchingPath.currentFare)} (원)</td>
+    </tr>
+    <tr>
+      <td>${matchingPath.currentUserUP.time} (분)</td>
+      <td>${Math.floor(matchingPath.matchedPath.summary.duration / 60)}(분)</td>
+    </tr>
+    <tr>
+      <td>${matchingPath.currentUserUP.distance} (km)</td>
+      <td>${Math.floor(matchingPath.currentDistance / 1000)} (km)</td>
+    </tr>
+  </table>
+  <div class="button-container">
+    <button id="accept-button">수락</button>
+    <button id="reject-button">거절</button>
+  </div>
+`
 
   // 수락 버튼 이벤트 리스너 추가
-  modal.querySelector('#acceptButton').addEventListener('click', () => {
-    closeModal(modal) // 모달 닫기
+  boxAndButton.querySelector('#accept-button').addEventListener('click', () => {
+    let buttonContainer = document.querySelector('.button-container')
+    if (buttonContainer) {
+      buttonContainer.remove()
+    }
     handleAccept() // 수락 버튼 클릭 시 처리할 함수 호출
   })
 
   // 거절 버튼 이벤트 리스너 추가
-  modal.querySelector('#rejectButton').addEventListener('click', () => {
+  boxAndButton.querySelector('#reject-button').addEventListener('click', () => {
+    let buttonContainer = document.querySelector('.button-container')
+    if (buttonContainer) {
+      buttonContainer.remove()
+    }
     handleReject()
-    closeModal(modal) // 모달 닫기
   })
-
-  // 모달을 body에 추가
-  document.body.appendChild(modal)
 }
 
 // 수락 버튼 클릭 시 처리할 함수
@@ -891,11 +947,6 @@ function handleReject() {
     .catch((error) => {
       console.error('UserId 가져오기 실패:', error)
     })
-}
-
-// 모달 닫기 함수
-function closeModal(modal) {
-  modal.remove()
 }
 
 //global socketOn
@@ -1009,41 +1060,7 @@ socket.on('matching', (matchingPath) => {
   })
 
   sendButton.remove()
-  boxAndButton.innerHTML = `
-  <style>
-  td {
-    padding: 10px;
-    border: 1px solid black;
-  }
-  tr:first-child td {
-    color: skyblue;
-  }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  </style>
-  <table>
-    <tr>
-      <td>매칭전</td>
-      <td>매칭후</td>
-    </tr>
-    <tr>
-      <td>${matchingPath.currentUserUP.fare} (원)</td>
-      <td>${Math.floor(matchingPath.currentFare)} (원)</td>
-    </tr>
-    <tr>
-      <td>${matchingPath.currentUserUP.time} (분)</td>
-      <td>${Math.floor(matchingPath.matchedPath.summary.duration / 60)}(분)</td>
-    </tr>
-    <tr>
-      <td>${matchingPath.currentUserUP.distance} (km)</td>
-      <td>${Math.floor(matchingPath.currentDistance / 1000)} (km)</td>
-    </tr>
-  </table>
-`
-
-  drawAccept()
+  drawAccept(matchingPath)
 
   // 좌표로 주소가져오는 함수
   function searchDetailAddrFromCoords(coords) {
