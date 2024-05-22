@@ -1,44 +1,33 @@
 <html lang="en">
   <head>
-    <link rel="manifest" href="manifest.json" />
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <title>드라이버모드</title>
-    <link
-      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
     <link href="css/driver.css" rel="stylesheet" />
     <script
       type="text/javascript"
-      src="//dapi.kakao.com/v2/maps/sdk.js?appkey=86ae03c1d2c30d0b0a969db803f5a333&libraries=services"
+      src="//dapi.kakao.com/v2/maps/sdk.js?appkey=8b8935e604301d354dc9050359a2237c&libraries=services"
     ></script>
-    <script type="module">
-      import 'https://cdn.jsdelivr.net/npm/@pwabuilder/pwaupdate'; const el =
-      document.createElement('pwa-update'); document.body.appendChild(el);
-    </script>
   </head>
   <body>
+    <button id="passenger-button">승객모드</button>
+    <button id="logout">log out</button>
     <header id="header-content">
       <h1>승객과 매칭중입니다</h1>
       <p>잠시만 기다려주세요...</p>
     </header>
-    <button id="passenger-button">승객모드</button>
-
+    <div class="buffering"></div>
+    <div class="taxi-icon">🚖</div>
     <div id="mapContainer" style="display: none; width: 100%; height: 80%;">
-      <!-- Kakao map will be displayed here -->
     </div>
 
     <div id="buttons" style="display: none;">
-      <button id="acceptButton">Accept</button>
-      <button id="rejectButton">Reject</button>
+      <button id="acceptButton">수락</button>
+      <button id="rejectButton">거절</button>
     </div>
-
-    <div>
-      <button id="finishDriveButton">운행종료</button>
-    </div>
+    <button id="finishDriveButton">운행종료</button>
 
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script
