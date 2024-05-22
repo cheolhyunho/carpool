@@ -5,6 +5,9 @@ const mapContainer = document.getElementById('mapContainer')
 const buttons = document.getElementById('buttons')
 const rejectButton = document.getElementById('rejectButton')
 const acceptButton = document.getElementById('acceptButton')
+var bufferingElement = document.querySelector('.buffering')
+var taxiIconElement = document.querySelector('.taxi-icon')
+const logoutButton = document.getElementById('logout')
 
 fetch('/unmatchedPath/userId', {
   method: 'GET',
@@ -50,6 +53,9 @@ socket.on('wantLocation', (matchedPath) => {
 })
 
 socket.on('letsDrive', function (matchedPath) {
+  headerContent.remove()
+  bufferingElement.remove()
+  taxiIconElement.remove()
   console.log('letsDrive 이벤트 실행중')
   buttons.style.display = 'block'
   mapContainer.style.display = 'block'
@@ -243,4 +249,26 @@ socket.on('updateLocation', (matchedPath) => {
   } catch (error) {
     console.error(error)
   }
+})
+
+logoutButton.addEventListener('click', function () {
+  fetch('/signup/logout', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('')
+      }
+      return
+    })
+    .then(() => {
+      console.log('Successful')
+      window.location.href = '/'
+    })
+    .catch((error) => {
+      console.error('Error:', error)
+    })
 })

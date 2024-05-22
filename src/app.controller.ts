@@ -39,6 +39,12 @@ export class AppController {
     return
   }
 
+  @Get('driver')
+  @Render('mapForDriver')
+  waitingDriver() {
+    return
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('home')
   @Render('map')
