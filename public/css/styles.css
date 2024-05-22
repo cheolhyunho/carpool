@@ -1257,8 +1257,8 @@ body {
   }
 
   #logout {
-    position: fixed;
-    right: -145%;
+    position: relative;
+    left: 80%;
     z-index: 1;
     /* Frame 26 */
 
@@ -1298,7 +1298,7 @@ body {
 
   #DriverMode {
     z-index: 2;
-    position: fixed;
+    position: relative;
     left: 80%;
 
     /* Frame 26 */
@@ -1315,7 +1315,7 @@ body {
     width: 95px;
     height: 40px;
     left: 20%px;
-    top: 33px;
+    top: 88px;
 
     background: #ffffff;
     box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
