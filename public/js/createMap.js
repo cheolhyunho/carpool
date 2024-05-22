@@ -167,9 +167,6 @@ function updateMapWithDestination(destinaitionAddress) {
           lat: result[0].y,
           lng: result[0].x,
         }
-        setDestinationButton.addEventListener('click', function () {
-          setDestination(destinationPoint)
-        })
       } else {
         var markers = []
 
@@ -434,10 +431,10 @@ function setOriginPoint(originAddress) {
           lat: result[0].y,
           lng: result[0].x,
         }
-        setOriginButton.addEventListener('click', function () {
-          console.log('출발지로 설정버튼 눌림')
-          sendPost(originPoint)
-        })
+        // setOriginButton.addEventListener('click', function () {
+        //   console.log('출발지로 설정버튼 눌림')
+        //   sendPost(originPoint)
+        // })
       } else {
         var markers = []
 
