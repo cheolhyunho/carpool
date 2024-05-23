@@ -113,9 +113,9 @@ export class KakaoMobilityService {
           tax_free_amount: '0',
 
           approval_url:
-            'https://7e4b-211-55-120-214.ngrok-free.app/matchedPath',
-          fail_url: 'https://7e4b-211-55-120-214.ngrok-free.app/matchedPath',
-          cancel_url: 'https://7e4b-211-55-120-214.ngrok-free.app/matchedPath',
+            'https://49e9-211-55-120-214.ngrok-free.app/matchedPath',
+          fail_url: 'https://49e9-211-55-120-214.ngrok-free.app/matchedPath',
+          cancel_url: 'https://49e9-211-55-120-214.ngrok-free.app/matchedPath',
         },
         httpsAgent: new https.Agent({
           secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT,
