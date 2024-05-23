@@ -112,9 +112,10 @@ export class KakaoMobilityService {
           total_amount: fare,
           tax_free_amount: '0',
 
-          approval_url: 'http://localhost:5000/matchedPath',
-          fail_url: 'http://localhost:5000/matchedPath',
-          cancel_url: 'http://localhost:5000/matchedPath',
+          approval_url:
+            'https://f35c-211-55-120-214.ngrok-free.app/matchedPath',
+          fail_url: 'https://f35c-211-55-120-214.ngrok-free.app/matchedPath',
+          cancel_url: 'https://f35c-211-55-120-214.ngrok-free.app/matchedPath',
         },
         httpsAgent: new https.Agent({
           secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT,
