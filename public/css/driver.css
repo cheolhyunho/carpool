@@ -1,8 +1,75 @@
-#passenger-button {
+#PassengerModee {
+  z-index: 1;
   position: absolute;
-  right: 0;
-  top: 0;
+  font-family: 'Pretendard';
+  /* Frame 43 */
+  top: 18px;
+  right: 7%;
+  /* Autlayout */
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 16px;
+  gap: 10px;
+
+  width: 70px;
+  height: 43px;
+
+  background: #2b8cff;
+  border-width: 0;
+  border-radius: 10px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+
+  color: #ffffff; /* white color */
+  font-weight: 700;
+  font-size: 18px;
 }
+
+#DriverModee {
+  font-family: 'Pretendard';
+  border-width: 0;
+  right: 1%;
+
+  /* Frame 26 */
+
+  /* Auto layout */
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0px 20px;
+  gap: 10px;
+
+  position: absolute;
+  width: 168px;
+  height: 50px;
+
+  top: 15px;
+
+  background: #ffffff;
+  box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+
+  font-style: normal;
+  font-weight: 700;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 21px;
+  text-align: center;
+  letter-spacing: -0.02em;
+
+  color: #2b8cff;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
 #buttons {
   display: flex;
   justify-content: center;
@@ -214,4 +281,109 @@ p {
   cursor: pointer; /* 마우스 커서를 포인터로 설정 */
   border-radius: 4px; /* 버튼 테두리 둥글기 설정 */
   box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2); /* 버튼에 그림자 효과 추가 */
+}
+
+@media only screen and (max-width: 600px) {
+  #PassengerModee {
+    font-family: 'Pretendard';
+    z-index: 2;
+    position: absolute;
+
+    top: 23px;
+    left: 55px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 10px;
+
+    width: 70px;
+    height: 43px;
+
+    background: #2b8cff;
+    border-radius: 10px;
+
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+
+    color: #ffffff;
+    font-weight: 500;
+  }
+
+  #DriverModee {
+    font-family: 'Pretendard';
+    z-index: 1;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0px 20px;
+    gap: 10px;
+
+    position: absolute;
+    width: 167px;
+    height: 50px;
+    left: 46px;
+    top: 20px;
+
+    background: #ffffff;
+    box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+
+    font-style: normal;
+    font-weight: 700;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 21px;
+    text-align: center;
+    letter-spacing: -0.02em;
+
+    color: #2b8cff;
+
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+  }
+  #logoutt {
+    position: fixed;
+    right: -146.5%;
+    z-index: 1;
+    /* Frame 26 */
+
+    /* Auto layout */
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 20px;
+    gap: 10px;
+
+    position: absolute;
+    width: 105px;
+    height: 40px;
+
+    bottom: 20%;
+
+    background: #ffffff;
+    box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+
+    font-style: normal;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 21px;
+    text-align: center;
+    letter-spacing: -0.02em;
+
+    color: #2b8cff;
+
+    /* Inside auto layout */
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+  }
 }

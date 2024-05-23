@@ -620,12 +620,13 @@ body {
 }
 
 #PassengerMode {
+  font-family: 'Pretendard';
   z-index: 2;
   position: absolute;
 
   /* Frame 43 */
   top: 18px;
-  right: -132.5%;
+  right: -132%;
   /* Autlayout */
   display: flex;
   flex-direction: row;
@@ -634,7 +635,7 @@ body {
   padding: 12px 16px;
   gap: 10px;
 
-  width: 60px;
+  width: 70px;
   height: 43px;
 
   background: #2b8cff;
@@ -644,14 +645,14 @@ body {
   flex: none;
   order: 0;
   flex-grow: 0;
-
+  font-size: 18px;
   color: #ffffff; /* white color */
-  font-weight: 320;
+  font-weight: 700;
 }
 
 #DriverMode {
   z-index: 1;
-
+  font-family: 'Pretendard';
   right: -147%;
 
   /* Frame 26 */
@@ -665,7 +666,7 @@ body {
   gap: 10px;
 
   position: absolute;
-  width: 150px;
+  width: 167px;
   height: 50px;
 
   top: 15px;
@@ -1711,11 +1712,12 @@ body {
   }
 
   #PassengerMode {
+    font-family: 'Pretendard';
     z-index: 2;
     position: absolute;
 
     top: 23px;
-    left: 51px;
+    left: 53px;
 
     display: flex;
     flex-direction: row;
@@ -1724,7 +1726,7 @@ body {
     padding: 12px 16px;
     gap: 10px;
 
-    width: 60px;
+    width: 70px;
     height: 43px;
 
     background: #2b8cff;
@@ -1739,6 +1741,7 @@ body {
   }
 
   #DriverMode {
+    font-family: 'Pretendard';
     z-index: 1;
 
     display: flex;
@@ -1749,7 +1752,7 @@ body {
     gap: 10px;
 
     position: absolute;
-    width: 150px;
+    width: 165px;
     height: 50px;
     left: 46px;
     top: 20px;
