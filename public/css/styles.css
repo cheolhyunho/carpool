@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Pretendard-Regular';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff')
+    format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
 body {
   background-color: white;
 }
@@ -31,7 +39,7 @@ body {
   position: relative;
   top: 8.5%;
   left: 0%;
-  font-family: 'Pretendard';
+  font-family: 'Pretendard-Regular';
   font-style: normal;
   font-weight: 700;
   font-size: 32px;
@@ -70,7 +78,7 @@ body {
   position: relative;
   top: 4.5%;
   left: 0%;
-  font-family: 'Pretendard';
+  font-family: 'Pretendard-Regular';
   font-style: normal;
   font-weight: 700;
   font-size: 32px;
@@ -115,7 +123,7 @@ body {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  padding: 0px;
+  padding-left: 8px;
   gap: 12px;
 
   width: 350px;
@@ -163,24 +171,6 @@ body {
   z-index: 6;
   width: 121px;
   padding: 15px;
-}
-
-#sendButton {
-  background-image: url('./free-icon-gps-484149.png');
-  background-size: 30px;
-  background-repeat: no-repeat;
-  background-position: center;
-  position: absolute;
-  top: 278px;
-  padding: 10px 20px;
-  left: 315px;
-
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  z-index: 7;
-  height: 28px;
 }
 
 /* #searchOriginButton {
@@ -252,6 +242,23 @@ body {
   order: 0;
   flex-grow: 0;
 } */
+#sendButton {
+  background-image: url('./free-icon-gps-484149.png');
+  background-size: 30px;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: absolute;
+  top: 278px;
+  padding: 10px 20px;
+  left: 315px;
+
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 7;
+  height: 28px;
+}
 
 /* #sendButton {
   background-image: url('./free-icon-gps-484149.png');
@@ -275,12 +282,12 @@ body {
   position: relative;
 
   border-radius: 12px;
-  top: -20.5%;
+  top: -22%;
   /* Auto layout */
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  padding: 0px;
+  padding-left: 8px;
   gap: 12px;
 
   width: 350px;
@@ -323,7 +330,7 @@ body {
   background-size: 30px;
   background-repeat: no-repeat;
   background-position: center;
-  top: -32%;
+  top: -33.5%;
   left: 54%;
   width: 121px;
   padding: 15px;
@@ -331,7 +338,7 @@ body {
 }
 #setDestinationButton {
   position: relative;
-  top: -42%;
+  top: -43.3%;
   left: 73.3%;
   box-sizing: border-box;
   color: #007fc9;
@@ -364,7 +371,7 @@ body {
 .map_wrap * {
   margin: 0;
   padding: 0;
-  font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;
+  font-family: 'Pretendard-Regular';
   font-size: 12px;
 }
 .map_wrap a,
@@ -386,7 +393,8 @@ body {
   margin: 10px 0 30px 10px;
   padding: 5px;
   overflow-y: auto;
-  background: rgba(255, 255, 255, 0.7);
+  /* background: rgba(255, 255, 255, 0.7); */
+  background: #f0f3f5;
   z-index: 2;
   font-size: 12px;
   border-radius: 10px;
@@ -521,7 +529,7 @@ body {
   box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
   border-radius: 12px;
 
-  font-family: 'Pretendard';
+  font-family: 'Pretendard-Regular';
   font-style: normal;
   font-weight: 300;
   font-size: 18px;
@@ -545,7 +553,7 @@ body {
   box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
   border-radius: 12px;
 
-  font-family: 'Pretendard';
+  font-family: 'Pretendard-Regular';
   font-style: normal;
   font-weight: 300;
   font-size: 18px;
@@ -565,10 +573,10 @@ body {
 
 #matching {
   position: relative;
-  left: -1%;
   top: -45%;
   border-radius: 12px;
-  width: 355px;
+  width: 490px;
+  height: 54px;
   background-color: #3b82f6; /* 파란색 배경 설정 */
   color: white; /* 글자색을 흰색으로 설정 */
   border: none; /* 기본 버튼 테두리를 제거 */
@@ -577,7 +585,7 @@ body {
   text-decoration: none; /* 텍스트 밑줄 제거 */
   display: inline-block;
   font-size: 16px;
-  margin: 4px 2px;
+  /* margin: 4px 2px; */
   cursor: pointer; /* 마우스를 올렸을 때 커서 모양 변경 */
 }
 
@@ -837,8 +845,8 @@ body {
     background-size: 30px;
     background-repeat: no-repeat;
     background-position: center;
-    position: absolute;
-    top: 278px;
+    position: relative;
+    top: -223px;
     padding: 10px 20px;
     left: 315px;
 
@@ -846,7 +854,7 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    z-index: 7;
+    z-index: 1;
     height: 28px;
   }
 
@@ -1276,7 +1284,7 @@ body {
     position: relative;
     top: 8.5%;
     left: 0%;
-    font-family: 'Pretendard';
+    font-family: 'Pretendard-Regular';
     font-style: normal;
     font-weight: 700;
     font-size: 32px;
@@ -1296,7 +1304,7 @@ body {
     position: relative;
     top: 4.5%;
     left: 0%;
-    font-family: 'Pretendard';
+    font-family: 'Pretendard-Regular';
     font-style: normal;
     font-weight: 700;
     font-size: 32px;
@@ -1320,7 +1328,7 @@ body {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-    padding: 0px;
+    padding-left: 8px;
     gap: 12px;
 
     width: 350px;
@@ -1378,8 +1386,8 @@ body {
     background-size: 30px;
     background-repeat: no-repeat;
     background-position: center;
-    position: relative;
-    top: -1262px;
+    position: absolute;
+    top: 278px;
     padding: 10px 20px;
     left: 315px;
 
@@ -1387,7 +1395,7 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    z-index: 2;
+    z-index: 7;
     height: 28px;
   }
 
@@ -1395,12 +1403,12 @@ body {
     position: relative;
 
     border-radius: 12px;
-    top: -20.5%;
+    top: -22%;
 
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-    padding: 0px;
+    padding-left: 8px;
     gap: 12px;
 
     width: 350px;
@@ -1419,7 +1427,7 @@ body {
     background-size: 30px;
     background-repeat: no-repeat;
     background-position: center;
-    top: -32%;
+    top: -33.5%;
     left: 54%;
     width: 121px;
     padding: 15px;
@@ -1427,7 +1435,7 @@ body {
   }
   #setDestinationButton {
     position: relative;
-    top: -42%;
+    top: -43.3%;
     left: 73.3%;
     box-sizing: border-box;
     color: #007fc9;
@@ -1459,7 +1467,7 @@ body {
   .map_wrap * {
     margin: 0;
     padding: 0;
-    font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;
+    font-family: 'Pretendard-Regular';
     font-size: 12px;
   }
   .map_wrap a,
@@ -1481,7 +1489,7 @@ body {
     margin: 10px 0 30px 10px;
     padding: 5px;
     overflow-y: auto;
-    background: rgba(255, 255, 255, 0.7);
+    background: #f0f3f5;
     z-index: 2;
     font-size: 12px;
     border-radius: 10px;
@@ -1616,7 +1624,7 @@ body {
     box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
     border-radius: 12px;
 
-    font-family: 'Pretendard';
+    font-family: 'Pretendard-Regular';
     font-style: normal;
     font-weight: 300;
     font-size: 18px;
@@ -1640,7 +1648,7 @@ body {
     box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
     border-radius: 12px;
 
-    font-family: 'Pretendard';
+    font-family: 'Pretendard-Regular';
     font-style: normal;
     font-weight: 300;
     font-size: 18px;
@@ -1662,7 +1670,8 @@ body {
     left: -1%;
     top: -45%;
     border-radius: 12px;
-    width: 355px;
+    width: 490px;
+    height: 54px;
     background-color: #3b82f6;
     color: white;
     border: none;
@@ -1671,7 +1680,7 @@ body {
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    margin: 4px 2px;
+    /* margin: 4px 2px; */
     cursor: pointer;
   }
 
