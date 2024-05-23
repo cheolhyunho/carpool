@@ -165,6 +165,24 @@ body {
   padding: 15px;
 }
 
+#sendButton {
+  background-image: url('./free-icon-gps-484149.png');
+  background-size: 30px;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: absolute;
+  top: 278px;
+  padding: 10px 20px;
+  left: 315px;
+
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 7;
+  height: 28px;
+}
+
 /* #searchOriginButton {
   position: fixed;
   top: 30.5%;
@@ -234,23 +252,6 @@ body {
   order: 0;
   flex-grow: 0;
 } */
-#sendButton {
-  background-image: url('./free-icon-gps-484149.png');
-  background-size: 30px;
-  background-repeat: no-repeat;
-  background-position: center;
-  position: relative;
-  top: -223px;
-  padding: 10px 20px;
-  left: 315px;
-
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  z-index: 1;
-  height: 28px;
-}
 
 /* #sendButton {
   background-image: url('./free-icon-gps-484149.png');
@@ -945,8 +946,8 @@ body {
     background-size: 30px;
     background-repeat: no-repeat;
     background-position: center;
-    position: relative;
-    top: -223px;
+    position: absolute;
+    top: 278px;
     padding: 10px 20px;
     left: 315px;
 
@@ -954,7 +955,7 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    z-index: 1;
+    z-index: 7;
     height: 28px;
   }
 
