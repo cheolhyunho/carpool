@@ -14,6 +14,7 @@ const modeButton = document.getElementById('DriverMode')
 const boxAndButton = document.getElementById('boxAndButton')
 const placesListBox = document.getElementById('placesList')
 const paginationBox = document.getElementById('pagination')
+
 modeButton.addEventListener('click', function () {
   window.location.href = window.location.origin + '/driver'
   fetch('/unmatchedPath/userId', {
@@ -1058,6 +1059,7 @@ socket.on('matching', (matchingPath) => {
 
   sendButton.remove()
   drawAccept(matchingPath)
+  // mapContainer.style.height = '300%'
 
   // 좌표로 주소가져오는 함수
   function searchDetailAddrFromCoords(coords) {
