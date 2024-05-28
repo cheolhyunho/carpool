@@ -1,10 +1,8 @@
-import { TaxiDriverEntity } from './../taxi-driver/texiDrivers.entity'
-import { CurrentUser } from './../common/decorators/current-user.decorator'
 import { KakaoMobilityService } from './../common/kakaoMobilityService/kakao.mobility.service'
 import { UserEntity } from './../users/users.entity'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { getConnection, Repository, Transaction } from 'typeorm'
+import { getConnection, Repository } from 'typeorm'
 import { UnmatchedPathEntity } from './unmatchedpaths.entity'
 import { UnmatchedPathDto } from './dto/unmatchedPath.dto'
 
@@ -58,9 +56,7 @@ export class UnmatchedPathsService {
       const savedUnmatchedPath = await this.unmatchedPathRepository.save(
         unmatchedPath,
       )
-      console.log('savedUnmatchedPath.id:', savedUnmatchedPath.id)
       user.unmatchedPath = savedUnmatchedPath
-      console.log('user.unmatchedPath.id:', user.unmatchedPath.id)
       await this.userRepository.save(user)
 
       return savedUnmatchedPath
@@ -80,25 +76,11 @@ export class UnmatchedPathsService {
     const target = await this.unmatchedPathRepository.findOne(
       user.unmatchedPath.id,
     )
-    console.log('target.id:', target.id)
     target.destinationPoint = {
       lat: body.lat,
       lng: body.lng,
     }
     const savedTarget = await this.unmatchedPathRepository.save(target)
-
-    console.log(
-      typeof savedTarget.startingPoint.lat,
-      typeof savedTarget.startingPoint.lng,
-    )
-    console.log(
-      typeof savedTarget.destinationPoint.lat,
-      typeof savedTarget.destinationPoint.lng,
-    )
-    console.log('출발지lat:', savedTarget.startingPoint.lat)
-    console.log('출발지lng:', savedTarget.startingPoint.lng)
-    console.log('목적지lat:', savedTarget.destinationPoint.lat)
-    console.log('목적지lng:', savedTarget.destinationPoint.lng)
     const kakaoResponse = await this.kakaoMobilityService.getInfo(
       savedTarget.startingPoint.lat,
       savedTarget.startingPoint.lng,
@@ -134,11 +116,12 @@ export class UnmatchedPathsService {
 
     targetUnmatchedPath.userIdArray = []
 
+    //매칭하기중인 유저들 id 배열에담기
     const userArray = await this.fetchUnmatchedPaths(user.id)
     if (userArray == null) {
-      console.log('조건에 만족하는 유저 x')
       return null
     }
+    console.log(user.username, '소켓거른후', userArray)
 
     const userIdArray = userArray.map((user) => user.id)
 
@@ -149,20 +132,21 @@ export class UnmatchedPathsService {
     )
 
     let tmpArray = []
-    let resultArray = []
+    //출발지 10km내 필터링
     tmpArray = await this.pushToTmpArray(savedTargetUnmatchedPath, tmpArray)
-    console.log('tmpArray:', tmpArray)
-    resultArray = await this.setResultArray(
+    console.log(user.username, '출발지거른후', tmpArray)
+    const resultId = await this.setResultArray(
       savedTargetUnmatchedPath,
       tmpArray,
-      resultArray,
     )
+    //자신의 목적지와 가장 가까운 상대찾기
+    console.log(user.username, '도착지제일가까운', resultId)
     const currentUserUP = targetUnmatchedPath
     const matchedUser = await this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
       .where('user.id = :userId', {
-        userId: resultArray[0],
+        userId: resultId,
       })
       .getOne()
     if (!matchedUser) {
@@ -171,11 +155,13 @@ export class UnmatchedPathsService {
     const matchedUserUP = await this.unmatchedPathRepository.findOne(
       matchedUser.unmatchedPath.id,
     )
+    console.log('각각 UP', currentUserUP, matchedUserUP)
 
     const [matchedPath, caseIndex] = await this.findMatchedCase(
       currentUserUP,
       matchedUserUP,
     )
+    console.log('matchePath & Case:', matchedPath, caseIndex)
 
     //택시비만 처리
 
@@ -208,7 +194,7 @@ export class UnmatchedPathsService {
       }
     } else if (caseIndex === 1 || caseIndex === 2) {
       const longerDistance = matchedPath.summary.distance
-      const shorterDistance = matchedPath.sections[2].distance
+      const shorterDistance = matchedPath.sections[1].distance
       const longerFare =
         (matchedPath.summary.fare.taxi * longerDistance) /
         (longerDistance + shorterDistance)
@@ -227,13 +213,7 @@ export class UnmatchedPathsService {
         matchedDistance = shorterDistance
       }
     }
-    console.log(
-      '나의 요금, 상대요금, 나의 거리, 상대거리 :',
-      currentFare,
-      matchedFare,
-      currentDistance,
-      matchedDistance,
-    )
+    console.log('톨비제외한 택시비:', currentFare, matchedFare)
     //톨비 있으면 톨비까지 처리
 
     if (matchedPath.summary.fare.toll != 0) {
@@ -460,63 +440,33 @@ export class UnmatchedPathsService {
     return tmpArray
   }
 
-  async setResultArray(savedTargetUnmatchedPath, tmpArray, resultArray) {
+  async setResultArray(savedTargetUnmatchedPath, tmpArray) {
+    let minId = ''
+    let minDistance = 1000000000000000
     for (let i = 0; i < tmpArray.length; i++) {
-      if (i === 0) {
-        resultArray.push(tmpArray[0])
-      } else {
-        // 반경 10km 이내에 있는 유저의 id 배열의 n번째 id
-        const targetUser1 = await this.userRepository
-          .createQueryBuilder('user')
-          .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
-          .where('user.id = :userId', {
-            userId: tmpArray[i],
-          })
-          .getOne()
-        const targetUnmatchedPath1 = await this.unmatchedPathRepository.findOne(
-          targetUser1.unmatchedPath.id,
-        )
-        // 로그인한 유저와 tmpArray[i] 에 유저와의 길찾기 api 호출
-        const kakaoResponse1 = await this.kakaoMobilityService.getInfo(
-          savedTargetUnmatchedPath.destinationPoint.lat,
-          savedTargetUnmatchedPath.destinationPoint.lng,
-          targetUnmatchedPath1.destinationPoint.lat,
-          targetUnmatchedPath1.destinationPoint.lng,
-        )
-        // resultArray 에 있는 값 === 현재까지 목적지가 가장 가까운 유저
-        const targetUser2 = await this.userRepository
-          .createQueryBuilder('user')
-          .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
-          .where('user.id = :userId', {
-            userId: resultArray[0],
-          })
-          .getOne()
-        const targetUnmatchedPath2 = await this.unmatchedPathRepository.findOne(
-          targetUser2.unmatchedPath.id,
-        )
-        const kakaoResponse2 = await this.kakaoMobilityService.getInfo(
-          savedTargetUnmatchedPath.destinationPoint.lat,
-          savedTargetUnmatchedPath.destinationPoint.lng,
-          targetUnmatchedPath2.destinationPoint.lat,
-          targetUnmatchedPath2.destinationPoint.lng,
-        )
-
-        if (kakaoResponse2.result_code === 104) {
-          break
-        }
-        if (kakaoResponse1.result_code === 104) {
-          resultArray.splice(0, 1)
-          resultArray.push(tmpArray[i])
-        } else if (
-          kakaoResponse1.summary.distance < kakaoResponse2.summary.distance
-        ) {
-          resultArray.splice(0, 1)
-          resultArray.push(tmpArray[i])
-        }
+      const userId = tmpArray[i]
+      const user = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
+        .where('user.id = :userId', {
+          userId: userId,
+        })
+        .getOne()
+      const kakaoResponse = await this.kakaoMobilityService.getInfo(
+        savedTargetUnmatchedPath.destinationPoint.lat,
+        savedTargetUnmatchedPath.destinationPoint.lng,
+        user.unmatchedPath.destinationPoint.lat,
+        user.unmatchedPath.destinationPoint.lng,
+      )
+      if (kakaoResponse.result_code === 104) {
+        minId = userId
+        minDistance = 0
+      } else if (kakaoResponse.summary.distance < minDistance) {
+        minId = userId
+        minDistance = kakaoResponse.summary.distance
       }
     }
-    console.log('resultArray:', resultArray)
-    return resultArray
+    return minId
   }
 
   async sleep(ms) {

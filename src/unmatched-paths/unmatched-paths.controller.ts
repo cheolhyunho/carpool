@@ -1,23 +1,11 @@
-import { IsUUID } from 'class-validator'
-import {
-  Body,
-  Controller,
-  Get,
-  Logger,
-  Post,
-  Render,
-  Req,
-  UseGuards,
-} from '@nestjs/common'
+import { Body, Controller, Get, Post, Render, UseGuards } from '@nestjs/common'
 import { UnmatchedPathsService } from './unmatched-paths.service'
 import { InjectRepository } from '@nestjs/typeorm'
 import { UnmatchedPathEntity } from './unmatchedpaths.entity'
 import { Repository } from 'typeorm'
 import { UnmatchedPathDto } from './dto/unmatchedPath.dto'
 import { JwtAuthGuard } from 'src/users/jwt/jwt.guard'
-import axios from 'axios'
 import { CurrentUser } from 'src/common/decorators/current-user.decorator'
-import { userInfo } from 'os'
 
 @UseGuards(JwtAuthGuard)
 @Controller('unmatchedPath')
@@ -35,8 +23,7 @@ export class UnmatchedPathsController {
   }
   @Get('userId')
   async test(@CurrentUser() user) {
-    console.log('userId 획득', user)
-
+    console.log('userId 획득')
     return user
   }
 

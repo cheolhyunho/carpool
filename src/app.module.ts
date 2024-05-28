@@ -8,15 +8,10 @@ import { UserEntity } from './users/users.entity'
 import { UsersModule } from './users/users.module'
 import { UnmatchedPathsModule } from './unmatched-paths/unmatched-paths.module'
 import { MatchedPathsModule } from './matched-paths/matched-paths.module'
-import { TaxiDriverModule } from './taxi-driver/taxi-driver.module'
 import { UnmatchedPathEntity } from './unmatched-paths/unmatchedpaths.entity'
 import { MatchedPathEntity } from './matched-paths/matchedPaths.entity'
-import { TaxiDriverEntity } from './taxi-driver/texiDrivers.entity'
 import { SignupModule } from './signup/signup.module'
-import { JwtModule } from '@nestjs/jwt'
-import { MatchingGateway } from './matching/matching.gateway'
 import { MatchingModule } from './matching/matching.module'
-import { UnmatchedPathsService } from './unmatched-paths/unmatched-paths.service'
 
 const typeOrmModuleOptions = {
   useFactory: async (
@@ -29,15 +24,10 @@ const typeOrmModuleOptions = {
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
-    entities: [
-      UserEntity,
-      UnmatchedPathEntity,
-      MatchedPathEntity,
-      TaxiDriverEntity,
-    ],
+    entities: [UserEntity, UnmatchedPathEntity, MatchedPathEntity],
     synchronize: true, //! set 'false' in production
     autoLoadEntities: true,
-    logging: true,
+    logging: false,
     keepConnectionAlive: true,
   }),
   inject: [ConfigService],
@@ -66,7 +56,6 @@ const typeOrmModuleOptions = {
     UsersModule,
     UnmatchedPathsModule,
     MatchedPathsModule,
-    TaxiDriverModule,
     SignupModule,
     MatchingModule,
   ],

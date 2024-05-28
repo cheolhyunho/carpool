@@ -3,7 +3,6 @@ import { CommonEntity } from './../common/entities/common.entity' // ormconfig.j
 import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne } from 'typeorm'
 import { UserEntity } from './../users/users.entity'
 import { UnmatchedPathEntity } from './../unmatched-paths/unmatchedpaths.entity'
-import { TaxiDriverEntity } from './../taxi-driver/texiDrivers.entity'
 
 @Entity({
   name: 'MatchedPaths',
@@ -55,7 +54,4 @@ export class MatchedPathEntity extends CommonEntity {
     },
   )
   unmatchedPaths: UnmatchedPathEntity[]
-
-  @OneToOne(() => TaxiDriverEntity)
-  driver: TaxiDriverEntity
 }

@@ -1,4 +1,4 @@
-#PassengerModee {
+#PassengerMode {
   z-index: 1;
   position: absolute;
   font-family: 'Pretendard';
@@ -30,7 +30,7 @@
   font-size: 18px;
 }
 
-#DriverModee {
+#DriverMode {
   font-family: 'Pretendard';
   border-width: 0;
   right: 1%;

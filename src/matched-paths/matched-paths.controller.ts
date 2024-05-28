@@ -22,7 +22,7 @@ export class MatchedPathsController {
   ) {}
 
   @Get()
-  @Render('home')
+  @Render('matched')
   async matched(@CurrentUser() user, @Query('pg_token') pgToken: string) {
     await this.matchedPathsService.completedPay({ user, pgToken })
   }
