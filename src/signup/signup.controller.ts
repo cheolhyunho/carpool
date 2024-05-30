@@ -1,18 +1,8 @@
 import { RequestDto } from './signup.request.dto'
 import { SignupService } from './signup.service'
 import { UserLogInDTO } from 'src/users/dtos/user-login.dto'
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Redirect,
-  Render,
-  Res,
-  UseInterceptors,
-} from '@nestjs/common'
+import { Body, Controller, Get, Post, Render, Res } from '@nestjs/common'
 import { Response } from 'express'
-import { OnlyPrivateInterceptor } from 'src/common/interceptors/only-private.interceptor'
 
 @Controller('signup')
 export class SignupController {

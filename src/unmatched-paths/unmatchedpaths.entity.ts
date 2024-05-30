@@ -2,7 +2,6 @@ import { CommonEntity } from '../common/entities/common.entity' // ormconfig.jso
 import { Column, Entity, ManyToOne, OneToOne } from 'typeorm'
 import { MatchedPathEntity } from '../matched-paths/matchedPaths.entity'
 import { UserEntity } from '../users/users.entity'
-import { text, uuid } from 'aws-sdk/clients/customerprofiles'
 
 @Entity({
   name: 'UnmatchedPaths',

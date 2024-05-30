@@ -1,6 +1,4 @@
-import { Exclude } from 'class-transformer'
 import {
-  IsNumber,
   IsNotEmpty,
   IsString,
   IsEmail,
@@ -29,9 +27,9 @@ export class RequestDto {
   @MaxLength(200, { message: '비밀번호는 200자 이하로만 가능합니다.' })
   password: string
 
-  @IsNotEmpty({ message: '비밀번호를 입력해주세요' })
+  @IsNotEmpty({ message: '확인 비밀번호를 입력해주세요' })
   @IsString()
-  @MinLength(12, { message: '비밀번호는 최소 12자를 충족해야 합니다.' })
-  @MaxLength(200, { message: '비밀번호는 200자 이하로만 가능합니다.' })
+  @MinLength(12, { message: '확인 비밀번호는 최소 12자를 충족해야 합니다.' })
+  @MaxLength(200, { message: '확인 비밀번호는 200자 이하로만 가능합니다.' })
   confirmPassword: string
 }

@@ -16,7 +16,7 @@
   width: 70px;
   height: 43px;
 
-  background: #2b8cff;
+  background: #ffffff;
   border-width: 0;
   border-radius: 10px;
 
@@ -25,7 +25,7 @@
   order: 0;
   flex-grow: 0;
 
-  color: #ffffff; /* white color */
+  color: #2b8cff; /* white color */
   font-weight: 700;
   font-size: 18px;
 }
@@ -51,7 +51,7 @@
 
   top: 15px;
 
-  background: #ffffff;
+  background: #2b8cff;
   box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
   border-radius: 12px;
 
@@ -63,7 +63,7 @@
   text-align: center;
   letter-spacing: -0.02em;
 
-  color: #2b8cff;
+  color: #ffffff;
 
   flex: none;
   order: 0;
@@ -302,17 +302,16 @@ p {
     width: 70px;
     height: 43px;
 
-    background: #2b8cff;
+    background: #ffffff;
     border-radius: 10px;
 
     flex: none;
     order: 0;
     flex-grow: 0;
 
-    color: #ffffff;
+    color: #2b8cff;
     font-weight: 500;
   }
-
   #DriverModee {
     font-family: 'Pretendard';
     z-index: 1;
@@ -330,7 +329,7 @@ p {
     left: 46px;
     top: 20px;
 
-    background: #ffffff;
+    background: #2b8cff;
     box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
     border-radius: 12px;
 
@@ -342,7 +341,7 @@ p {
     text-align: center;
     letter-spacing: -0.02em;
 
-    color: #2b8cff;
+    color: #ffffff;
 
     flex: none;
     order: 0;

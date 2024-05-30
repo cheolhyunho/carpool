@@ -1,25 +1,12 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query,
-  Render,
-  UseGuards,
-} from '@nestjs/common'
+import { Controller, Get, Query, Render, UseGuards } from '@nestjs/common'
 import { MatchedPathsService } from './matched-paths.service'
 import { JwtAuthGuard } from 'src/users/jwt/jwt.guard'
 import { CurrentUser } from 'src/common/decorators/current-user.decorator'
-import { KakaoMobilityService } from 'src/common/kakaoMobilityService/kakao.mobility.service'
 
 @UseGuards(JwtAuthGuard)
 @Controller('matchedPath')
 export class MatchedPathsController {
-  constructor(
-    private readonly matchedPathsService: MatchedPathsService,
-    private readonly kakaoMobilityService: KakaoMobilityService,
-  ) {}
+  constructor(private readonly matchedPathsService: MatchedPathsService) {}
 
   @Get()
   @Render('matched')

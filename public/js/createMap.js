@@ -783,6 +783,7 @@ logoutButton.addEventListener('click', function () {
 })
 
 matchingButton.addEventListener('click', function () {
+  matchingButton.disabled = true
   fetch('/unmatchedPath/userId', {
     method: 'GET',
     headers: {
@@ -804,6 +805,7 @@ matchingButton.addEventListener('click', function () {
     .catch((error) => {
       console.error('UserId 가져오기 실패:', error)
       console.log(error)
+      matchingButton.disabled = false
     })
 })
 

@@ -46,12 +46,6 @@ export class UnmatchedPathsController {
     return
   }
 
-  @Get('driveMode')
-  @Render('home')
-  testtest() {
-    return
-  }
-
   @Post()
   async createUnmatchedPath(
     @Body() unmatchedPathDto: UnmatchedPathDto,

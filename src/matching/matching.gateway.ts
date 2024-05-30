@@ -387,11 +387,12 @@ export class MatchingGateway implements OnGatewayDisconnect {
             firstUser.unmatchedPath,
             secondUser.unmatchedPath,
           )
+          console.log('location:', firstUser, secondUser)
           socket
-            .to(updatedMatchedPath.users[0].socketId)
+            .to(firstUser.socketId)
             .emit('location', firstUser.unmatchedPath)
           socket
-            .to(updatedMatchedPath.users[1].socketId)
+            .to(secondUser.socketId)
             .emit('location', secondUser.unmatchedPath)
           console.log('navigation 이벤트 실행전')
           socket.emit('navigation', updatedMatchedPath)
@@ -404,12 +405,8 @@ export class MatchingGateway implements OnGatewayDisconnect {
           socket.on('finishDrive', () => {
             console.log('finishDrive 실행중')
             clearInterval(setInt)
-            socket
-              .to(updatedMatchedPath.users[0].socketId)
-              .emit('finishTracking')
-            socket
-              .to(updatedMatchedPath.users[1].socketId)
-              .emit('finishTracking')
+            socket.to(firstUser.socketId).emit('finishTracking')
+            socket.to(secondUser.socketId).emit('finishTracking')
           })
           return '승객들 결제완료'
         } else {
