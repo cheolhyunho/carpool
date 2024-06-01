@@ -24,7 +24,7 @@ export class AppController {
     // 여기에서 jwt 쿠키의 존재 여부를 확인하고, 있다면 '/home'으로 리다이렉트
     const jwtCookie = request.cookies['jwt']
 
-    console.log(jwtCookie)
+    console.log('쿠키확인용', jwtCookie)
 
     if (jwtCookie) {
       response.redirect('/unmatchedPath')

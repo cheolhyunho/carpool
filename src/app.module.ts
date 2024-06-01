@@ -37,7 +37,7 @@ const typeOrmModuleOptions = {
     ],
     synchronize: true, //! set 'false' in production
     autoLoadEntities: true,
-    logging: true,
+    logging: false,
     keepConnectionAlive: true,
   }),
   inject: [ConfigService],

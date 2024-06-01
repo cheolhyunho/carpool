@@ -67,6 +67,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
 
     let response = null
     let matchFound = false
+    // await this.unmatchedPathService.sleep(10000)
     const startTime = Date.now()
     while (!matchFound) {
       response = await this.unmatchedPathService.setMatching(user)
@@ -280,7 +281,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
       )
       console.log(kakaoResponse.summary.duration)
 
-      if (kakaoResponse.summary.duration <= 1000) {
+      if (kakaoResponse.summary.duration <= 100000) {
         console.log('택시기사에게 send:', data.matchedPath)
         socket.emit('letsDrive', data.matchedPath)
         return

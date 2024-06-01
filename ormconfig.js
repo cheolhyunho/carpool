@@ -12,7 +12,7 @@ module.exports = {
   synchronize: true,
   autoLoadEntities: true,
   keepConnectionAlive: true,
-  logging: true,
+  logging: false,
   namingStrategy: new SnakeNamingStrategy(),
   // entities: [UserEntity],
   entities: ['src/**/*.entity.ts'],

@@ -6,8 +6,8 @@ import { UserEntity } from './users.entity'
 import { PassportModule } from '@nestjs/passport'
 import { JwtModule } from '@nestjs/jwt'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { UsersService } from './users.service';
-import { UsersController } from './users.controller';
+import { UsersService } from './users.service'
+import { UsersController } from './users.controller'
 
 @Module({
   imports: [

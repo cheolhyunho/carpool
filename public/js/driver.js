@@ -1,6 +1,5 @@
 const socket = io('/')
 const headerContent = document.getElementById('header-content')
-const passangerButton = document.getElementById('passenger-button')
 const mapContainer = document.getElementById('mapContainer')
 const buttons = document.getElementById('buttons')
 const rejectButton = document.getElementById('rejectButton')
@@ -33,10 +32,6 @@ fetch('/unmatchedPath/userId', {
   .catch((error) => {
     console.error(error)
   })
-
-passangerButton.addEventListener('click', function () {
-  window.location.href = window.location.origin + '/unmatchedPath'
-})
 
 socket.on('wantLocation', (matchedPath) => {
   if ('geolocation' in navigator) {
