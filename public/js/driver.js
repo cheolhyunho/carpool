@@ -2,13 +2,73 @@ const socket = io('/')
 const headerContent = document.getElementById('header-content')
 const mapContainer = document.getElementById('mapContainer')
 const buttons = document.getElementById('buttons')
-const rejectButton = document.getElementById('rejectButton')
-const acceptButton = document.getElementById('acceptButton')
 var bufferingElement = document.querySelector('.buffering')
 var taxiIconElement = document.querySelector('.taxi-icon')
 const logoutButton = document.getElementById('logout')
 const finishDriveButton = document.getElementById('finishDriveButton')
 const passengerModeButton = document.getElementById('PassengerMode')
+
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(function (position) {
+    var lat = position.coords.latitude // 위도
+    var lon = position.coords.longitude // 경도
+
+    var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+      mapOption = {
+        center: new kakao.maps.LatLng(lat, lon), // 지도의 중심좌표
+        level: 3, // 지도의 확대 레벨
+      }
+
+    var map = new kakao.maps.Map(mapContainer, mapOption) // 지도를 생성합니다
+
+    // 마커 이미지의 주소입니다
+    var imageSrc =
+      'http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png' // Kakao 내비게이션 스타일의 아이콘 URL로 변경
+    var imageSize = new kakao.maps.Size(64, 69) // 마커 이미지의 크기
+    var imageOption = { offset: new kakao.maps.Point(27, 69) } // 마커 이미지의 옵션, 마커의 좌표와 일치시킬 이미지 안의 좌표 설정
+
+    // 마커 이미지를 생성합니다
+    var markerImage = new kakao.maps.MarkerImage(
+      imageSrc,
+      imageSize,
+      imageOption,
+    )
+
+    // 마커가 표시될 위치입니다
+    var markerPosition = new kakao.maps.LatLng(lat, lon)
+
+    // 마커를 생성합니다
+    var marker = new kakao.maps.Marker({
+      position: markerPosition,
+      image: markerImage, // 마커 이미지 설정
+    })
+
+    // 마커가 지도 위에 표시되도록 설정합니다
+    marker.setMap(map)
+  })
+} else {
+  // 사용자가 위치 정보를 허용하지 않은 경우의 처리
+  alert('Geolocation을 지원하지 않는 브라우저입니다.')
+}
+
+function updateLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function (position) {
+      var lat = position.coords.latitude
+      var lon = position.coords.longitude
+      var locPosition = new kakao.maps.LatLng(lat, lon)
+
+      // 마커 위치를 갱신합니다
+      marker.setPosition(locPosition)
+
+      // 지도 중심을 현재 위치로 이동합니다
+      map.setCenter(locPosition)
+    })
+  }
+}
+
+// 5초마다 위치를 갱신합니다
+setInterval(updateLocation, 5000)
 
 passengerModeButton.addEventListener('click', function () {
   window.location.href = window.location.origin + '/unmatchedPath'
@@ -36,6 +96,10 @@ fetch('/unmatchedPath/userId', {
 socket.on('wantLocation', (matchedPath) => {
   if ('geolocation' in navigator) {
     console.log('wantLocation On 실행중')
+    const oldMapContainer = document.getElementById('map')
+    if (oldMapContainer) {
+      oldMapContainer.remove()
+    }
     navigator.geolocation.getCurrentPosition(function (position) {
       const latitude = position.coords.latitude
       const longitude = position.coords.longitude
@@ -62,12 +126,54 @@ socket.on('letsDrive', function (matchedPath) {
   mapContainer.style.display = 'block'
   mapOption = {
     center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-    level: 11, // 지도의 확대 레벨
+    level: 9, // 지도의 확대 레벨
   }
 
   var map = new kakao.maps.Map(mapContainer, mapOption) // 지도를 생성합니다
   var geocoder = new kakao.maps.services.Geocoder()
+  // 새로운 박스를 생성하여 데이터를 표시합니다
 
+  var link = document.createElement('link')
+  link.href =
+    'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap'
+  link.rel = 'stylesheet'
+  document.head.appendChild(link)
+
+  var infoBox = document.createElement('div')
+  infoBox.style.border = '1px solid black'
+  infoBox.style.padding = '10px'
+  infoBox.style.margin = '10px 0'
+  infoBox.style.backgroundColor = '#f9f9f9'
+  infoBox.style.zIndex = '1'
+  infoBox.style.position = 'absolute'
+  infoBox.style.top = '10px' // 원하는 위치로 조정
+  infoBox.style.left = '10px' // 원하는 위치로 조정
+
+  infoBox.style.fontFamily = "'Roboto', sans-serif"
+  infoBox.style.borderRadius = '10px' // 부드러운 모서리
+
+  // 데이터를 추출합니다
+  var firstFare = matchedPath.firstFare || 0
+  var secondFare = matchedPath.secondFare || 0
+  var totalFare = firstFare + secondFare
+  var totalDistance = matchedPath.totalDistance || 0
+  var totalDuration = matchedPath.totalDuration || 0
+  console.log('totalDistance:', totalDistance)
+
+  // 정보를 표시합니다
+  infoBox.innerHTML = `
+      <h3>주행 정보</h3>
+      <p><strong>주행 보수:</strong> ${totalFare}원</p>
+      <p><strong>주행 거리:</strong> ${Math.round(totalDistance / 1000)}km</p>
+      <p><strong>주행 시간:</strong> ${Math.round(totalDuration / 60)}분</p>
+      <button id="acceptButton" class="styled-button accept-button" >수락</button>
+      <button id="rejectButton" class="styled-button reject-button">거절</button>
+    `
+
+  // 박스를 페이지에 추가합니다
+  document.body.appendChild(infoBox)
+  const rejectButton = document.getElementById('rejectButton')
+  const acceptButton = document.getElementById('acceptButton')
   var positions = [
     {
       content: '<div>승객1 승차</div>',
@@ -132,6 +238,12 @@ socket.on('letsDrive', function (matchedPath) {
     socket.emit('imDriver', matchedPath, (message) => {
       alert(message)
     })
+    const currentOrigin = window.location.origin // "http://example.com"
+    const newPath = '/matchedPath/waittingPayment'
+
+    // 현재 URL에서 '/driver'를 제거
+    const newUrl = currentOrigin.replace('/driver', '') + newPath
+    window.location.href = newUrl
   })
   rejectButton.addEventListener('click', () => {
     location.reload()
