@@ -8,7 +8,7 @@ var bufferingElement = document.querySelector('.buffering')
 var taxiIconElement = document.querySelector('.taxi-icon')
 const logoutButton = document.getElementById('logout')
 const finishDriveButton = document.getElementById('finishDriveButton')
-const passengerModeButton = document.getElementById('PassengerModee')
+const passengerModeButton = document.getElementById('PassengerMode')
 
 passengerModeButton.addEventListener('click', function () {
   window.location.href = window.location.origin + '/unmatchedPath'

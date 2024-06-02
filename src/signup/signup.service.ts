@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  Body,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common'
@@ -10,7 +9,6 @@ import { Repository } from 'typeorm'
 import { RequestDto } from './signup.request.dto'
 import { UserLogInDTO } from 'src/users/dtos/user-login.dto'
 import { Logger } from '@nestjs/common'
-import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 
@@ -31,6 +29,7 @@ export class SignupService {
     })
 
     if (existingUser) {
+      console.log('이미 등록된 이메일 주소입니다.')
       return '이미 등록된 이메일 주소입니다.'
     }
 

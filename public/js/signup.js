@@ -8,15 +8,23 @@ function sendPost(userInfo) {
   })
     .then((response) => {
       if (!response.ok) {
-        throw new Error('user Model create Fail!')
+        return response.json().then((errorData) => {
+          throw new Error(errorData.message.join(', '))
+        })
       }
-      return response.json()
+      return response.text()
     })
     .then((data) => {
-      console.log('create Successful:', data)
-      window.location.href = '/'
+      console.log(data)
+      if (data.length < 25) {
+        alert(data)
+      } else {
+        console.log('create Successful:', data)
+        window.location.href = '/'
+      }
     })
     .catch((error) => {
+      alert(error.message)
       console.error('Error:', error)
     })
 }

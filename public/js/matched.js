@@ -49,6 +49,7 @@ var clusterer = new kakao.maps.MarkerClusterer({
 })
 
 socket.on('location', (unmatchedPath) => {
+  console.log('탑승위치표시')
   var markerPosition = new kakao.maps.LatLng(
     unmatchedPath.startingPoint.lat,
     unmatchedPath.startingPoint.lng,

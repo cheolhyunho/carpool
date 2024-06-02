@@ -1,4 +1,3 @@
-import { CurrentUser } from './../common/decorators/current-user.decorator'
 import { Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import {
@@ -10,13 +9,12 @@ import {
 } from '@nestjs/websockets'
 import { UnmatchedPathsService } from 'src/unmatched-paths/unmatched-paths.service'
 import { UserEntity } from 'src/users/users.entity'
-import { Repository, getRepository } from 'typeorm'
+import { Repository } from 'typeorm'
 import { Socket } from 'socket.io'
 import { MatchedPathEntity } from '../matched-paths/matchedPaths.entity'
 import { MatchedPathsService } from '../matched-paths/matched-paths.service'
 import { EntityManager } from 'typeorm'
 import { KakaoMobilityService } from 'src/common/kakaoMobilityService/kakao.mobility.service'
-import * as fs from 'fs'
 
 @WebSocketGateway()
 export class MatchingGateway implements OnGatewayDisconnect {
@@ -67,7 +65,9 @@ export class MatchingGateway implements OnGatewayDisconnect {
 
     let response = null
     let matchFound = false
-    // await this.unmatchedPathService.sleep(10000)
+
+    await this.unmatchedPathService.sleep(10000)
+
     const startTime = Date.now()
     while (!matchFound) {
       response = await this.unmatchedPathService.setMatching(user)
@@ -148,12 +148,10 @@ export class MatchingGateway implements OnGatewayDisconnect {
     const drivers = await this.userRepository.find({
       where: { isDriver: true },
     })
-    console.log('드라이버', drivers)
+    console.log('운행중인 모든 드라이버', drivers)
 
     for (const driver of drivers) {
-      console.log('wantLocation 이벤트 실행중')
-      console.log('driver:', driver)
-      console.log('드라이버 소켓아이디:', driver.socketId)
+      console.log('wantLocation 이벤트 실행중', driver)
       socket.to(driver.socketId).emit('wantLocation', matchedPath)
     }
   }
@@ -208,15 +206,12 @@ export class MatchingGateway implements OnGatewayDisconnect {
       const drivers = await this.userRepository.find({
         where: { isDriver: true },
       })
-      console.log('드라이버', drivers)
+
       if (drivers.length === 0) {
         socket.emit('noDriver')
       }
       if (!this.isAlreadySentMap.get(matchedPath.id)) {
-        for (const driver of drivers) {
-          console.log('wantLocation 이벤트 실행중')
-          await this.sendWantLocationEvent(matchedPath, socket)
-        }
+        await this.sendWantLocationEvent(matchedPath, socket)
         this.isAlreadySentMap.set(matchedPath.id, true)
       }
       console.log(this.isAlreadySentMap)
@@ -279,15 +274,16 @@ export class MatchingGateway implements OnGatewayDisconnect {
         data.lat,
         data.lng,
       )
-      console.log(kakaoResponse.summary.duration)
 
-      if (kakaoResponse.summary.duration <= 100000) {
+      if (kakaoResponse.result_code === 104) {
+        socket.emit('letsDrive', data.matchedPath)
+      } else if (kakaoResponse.summary.duration <= 6000) {
         console.log('택시기사에게 send:', data.matchedPath)
         socket.emit('letsDrive', data.matchedPath)
         return
       }
     } catch (e) {
-      console.log(e, '121')
+      console.log(e, 'hereIsLocation error')
     }
   }
 
@@ -345,7 +341,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
           ) {
             isAccepted = true
           } else {
-            console.log('수락대기중')
+            console.log('결제완료대기중')
             await this.unmatchedPathService.sleep(1000)
             const updatedMatchedPath = await this.entityManager.findOne(
               MatchedPathEntity,
@@ -391,11 +387,12 @@ export class MatchingGateway implements OnGatewayDisconnect {
             firstUser.unmatchedPath,
             secondUser.unmatchedPath,
           )
+          console.log('location:', firstUser, secondUser)
           socket
-            .to(updatedMatchedPath.users[0].socketId)
+            .to(firstUser.socketId)
             .emit('location', firstUser.unmatchedPath)
           socket
-            .to(updatedMatchedPath.users[1].socketId)
+            .to(secondUser.socketId)
             .emit('location', secondUser.unmatchedPath)
           console.log('navigation 이벤트 실행전')
           socket.emit('navigation', updatedMatchedPath)
@@ -408,12 +405,8 @@ export class MatchingGateway implements OnGatewayDisconnect {
           socket.on('finishDrive', () => {
             console.log('finishDrive 실행중')
             clearInterval(setInt)
-            socket
-              .to(updatedMatchedPath.users[0].socketId)
-              .emit('finishTracking')
-            socket
-              .to(updatedMatchedPath.users[1].socketId)
-              .emit('finishTracking')
+            socket.to(firstUser.socketId).emit('finishTracking')
+            socket.to(secondUser.socketId).emit('finishTracking')
           })
           return '승객들 결제완료'
         } else {
@@ -479,7 +472,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
       where: { socketId: socket.id },
       relations: ['matchedPath', 'unmatchedPath'],
     })
-    console.log('diconnect user:', user)
+
     if (user) {
       user.isMatching = false
       user.socketId = null
@@ -488,6 +481,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
       user.isAdmin = false
       await this.userRepository.save(user)
     }
-    this.logger.log(`disconnected : ${socket.id} ${socket.nsp.name}`)
+    this.logger.log(`disconnected : ${socket.id}`)
   }
 }

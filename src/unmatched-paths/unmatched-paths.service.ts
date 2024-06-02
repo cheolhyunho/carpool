@@ -1,10 +1,8 @@
-import { TaxiDriverEntity } from './../taxi-driver/texiDrivers.entity'
-import { CurrentUser } from './../common/decorators/current-user.decorator'
 import { KakaoMobilityService } from './../common/kakaoMobilityService/kakao.mobility.service'
 import { UserEntity } from './../users/users.entity'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { getConnection, Repository, Transaction } from 'typeorm'
+import { getConnection, Repository } from 'typeorm'
 import { UnmatchedPathEntity } from './unmatchedpaths.entity'
 import { UnmatchedPathDto } from './dto/unmatchedPath.dto'
 
@@ -58,9 +56,7 @@ export class UnmatchedPathsService {
       const savedUnmatchedPath = await this.unmatchedPathRepository.save(
         unmatchedPath,
       )
-      console.log('savedUnmatchedPath.id:', savedUnmatchedPath.id)
       user.unmatchedPath = savedUnmatchedPath
-      console.log('user.unmatchedPath.id:', user.unmatchedPath.id)
       await this.userRepository.save(user)
 
       return savedUnmatchedPath
@@ -80,25 +76,11 @@ export class UnmatchedPathsService {
     const target = await this.unmatchedPathRepository.findOne(
       user.unmatchedPath.id,
     )
-    console.log('target.id:', target.id)
     target.destinationPoint = {
       lat: body.lat,
       lng: body.lng,
     }
     const savedTarget = await this.unmatchedPathRepository.save(target)
-
-    console.log(
-      typeof savedTarget.startingPoint.lat,
-      typeof savedTarget.startingPoint.lng,
-    )
-    console.log(
-      typeof savedTarget.destinationPoint.lat,
-      typeof savedTarget.destinationPoint.lng,
-    )
-    console.log('출발지lat:', savedTarget.startingPoint.lat)
-    console.log('출발지lng:', savedTarget.startingPoint.lng)
-    console.log('목적지lat:', savedTarget.destinationPoint.lat)
-    console.log('목적지lng:', savedTarget.destinationPoint.lng)
     const kakaoResponse = await this.kakaoMobilityService.getInfo(
       savedTarget.startingPoint.lat,
       savedTarget.startingPoint.lng,
@@ -134,10 +116,12 @@ export class UnmatchedPathsService {
 
     targetUnmatchedPath.userIdArray = []
 
+    //매칭하기중인 유저들 id 배열에담기
     const userArray = await this.fetchUnmatchedPaths(user.id)
     if (userArray == null) {
       return null
     }
+    console.log(user.username, '소켓거른후', userArray)
 
     const userIdArray = userArray.map((user) => user.id)
 
@@ -148,15 +132,15 @@ export class UnmatchedPathsService {
     )
 
     let tmpArray = []
-
+    //출발지 10km내 필터링
     tmpArray = await this.pushToTmpArray(savedTargetUnmatchedPath, tmpArray)
-    console.log('나는', user.username, '이에요 ', '내 짝 후보들은', tmpArray)
-
+    console.log(user.username, '출발지거른후', tmpArray)
     const resultId = await this.setResultArray(
       savedTargetUnmatchedPath,
       tmpArray,
     )
-    console.log('reusltId;', resultId, 'username:', user.username)
+    //자신의 목적지와 가장 가까운 상대찾기
+    console.log(user.username, '도착지제일가까운', resultId)
     const currentUserUP = targetUnmatchedPath
     const matchedUser = await this.userRepository
       .createQueryBuilder('user')
@@ -171,11 +155,13 @@ export class UnmatchedPathsService {
     const matchedUserUP = await this.unmatchedPathRepository.findOne(
       matchedUser.unmatchedPath.id,
     )
+    console.log('각각 UP', currentUserUP, matchedUserUP)
 
     const [matchedPath, caseIndex] = await this.findMatchedCase(
       currentUserUP,
       matchedUserUP,
     )
+    console.log('matchePath & Case:', matchedPath, caseIndex)
 
     //택시비만 처리
 
@@ -208,7 +194,7 @@ export class UnmatchedPathsService {
       }
     } else if (caseIndex === 1 || caseIndex === 2) {
       const longerDistance = matchedPath.summary.distance
-      const shorterDistance = matchedPath.sections[2].distance
+      const shorterDistance = matchedPath.sections[1].distance
       const longerFare =
         (matchedPath.summary.fare.taxi * longerDistance) /
         (longerDistance + shorterDistance)
@@ -227,13 +213,7 @@ export class UnmatchedPathsService {
         matchedDistance = shorterDistance
       }
     }
-    console.log(
-      '나의 요금, 상대요금, 나의 거리, 상대거리 :',
-      currentFare,
-      matchedFare,
-      currentDistance,
-      matchedDistance,
-    )
+    console.log('톨비제외한 택시비:', currentFare, matchedFare)
     //톨비 있으면 톨비까지 처리
 
     if (matchedPath.summary.fare.toll != 0) {
@@ -490,7 +470,6 @@ export class UnmatchedPathsService {
         minDistance = kakaoResponse.summary.distance
       }
     }
-
     return minId
   }
 

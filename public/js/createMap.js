@@ -14,6 +14,7 @@ const modeButton = document.getElementById('DriverMode')
 const boxAndButton = document.getElementById('boxAndButton')
 const placesListBox = document.getElementById('placesList')
 const paginationBox = document.getElementById('pagination')
+
 modeButton.addEventListener('click', function () {
   window.location.href = window.location.origin + '/driver'
   fetch('/unmatchedPath/userId', {
@@ -782,6 +783,7 @@ logoutButton.addEventListener('click', function () {
 })
 
 matchingButton.addEventListener('click', function () {
+  matchingButton.disabled = true
   fetch('/unmatchedPath/userId', {
     method: 'GET',
     headers: {
@@ -803,6 +805,7 @@ matchingButton.addEventListener('click', function () {
     .catch((error) => {
       console.error('UserId 가져오기 실패:', error)
       console.log(error)
+      matchingButton.disabled = false
     })
 })
 
@@ -1058,6 +1061,7 @@ socket.on('matching', (matchingPath) => {
 
   sendButton.remove()
   drawAccept(matchingPath)
+  // mapContainer.style.height = '300%'
 
   // 좌표로 주소가져오는 함수
   function searchDetailAddrFromCoords(coords) {
