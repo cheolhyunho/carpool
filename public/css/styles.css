@@ -1038,10 +1038,10 @@ body {
 
   #PassengerMode {
     z-index: 2;
-    position: absolute;
+    position: relative;
 
     top: 23px;
-    left: 51px;
+    left: 55px;
 
     display: flex;
     flex-direction: row;

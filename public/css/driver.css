@@ -1,3 +1,44 @@
+#driving_profit {
+  text-align: left;
+}
+#driving_distance {
+  text-align: left;
+}
+#driving_duration {
+  text-align: left;
+}
+#passenger1 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#passenger2 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#passenger3 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#passenger4 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#jibeon1 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#jibeon2 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#jibeon3 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#jibeon4 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
 #acceptButton {
   position: relative;
 
@@ -324,14 +365,47 @@ p {
 }
 
 @media only screen and (max-width: 600px) {
-  #PassengerModee {
+  #driving_profit {
+    text-align: left;
+  }
+  #driving_distance {
+    text-align: left;
+  }
+  #driving_duration {
+    text-align: left;
+  }
+  #passenger1 {
     font-family: 'Pretendard';
-    z-index: 2;
+  }
+  #passenger2 {
+    font-family: 'Pretendard';
+  }
+  #passenger3 {
+    font-family: 'Pretendard';
+  }
+  #passenger4 {
+    font-family: 'Pretendard';
+  }
+  #jibeon1 {
+    font-family: 'Pretendard';
+  }
+  #jibeon2 {
+    font-family: 'Pretendard';
+  }
+  #jibeon3 {
+    font-family: 'Pretendard';
+  }
+  #jibeon4 {
+    font-family: 'Pretendard';
+  }
+  #PassengerMode {
+    z-index: 3;
     position: absolute;
-
-    top: 23px;
-    left: 55px;
-
+    font-family: 'Pretendard';
+    /* Frame 43 */
+    top: 18px;
+    right: 16%;
+    /* Autlayout */
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -343,19 +417,27 @@ p {
     height: 43px;
 
     background: #ffffff;
+    border-width: 0;
     border-radius: 10px;
 
+    /* Inside auto layout */
     flex: none;
     order: 0;
     flex-grow: 0;
 
-    color: #2b8cff;
-    font-weight: 500;
+    color: #2b8cff; /* white color */
+    font-weight: 700;
+    font-size: 18px;
   }
-  #DriverModee {
+  #DriverMode {
     font-family: 'Pretendard';
+    border-width: 0;
+    right: 1%;
     z-index: 2;
 
+    /* Frame 26 */
+
+    /* Auto layout */
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
@@ -364,10 +446,10 @@ p {
     gap: 10px;
 
     position: absolute;
-    width: 167px;
+    width: 168px;
     height: 50px;
-    left: 46px;
-    top: 20px;
+
+    top: 15px;
 
     background: #2b8cff;
     box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
@@ -424,5 +506,10 @@ p {
     flex: none;
     order: 0;
     flex-grow: 0;
+  }
+  #finishDriveButton {
+    position: relative;
+    right: 0%;
+    top: 38%;
   }
 }

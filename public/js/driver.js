@@ -8,6 +8,7 @@ const logoutButton = document.getElementById('logout')
 const finishDriveButton = document.getElementById('finishDriveButton')
 const passengerModeButton = document.getElementById('PassengerMode')
 
+var map, marker // 전역 변수로 선언
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(function (position) {
     var lat = position.coords.latitude // 위도
@@ -23,7 +24,7 @@ if (navigator.geolocation) {
 
     // 마커 이미지의 주소입니다
     var imageSrc =
-      'http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png' // Kakao 내비게이션 스타일의 아이콘 URL로 변경
+      'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png' // Kakao 내비게이션 스타일의 아이콘 URL로 변경
     var imageSize = new kakao.maps.Size(64, 69) // 마커 이미지의 크기
     var imageOption = { offset: new kakao.maps.Point(27, 69) } // 마커 이미지의 옵션, 마커의 좌표와 일치시킬 이미지 안의 좌표 설정
 
@@ -58,11 +59,12 @@ function updateLocation() {
       var lon = position.coords.longitude
       var locPosition = new kakao.maps.LatLng(lat, lon)
 
-      // 마커 위치를 갱신합니다
-      marker.setPosition(locPosition)
-
-      // 지도 중심을 현재 위치로 이동합니다
-      map.setCenter(locPosition)
+      if (marker && map) {
+        // 마커 위치를 갱신합니다
+        marker.setPosition(locPosition)
+        // 지도 중심을 현재 위치로 이동합니다
+        map.setCenter(locPosition)
+      }
     })
   }
 }
@@ -163,9 +165,13 @@ socket.on('letsDrive', function (matchedPath) {
   // 정보를 표시합니다
   infoBox.innerHTML = `
       <h3>주행 정보</h3>
-      <p><strong>주행 보수:</strong> ${totalFare}원</p>
-      <p><strong>주행 거리:</strong> ${Math.round(totalDistance / 1000)}km</p>
-      <p><strong>주행 시간:</strong> ${Math.round(totalDuration / 60)}분</p>
+      <p id="driving_profit"><strong>주행 보수:</strong> ${totalFare}원</p>
+      <p id="driving_distance"><strong>주행 거리:</strong> ${Math.round(
+        totalDistance / 1000,
+      )}km     </p>
+      <p id="driving_duration"><strong>주행 시간:</strong> ${Math.round(
+        totalDuration / 60,
+      )}분</p>
       <button id="acceptButton" class="styled-button accept-button" >수락</button>
       <button id="rejectButton" class="styled-button reject-button">거절</button>
     `
@@ -176,28 +182,32 @@ socket.on('letsDrive', function (matchedPath) {
   const acceptButton = document.getElementById('acceptButton')
   var positions = [
     {
-      content: '<div>승객1 승차</div>',
+      content:
+        '<div id="passenger1" style="border-radius: 50px; padding: 5px;"">승객1 승차</div>',
       latlng: new kakao.maps.LatLng(
         matchedPath.origin.lat,
         matchedPath.origin.lng,
       ),
     },
     {
-      content: '<div>승객 하차</div>',
+      content:
+        '<div id="passenger2" style="border-radius: 50px; padding: 5px;"">승객 하차</div>',
       latlng: new kakao.maps.LatLng(
         matchedPath.destinationPoint.lat,
         matchedPath.destinationPoint.lng,
       ),
     },
     {
-      content: '<div>승객2 승차</div>',
+      content:
+        '<div id="passenger3" style="border-radius: 50px; padding: 5px;"">승객2 승차</div>',
       latlng: new kakao.maps.LatLng(
         matchedPath.firstWayPoint.lat,
         matchedPath.firstWayPoint.lng,
       ),
     },
     {
-      content: '<div>승객 하차</div>',
+      content:
+        '<div id="passenger4" style="border-radius: 50px; padding: 5px;">승객 하차</div>',
       latlng: new kakao.maps.LatLng(
         matchedPath.secondWayPoint.lat,
         matchedPath.secondWayPoint.lng,
@@ -207,28 +217,36 @@ socket.on('letsDrive', function (matchedPath) {
   searchDetailAddrFromCoords(positions[0], function (result, status) {
     if (status === kakao.maps.services.Status.OK) {
       positions[0].content +=
-        '<div>지번 주소 : ' + result[0].address.address_name + '</div>'
+        '<div id="jibeon1" style="border-radius: 50px; padding: 5px;"">지번 주소 : ' +
+        result[0].address.address_name +
+        '</div>'
       updateInfowindowContent(0)
     }
   })
   searchDetailAddrFromCoords(positions[1], function (result, status) {
     if (status === kakao.maps.services.Status.OK) {
       positions[1].content +=
-        '<div>지번 주소 : ' + result[0].address.address_name + '</div>'
+        '<div id="jibeon2" style="border-radius: 50px; padding: 5px;"">지번 주소 : ' +
+        result[0].address.address_name +
+        '</div>'
       updateInfowindowContent(1)
     }
   })
   searchDetailAddrFromCoords(positions[2], function (result, status) {
     if (status === kakao.maps.services.Status.OK) {
       positions[2].content +=
-        '<div>지번 주소 : ' + result[0].address.address_name + '</div>'
+        '<div id="jibeon3" style="border-radius: 50px; padding: 5px;"">지번 주소 : ' +
+        result[0].address.address_name +
+        '</div>'
       updateInfowindowContent(2)
     }
   })
   searchDetailAddrFromCoords(positions[3], function (result, status) {
     if (status === kakao.maps.services.Status.OK) {
       positions[3].content +=
-        '<div>지번 주소 : ' + result[0].address.address_name + '</div>'
+        '<div id="jibeon4" style="border-radius: 50px; padding: 5px;"">지번 주소 : ' +
+        result[0].address.address_name +
+        '</div>'
       updateInfowindowContent(3)
     }
   })
@@ -336,9 +354,20 @@ script.onload = function () {
 }
 
 document.body.appendChild(script)
+
 socket.on('navigation', (matchedPath) => {
-  console.log('navigation event on')
-  window.startNavigation(matchedPath)
+  console.log('navigation 이벤트 실행중')
+  const currentEndPoint = window.location.origin
+  const targetEndPoint = currentEndPoint.replace(
+    '/matchedPath/waittingPayment',
+    '/driver',
+  )
+  window.location.href = targetEndPoint
+  if (window.startNavigation) {
+    window.startNavigation(matchedPath)
+  } else {
+    console.error('startNavigation function is not defined')
+  }
 })
 
 socket.on('updateLocation', (matchedPath) => {
