@@ -65,8 +65,8 @@ export class MatchingGateway implements OnGatewayDisconnect {
 
     let response = null
     let matchFound = false
-
-    await this.unmatchedPathService.sleep(10000)
+    //테스트시에 주석처리
+    // await this.unmatchedPathService.sleep(10000)
 
     const startTime = Date.now()
     while (!matchFound) {
@@ -187,6 +187,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
         isAccepted = true
       } else {
         console.log('수락대기중')
+
         await this.unmatchedPathService.sleep(1000)
         const updatedMatchedPath = await this.entityManager.findOne(
           MatchedPathEntity,

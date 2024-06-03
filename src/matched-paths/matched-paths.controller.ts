@@ -13,4 +13,9 @@ export class MatchedPathsController {
   async matched(@CurrentUser() user, @Query('pg_token') pgToken: string) {
     await this.matchedPathsService.completedPay({ user, pgToken })
   }
+  @Get('waittingPayment')
+  @Render('waittingPayment')
+  async wattingPayment() {
+    return
+  }
 }

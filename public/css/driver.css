@@ -1,10 +1,85 @@
+#driving_profit {
+  text-align: left;
+}
+#driving_distance {
+  text-align: left;
+}
+#driving_duration {
+  text-align: left;
+}
+#passenger1 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#passenger2 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#passenger3 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#passenger4 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#jibeon1 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#jibeon2 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#jibeon3 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#jibeon4 {
+  font-family: 'Pretendard';
+  border-radius: 15px;
+}
+#acceptButton {
+  position: relative;
+
+  border-radius: 12px;
+  width: 90px;
+  height: 48px;
+  background-color: #3b82f6; /* 파란색 배경 설정 */
+  color: white; /* 글자색을 흰색으로 설정 */
+  border: none; /* 기본 버튼 테두리를 제거 */
+  padding: 10px 20px; /* 버튼 내부의 여백 설정 */
+  text-align: center; /* 텍스트를 중앙으로 정렬 */
+  text-decoration: none; /* 텍스트 밑줄 제거 */
+  display: inline-block;
+  font-size: 16px;
+  /* margin: 4px 2px; */
+  cursor: pointer; /* 마우스를 올렸을 때 커서 모양 변경 */
+}
+#rejectButton {
+  position: relative;
+
+  border-radius: 12px;
+  width: 90px;
+  height: 48px;
+  background-color: white;
+  color: #3b82f6;
+  border: none; /* 기본 버튼 테두리를 제거 */
+  padding: 10px 20px; /* 버튼 내부의 여백 설정 */
+  text-align: center; /* 텍스트를 중앙으로 정렬 */
+  text-decoration: none; /* 텍스트 밑줄 제거 */
+  display: inline-block;
+  font-size: 16px;
+  /* margin: 4px 2px; */
+  cursor: pointer; /* 마우스를 올렸을 때 커서 모양 변경 */
+}
 #PassengerMode {
-  z-index: 1;
+  z-index: 3;
   position: absolute;
   font-family: 'Pretendard';
   /* Frame 43 */
   top: 18px;
-  right: 7%;
+  right: 7.5%;
   /* Autlayout */
   display: flex;
   flex-direction: row;
@@ -34,6 +109,7 @@
   font-family: 'Pretendard';
   border-width: 0;
   right: 1%;
+  z-index: 2;
 
   /* Frame 26 */
 
@@ -141,14 +217,19 @@ p {
   text-align: center; /* 텍스트를 중앙 정렬 */
   animation: fade 5s infinite;
 }
-
 #logout {
+  position: relative;
+  top: 100px;
+  left: 100px;
+}
+
+/* #logout {
   position: relative;
   left: 1%;
   z-index: 2;
-  /* Frame 26 */
 
-  /* Auto layout */
+
+
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -176,11 +257,11 @@ p {
 
   color: #2b8cff;
 
-  /* Inside auto layout */
+
   flex: none;
   order: 0;
   flex-grow: 0;
-}
+} */
 
 #passenger-button {
   z-index: 2;
@@ -284,14 +365,47 @@ p {
 }
 
 @media only screen and (max-width: 600px) {
-  #PassengerModee {
+  #driving_profit {
+    text-align: left;
+  }
+  #driving_distance {
+    text-align: left;
+  }
+  #driving_duration {
+    text-align: left;
+  }
+  #passenger1 {
     font-family: 'Pretendard';
-    z-index: 2;
+  }
+  #passenger2 {
+    font-family: 'Pretendard';
+  }
+  #passenger3 {
+    font-family: 'Pretendard';
+  }
+  #passenger4 {
+    font-family: 'Pretendard';
+  }
+  #jibeon1 {
+    font-family: 'Pretendard';
+  }
+  #jibeon2 {
+    font-family: 'Pretendard';
+  }
+  #jibeon3 {
+    font-family: 'Pretendard';
+  }
+  #jibeon4 {
+    font-family: 'Pretendard';
+  }
+  #PassengerMode {
+    z-index: 3;
     position: absolute;
-
-    top: 23px;
-    left: 55px;
-
+    font-family: 'Pretendard';
+    /* Frame 43 */
+    top: 18px;
+    right: 16%;
+    /* Autlayout */
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -303,19 +417,27 @@ p {
     height: 43px;
 
     background: #ffffff;
+    border-width: 0;
     border-radius: 10px;
 
+    /* Inside auto layout */
     flex: none;
     order: 0;
     flex-grow: 0;
 
-    color: #2b8cff;
-    font-weight: 500;
+    color: #2b8cff; /* white color */
+    font-weight: 700;
+    font-size: 18px;
   }
-  #DriverModee {
+  #DriverMode {
     font-family: 'Pretendard';
-    z-index: 1;
+    border-width: 0;
+    right: 1%;
+    z-index: 2;
 
+    /* Frame 26 */
+
+    /* Auto layout */
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
@@ -324,10 +446,10 @@ p {
     gap: 10px;
 
     position: absolute;
-    width: 167px;
+    width: 168px;
     height: 50px;
-    left: 46px;
-    top: 20px;
+
+    top: 15px;
 
     background: #2b8cff;
     box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
@@ -384,5 +506,10 @@ p {
     flex: none;
     order: 0;
     flex-grow: 0;
+  }
+  #finishDriveButton {
+    position: relative;
+    right: 0%;
+    top: 38%;
   }
 }

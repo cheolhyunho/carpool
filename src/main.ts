@@ -14,6 +14,7 @@ import { HttpApiExceptionFilter } from './common/exceptions/http-api-exception.f
 import { join } from 'path'
 import * as expressSession from 'express-session'
 import { SessionOptions } from 'express-session'
+import { UnauthorizedRedirectFilter } from './common/exceptions/unauth-exception.filter'
 
 class Application {
   private logger = new Logger(Application.name)
@@ -81,7 +82,10 @@ class Application {
     this.server.useGlobalInterceptors(
       new ClassSerializerInterceptor(this.server.get(Reflector)),
     )
-    this.server.useGlobalFilters(new HttpApiExceptionFilter())
+    this.server.useGlobalFilters(
+      new HttpApiExceptionFilter(),
+      new UnauthorizedRedirectFilter(),
+    )
   }
 
   async boostrap() {

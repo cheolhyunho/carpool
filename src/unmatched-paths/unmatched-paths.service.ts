@@ -429,14 +429,18 @@ export class UnmatchedPathsService {
         targetUnmatchedPath.startingPoint.lat,
         targetUnmatchedPath.startingPoint.lng,
       )
+
       if (kakaoResponse.result_code === 104) {
         tmpArray.push(savedTargetUnmatchedPath.userIdArray[i])
+        console.log(targetUser.username, 'qpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqp')
         continue
       }
       if (kakaoResponse.summary.distance <= 10000) {
         tmpArray.push(savedTargetUnmatchedPath.userIdArray[i])
+        console.log(targetUser.username, 'wowowowowowowowowowowowowowo')
       }
     }
+
     return tmpArray
   }
 
