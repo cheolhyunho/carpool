@@ -103,8 +103,9 @@ export class KakaoMobilityService {
 
           approval_url:
             'https://a01f-121-137-114-182.ngrok-free.app/matchedPath',
-          fail_url: 'https://a01f-121-137-114-182.ngrok-free.app/matchedPath',
-          cancel_url: 'https://a01f-121-137-114-182.ngrok-free.app/matchedPath',
+          fail_url: 'https://a01f-121-137-114-182.ngrok-free.app/unmatchedPath',
+          cancel_url:
+            'https://a01f-121-137-114-182.ngrok-free.app/unmatchedPath',
         },
         httpsAgent: new https.Agent({
           secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT,
