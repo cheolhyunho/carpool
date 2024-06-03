@@ -148,7 +148,7 @@ socket.on('letsDrive', function (matchedPath) {
   infoBox.style.backgroundColor = '#f9f9f9'
   infoBox.style.zIndex = '1'
   infoBox.style.position = 'absolute'
-  infoBox.style.top = '10px' // 원하는 위치로 조정
+  infoBox.style.top = '70px' // 원하는 위치로 조정
   infoBox.style.left = '10px' // 원하는 위치로 조정
 
   infoBox.style.fontFamily = "'Roboto', sans-serif"
@@ -272,14 +272,12 @@ socket.on('letsDrive', function (matchedPath) {
     socket.emit('imDriver', matchedPath, (message) => {
       alert(message)
     })
-    // const currentOrigin = window.location.origin // "http://example.com"
-    // const newPath = '/matchedPath/waittingPayment'
 
-    // // 현재 URL에서 '/driver'를 제거
-    // const newUrl = currentOrigin.replace('/driver', '') + newPath
-    // window.location.href = newUrl
     const forRemoveMap = document.getElementById('mapContainer')
+    const logOutButton = document.getElementById('logout')
     forRemoveMap.remove()
+    infoBox.remove()
+    logOutButton.remove()
     fetchWaittingPayment()
   })
   rejectButton.addEventListener('click', () => {

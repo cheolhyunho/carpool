@@ -8,6 +8,7 @@
     />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <title>드라이버모드</title>
+
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"
@@ -17,6 +18,7 @@
       type="text/javascript"
       src="//dapi.kakao.com/v2/maps/sdk.js?appkey=86ae03c1d2c30d0b0a969db803f5a333&libraries=services"
     ></script>
+
   </head>
   <body>
     <div
@@ -25,10 +27,10 @@
     ></div>
     <button id="PassengerMode">승객</button>
     <button id="DriverMode">드라이버</button>
-    <button id="logout">log out</button>
+    <button id="logout">로그아웃</button>
     <header id="header-content">
-      <h1>승객과 매칭중입니다</h1>
-      <p>잠시만 기다려주세요...</p>
+      <h1 id="waitting3">승객과 매칭중입니다</h1>
+      <p id="waitting4">잠시만 기다려주세요...</p>
     </header>
     <div class="buffering"></div>
     <div class="taxi-icon"></div>
@@ -39,7 +41,7 @@
       {{! <button id="acceptButton">수락</button>
       <button id="rejectButton">거절</button> }}
     </div>
-    <button id="finishDriveButton">운행종료</button>
+    {{! <button id="finishDriveButton">운행종료</button> }}
 
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script
