@@ -192,7 +192,7 @@ script.crossOrigin = 'anonymous'
 
 script.onload = function () {
   // 스크립트가 로드된 후에 Kakao를 초기화합니다.
-  Kakao.init('86ae03c1d2c30d0b0a969db803f5a333')
+  Kakao.init('a98664e9f599be2547e4095d1a9c907d')
   console.log('Kakao:', Kakao)
   // Kakao 초기화 후에 startNavigation 함수를 설정합니다.
   window.startNavigation = function (matchedPath) {
