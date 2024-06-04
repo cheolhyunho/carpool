@@ -250,18 +250,37 @@ socket.on('letsDrive', function (matchedPath) {
       updateInfowindowContent(3)
     }
   })
+  async function fetchWaittingPayment() {
+    try {
+      const response = await fetch('matchedPath/waittingPayment')
+      if (response.ok) {
+        const html = await response.text()
+        document.getElementById('waittingPaymentContainer').innerHTML = html
+      } else {
+        console.error(
+          'Failed to fetch the waittingPayment page:',
+          response.status,
+        )
+      }
+    } catch (error) {
+      console.error('Error fetching the waittingPayment page:', error)
+    }
+  }
 
   acceptButton.addEventListener('click', () => {
     buttons.style.display = 'none'
     socket.emit('imDriver', matchedPath, (message) => {
       alert(message)
     })
-    const currentOrigin = window.location.origin // "http://example.com"
-    const newPath = '/matchedPath/waittingPayment'
+    // const currentOrigin = window.location.origin // "http://example.com"
+    // const newPath = '/matchedPath/waittingPayment'
 
-    // 현재 URL에서 '/driver'를 제거
-    const newUrl = currentOrigin.replace('/driver', '') + newPath
-    window.location.href = newUrl
+    // // 현재 URL에서 '/driver'를 제거
+    // const newUrl = currentOrigin.replace('/driver', '') + newPath
+    // window.location.href = newUrl
+    const forRemoveMap = document.getElementById('mapContainer')
+    forRemoveMap.remove()
+    fetchWaittingPayment()
   })
   rejectButton.addEventListener('click', () => {
     location.reload()
@@ -321,48 +340,52 @@ script.integrity =
 script.crossOrigin = 'anonymous'
 
 script.onload = function () {
-  // 스크립트가 로드된 후에 Kakao를 초기화합니다.
-  Kakao.init('a98664e9f599be2547e4095d1a9c907d')
-  console.log('Kakao:', Kakao)
-  // Kakao 초기화 후에 startNavigation 함수를 설정합니다.
-  window.startNavigation = function (matchedPath) {
-    console.log('startNavigation 함수 실행중')
-    Kakao.Navi.start({
-      name: '도착지',
-      x: matchedPath.destinationPoint.lng,
-      y: matchedPath.destinationPoint.lat,
-      coordType: 'wgs84',
-      viaPoints: [
-        {
-          name: '경유지1',
-          x: matchedPath.origin.lng,
-          y: matchedPath.origin.lat,
-        },
-        {
-          name: '경유지2',
-          x: matchedPath.firstWayPoint.lng,
-          y: matchedPath.firstWayPoint.lat,
-        },
-        {
-          name: '경유지3',
-          x: matchedPath.secondWayPoint.lng,
-          y: matchedPath.secondWayPoint.lat,
-        },
-      ],
-    })
+  console.log('Kakao SDK loades')
+  if (typeof Kakao !== 'undefined') {
+    console.log('Kakao:', Kakao)
+    // 스크립트가 로드된 후에 Kakao를 초기화합니다.
+    Kakao.init('a98664e9f599be2547e4095d1a9c907d')
+
+    // Kakao 초기화 후에 startNavigation 함수를 설정합니다.
+    window.startNavigation = function (matchedPath) {
+      console.log('startNavigation 함수 실행중')
+      Kakao.Navi.start({
+        name: '도착지',
+        x: matchedPath.destinationPoint.lng,
+        y: matchedPath.destinationPoint.lat,
+        coordType: 'wgs84',
+        viaPoints: [
+          {
+            name: '경유지1',
+            x: matchedPath.origin.lng,
+            y: matchedPath.origin.lat,
+          },
+          {
+            name: '경유지2',
+            x: matchedPath.firstWayPoint.lng,
+            y: matchedPath.firstWayPoint.lat,
+          },
+          {
+            name: '경유지3',
+            x: matchedPath.secondWayPoint.lng,
+            y: matchedPath.secondWayPoint.lat,
+          },
+        ],
+      })
+    }
+  } else {
+    console.error('Kakao is not defined')
   }
+}
+
+script.onerror = function () {
+  console.error('Failed to load the Kakao SDK script')
 }
 
 document.body.appendChild(script)
 
 socket.on('navigation', (matchedPath) => {
   console.log('navigation 이벤트 실행중')
-  const currentEndPoint = window.location.origin
-  const targetEndPoint = currentEndPoint.replace(
-    '/matchedPath/waittingPayment',
-    '/driver',
-  )
-  window.location.href = targetEndPoint
   if (window.startNavigation) {
     window.startNavigation(matchedPath)
   } else {
