@@ -66,7 +66,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     let response = null
     let matchFound = false
     //테스트시에 주석처리
-    // await this.unmatchedPathService.sleep(10000)
+    await this.unmatchedPathService.sleep(10000)
 
     const startTime = Date.now()
     while (!matchFound) {
@@ -150,9 +150,13 @@ export class MatchingGateway implements OnGatewayDisconnect {
     })
     console.log('운행중인 모든 드라이버', drivers)
 
-    for (const driver of drivers) {
-      console.log('wantLocation 이벤트 실행중', driver)
-      socket.to(driver.socketId).emit('wantLocation', matchedPath)
+    // for (const driver of drivers) {
+    //   console.log('wantLocation 이벤트 실행중', driver)
+    //   socket.to(driver.socketId).emit('wantLocation', matchedPath)
+    // }
+    socket.to(drivers[0].socketId).emit('wantLocation', matchedPath)
+    if (drivers[0].isMatching) {
+      socket.to(drivers[1].socketId).emit('wantLocation', matchedPath)
     }
   }
 
@@ -278,7 +282,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
 
       if (kakaoResponse.result_code === 104) {
         socket.emit('letsDrive', data.matchedPath)
-      } else if (kakaoResponse.summary.duration <= 6000) {
+      } else if (kakaoResponse.summary.duration <= 6000000000000) {
         console.log('택시기사에게 send:', data.matchedPath)
         socket.emit('letsDrive', data.matchedPath)
         return
@@ -298,6 +302,11 @@ export class MatchingGateway implements OnGatewayDisconnect {
     if (matchedPath.isReal) {
       socket.emit('alreadyMatched')
     } else {
+      const driver = await this.userRepository.findOne({
+        where: { socketId: socket.id },
+      })
+      driver.isMatching = true
+      await this.userRepository.save(driver)
       //카카오페이결제 링크 받아오기
       matchedPath.isReal = true
       await this.matchedPathRepository.save(matchedPath)
