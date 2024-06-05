@@ -120,6 +120,7 @@ socket.on('wantLocation', (matchedPath) => {
 })
 
 socket.on('letsDrive', function (matchedPath) {
+  socket.off('letsDrive')
   headerContent.remove()
   bufferingElement.remove()
   taxiIconElement.remove()

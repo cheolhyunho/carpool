@@ -145,15 +145,21 @@ export class MatchingGateway implements OnGatewayDisconnect {
   }
 
   async sendWantLocationEvent(matchedPath, socket) {
-    const drivers = await this.userRepository.find({
-      where: { isDriver: true },
+    // const drivers = await this.userRepository.find({
+    //   where: { isDriver: true },
+    // })
+    const driver = await this.userRepository.findOne({
+      where: { isDriver: true, isMatching: false },
     })
-    console.log('운행중인 모든 드라이버', drivers)
+    console.log('운행중인 모든 드라이버', driver)
+    driver.isMatching = true
+    await this.userRepository.save(driver)
 
-    for (const driver of drivers) {
-      console.log('wantLocation 이벤트 실행중', driver)
-      socket.to(driver.socketId).emit('wantLocation', matchedPath)
-    }
+    // for (const driver of drivers) {
+    //   console.log('wantLocation 이벤트 실행중', driver)
+    //   socket.to(driver.socketId).emit('wantLocation', matchedPath)
+    // }
+    socket.to(driver.socketId).emit('wantLocation', matchedPath)
   }
 
   @SubscribeMessage('accept')
