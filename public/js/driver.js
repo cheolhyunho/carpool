@@ -329,9 +329,7 @@ socket.on('failedPay', () => {
   alert('결제문제로 매칭이 취소되었습니다.')
   location.reload()
 })
-
-var script = document.createElement('script')
-
+let script = document.createElement('script')
 script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.1/kakao.min.js'
 script.integrity =
   'sha384-kDljxUXHaJ9xAb2AzRd59KxjrFjzHa5TAoFQ6GbYTCAG0bjM55XohjjDT7tDDC01'
