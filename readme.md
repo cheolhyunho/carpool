@@ -1,3 +1,3 @@
-![Image Description](./public/images/KakaoTalk_Photo_2024-06-27-17-35-19.png)
+![Image Description](./public/images/KakaoTalk_Photo_2024-06-28-22-28-53.png)
 
 
