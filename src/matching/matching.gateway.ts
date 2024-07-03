@@ -66,7 +66,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     let response = null
     let matchFound = false
     //테스트시에 주석처리
-    // await this.unmatchedPathService.sleep(10000)
+    await this.unmatchedPathService.sleep(5000)
 
     const startTime = Date.now()
     while (!matchFound) {
@@ -148,17 +148,18 @@ export class MatchingGateway implements OnGatewayDisconnect {
     // const drivers = await this.userRepository.find({
     //   where: { isDriver: true },
     // })
+
+    // console.log('운행중인 모든 드라이버', drivers)
+    // for (const driver of drivers) {
+    //   console.log('wantLocation 이벤트 실행중', driver)
+    //   socket.to(driver.socketId).emit('wantLocation', matchedPath)
+    // }
     const driver = await this.userRepository.findOne({
       where: { isDriver: true, isMatching: false },
     })
     console.log('운행중인 모든 드라이버', driver)
     driver.isMatching = true
     await this.userRepository.save(driver)
-
-    // for (const driver of drivers) {
-    //   console.log('wantLocation 이벤트 실행중', driver)
-    //   socket.to(driver.socketId).emit('wantLocation', matchedPath)
-    // }
     socket.to(driver.socketId).emit('wantLocation', matchedPath)
   }
 
@@ -284,7 +285,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
 
       if (kakaoResponse.result_code === 104) {
         socket.emit('letsDrive', data.matchedPath)
-      } else if (kakaoResponse.summary.duration <= 6000) {
+      } else if (kakaoResponse.summary.duration <= 6000000000000) {
         console.log('택시기사에게 send:', data.matchedPath)
         socket.emit('letsDrive', data.matchedPath)
         return
@@ -364,7 +365,11 @@ export class MatchingGateway implements OnGatewayDisconnect {
         }
 
         if (isAccepted && elapsedTime < timeoutLimit) {
-          console.log('결제완료')
+          console.log(
+            'pg토큰확인',
+            matchedPath.users[0].pgToken,
+            matchedPath.users[1].pgToken,
+          )
           await this.kakaoMobilityService.getApprove(
             firstUserUrl.tid,
             matchedPath.users[0].pgToken,
@@ -394,13 +399,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
             firstUser.unmatchedPath,
             secondUser.unmatchedPath,
           )
-          console.log('location:', firstUser, secondUser)
-          socket
-            .to(firstUser.socketId)
-            .emit('location', firstUser.unmatchedPath)
-          socket
-            .to(secondUser.socketId)
-            .emit('location', secondUser.unmatchedPath)
           console.log('navigation 이벤트 실행전')
           socket.emit('navigation', updatedMatchedPath)
           console.log('navigation 이벤트 실행후')
@@ -452,6 +450,16 @@ export class MatchingGateway implements OnGatewayDisconnect {
     user.socketId = socket.id
     user.isMatching = true
     await this.userRepository.save(user)
+  }
+
+  @SubscribeMessage('markLocation')
+  async handleLoation(@ConnectedSocket() socket: Socket, @MessageBody() user) {
+    console.log('출발지마킹')
+    const user1 = await this.userRepository.findOne({
+      where: { id: user.id },
+      relations: ['unmatchedPath'],
+    })
+    socket.emit('location', user1.unmatchedPath)
   }
 
   @SubscribeMessage('realTimeLocation')

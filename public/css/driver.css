@@ -404,7 +404,7 @@ p {
     font-family: 'Pretendard';
     /* Frame 43 */
     top: 18px;
-    right: 16%;
+    left: 6.5%;
     /* Autlayout */
     display: flex;
     flex-direction: row;
@@ -416,7 +416,7 @@ p {
     width: 70px;
     height: 43px;
 
-    background: #ffffff;
+    background: #2b8cff;
     border-width: 0;
     border-radius: 10px;
 
@@ -425,14 +425,14 @@ p {
     order: 0;
     flex-grow: 0;
 
-    color: #2b8cff; /* white color */
+    color: #ffffff; /* white color */
     font-weight: 700;
     font-size: 18px;
   }
   #DriverMode {
     font-family: 'Pretendard';
     border-width: 0;
-    right: 1%;
+    left: 5%;
     z-index: 2;
 
     /* Frame 26 */
@@ -451,7 +451,7 @@ p {
 
     top: 15px;
 
-    background: #2b8cff;
+    background: #ffffff;
     box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
     border-radius: 12px;
 
@@ -463,16 +463,20 @@ p {
     text-align: center;
     letter-spacing: -0.02em;
 
-    color: #ffffff;
+    color: #2b8cff;
 
     flex: none;
     order: 0;
     flex-grow: 0;
   }
-  #logoutt {
-    position: fixed;
-    right: -146.5%;
-    z-index: 1;
+  .logout {
+    z-index: 10;
+    position: absolute;
+    width: 105px;
+    height: 40px;
+    bottom: 30%;
+    left: 40%;
+
     /* Frame 26 */
 
     /* Auto layout */
@@ -482,12 +486,6 @@ p {
     align-items: center;
     padding: 0px 20px;
     gap: 10px;
-
-    position: absolute;
-    width: 105px;
-    height: 40px;
-
-    bottom: 20%;
 
     background: #ffffff;
     box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.2);
@@ -508,8 +506,60 @@ p {
     flex-grow: 0;
   }
   #finishDriveButton {
+    position: fixed;
+    left: 5%;
+    top: 90%;
+  }
+  #header-content2 {
     position: relative;
-    right: 0%;
-    top: 38%;
+    top: 25%;
+    left: 20%;
+  }
+  .buffering {
+    position: relative;
+    left: 24.5%;
+    display: inline-block;
+    width: 250px;
+    height: 250px;
+    border: 15px solid #f3f3f3;
+    border-top: 15px solid #3498db;
+    border-radius: 50%;
+    animation: spin 5s linear infinite;
+    margin-top: 50px;
+  }
+  .buffering2 {
+    position: relative;
+    left: 24.5%;
+    display: inline-block;
+    width: 250px;
+    height: 250px;
+    border: 15px solid #f3f3f3;
+    border-top: 15px solid #3498db;
+    border-radius: 50%;
+    animation: spin 5s linear infinite;
+    margin-top: 50px;
+  }
+
+  #waitting {
+    position: fixed;
+    top: 40%;
+  }
+  #waitting2 {
+    position: fixed;
+    top: 49%;
+    left: 30%;
+  }
+
+  #waitting3 {
+    position: relative;
+    top: -50%;
+  }
+  #waitting4 {
+    position: relative;
+    top: 35%;
+  }
+  #header-content {
+    position: relative;
+    top: 50%;
   }
 }

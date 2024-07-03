@@ -13,6 +13,7 @@ fetch('/unmatchedPath/userId', {
   })
   .then((data) => {
     socket.emit('socketIdSave', data)
+    socket.emit('markLocation', data)
   })
   .catch((error) => {
     console.error('UserId 가져오기 실패:', error)
