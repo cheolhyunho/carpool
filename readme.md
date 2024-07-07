@@ -19,6 +19,8 @@
 
 ## 팀원 소개
 
+|이름|역할|email|
+|---|---|---|
 |배철현|FE,BE|baecheolhyeon7@gmail.com|
 |유현호|FE,BE|nolja126@gmail.com|
 
