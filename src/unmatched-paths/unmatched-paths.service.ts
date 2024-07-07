@@ -121,7 +121,7 @@ export class UnmatchedPathsService {
     if (userArray == null) {
       return null
     }
-    console.log(user.username, '소켓거른후', userArray)
+    console.log(user.username, '소켓필터후', userArray)
 
     const userIdArray = userArray.map((user) => user.id)
 
@@ -134,7 +134,7 @@ export class UnmatchedPathsService {
     let tmpArray = []
     //출발지 10km내 필터링
     tmpArray = await this.pushToTmpArray(savedTargetUnmatchedPath, tmpArray)
-    console.log(user.username, '출발지거른후', tmpArray)
+    console.log(user.username, '출발지필터후', tmpArray)
     const resultId = await this.setResultArray(
       savedTargetUnmatchedPath,
       tmpArray,
@@ -432,12 +432,10 @@ export class UnmatchedPathsService {
 
       if (kakaoResponse.result_code === 104) {
         tmpArray.push(savedTargetUnmatchedPath.userIdArray[i])
-        console.log(targetUser.username, 'qpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqp')
         continue
       }
       if (kakaoResponse.summary.distance <= 10000) {
         tmpArray.push(savedTargetUnmatchedPath.userIdArray[i])
-        console.log(targetUser.username, 'wowowowowowowowowowowowowowo')
       }
     }
 
