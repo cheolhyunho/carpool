@@ -19,6 +19,11 @@
 
 ## 팀원 소개
 
+<<<<<<< HEAD
+=======
+|이름|역할|email|
+|---|---|---|
+>>>>>>> c61a35ca775bd51f8b3a667a95e91b80aaea325c
 |배철현|FE,BE|baecheolhyeon7@gmail.com|
 |유현호|FE,BE|nolja126@gmail.com|
 
