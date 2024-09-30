@@ -2,11 +2,7 @@ import { JwtPayload } from './jwt.payload'
 import { SignupService } from 'src/signup/signup.service'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 import { PassportStrategy } from '@nestjs/passport'
-import {
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { jwtExtractorFromCookies } from '../../common/utils/jwtExtractorFromCookies'
 import { ConfigService } from '@nestjs/config'
 
