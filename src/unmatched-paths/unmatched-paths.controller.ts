@@ -16,11 +16,6 @@ export class UnmatchedPathsController {
     private readonly unmatchedPathRepository: Repository<UnmatchedPathEntity>,
   ) {}
 
-  @Get('test')
-  @Render('test')
-  tmp() {
-    return
-  }
   @Get('userId')
   async test(@CurrentUser() user) {
     console.log('userId 획득')

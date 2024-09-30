@@ -10,7 +10,7 @@ export class SignupController {
 
   @Get()
   @Render('signup')
-  tmp() {
+  renderSignUpPage() {
     return
   }
 
