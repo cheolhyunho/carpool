@@ -1216,9 +1216,21 @@ socket.on('noDriver', () => {
 })
 
 socket.on('kakaoPay', (link) => {
-  //카카오페이결제 링크로 이동
-  window.location.href = link
+  window.location.href = isMobile()
+    ? link.next_redirect_mobile_url
+    : link.next_redirect_pc_url
 })
+
+function isMobile() {
+  // 터치 기능 확인
+  const hasTouchScreen = window.matchMedia(
+    '(hover: none) and (pointer: coarse)',
+  ).matches
+  // 화면 크기 확인
+  const isMobileSize = window.matchMedia('(max-width: 768px)').matches
+
+  return hasTouchScreen && isMobileSize
+}
 
 socket.on('noUnmatchedPath', () => {
   alert('출발지와 목적지를 설정하고 매칭을 시도해주세요')
