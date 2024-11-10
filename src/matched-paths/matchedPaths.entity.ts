@@ -41,6 +41,7 @@ export class MatchedPathEntity extends CommonEntity {
   isReal: boolean
 
   @Column('uuid', { array: true, nullable: true })
+  driverIdArr: string[]
 
   //* Relation */
   @OneToMany(() => UserEntity, (user: UserEntity) => user.matchedPath, {})

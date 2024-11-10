@@ -278,6 +278,37 @@ export class MatchingGateway implements OnGatewayDisconnect {
     await this.userRepository.save(currentUser)
   }
 
+  @SubscribeMessage('driverReject')
+  async handleDriverReject(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data,
+  ) {
+    const targetMatchedPath = await this.matchedPathRepository.findOne({
+      where: { id: data.matchedPath.id },
+    })
+    const targetDriverId = targetMatchedPath.driverIdArr.pop()
+    let targetDriver = await this.userRepository.findOne({
+      where: { id: targetDriverId },
+    })
+    if (targetDriver.lock) {
+      targetDriver = await this.userRepository.findOne({
+        where: { id: targetMatchedPath.driverIdArr.pop() },
+      })
+    }
+    if (targetDriver !== undefined) {
+      targetDriver.lock = true
+      await this.userRepository.save(targetDriver)
+      socket.to(targetDriver.socketId).emit('letsDrive')
+    } else {
+      const targetUser1 = await this.userRepository.findOne({
+        where: { id: targetMatchedPath.users[0].id },
+      })
+      const targetUser2 = await this.userRepository.findOne({
+        where: { id: targetMatchedPath.users[1].id },
+      })
+    }
+  }
+
   @SubscribeMessage('hereIsLocation')
   async requestToDriver(
     @ConnectedSocket() socket: Socket,
@@ -309,10 +340,17 @@ export class MatchingGateway implements OnGatewayDisconnect {
         return
       }
       const targetDriverId = targetMatchedPath.driverIdArr.pop()
-      const targetDriver = await this.userRepository.findOne({
+      let targetDriver = await this.userRepository.findOne({
         where: { id: targetDriverId },
       })
-      socket.to(targetDriver.socketId).emit('hereIsLocation', data)
+      if (targetDriver.lock) {
+        targetDriver = await this.userRepository.findOne({
+          where: { id: targetMatchedPath.driverIdArr.pop() },
+        })
+      }
+      targetDriver.lock = true
+      await this.userRepository.save(targetDriver)
+      socket.to(targetDriver.socketId).emit('letsDrive', data)
     } catch (e) {
       console.log(e, 'hereIsLocation error')
     }
