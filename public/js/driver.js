@@ -121,7 +121,7 @@ socket.on('wantLocation', (data) => {
 })
 
 socket.on('letsDrive', function (matchedPath) {
-  socket.off('letsDrive')
+  // socket.off('letsDrive')
   headerContent.remove()
   bufferingElement.remove()
   taxiIconElement.remove()
@@ -284,6 +284,7 @@ socket.on('letsDrive', function (matchedPath) {
   })
   rejectButton.addEventListener('click', () => {
     location.reload()
+    socket.emit('driverReject', matchedPath)
   })
 
   function updateInfowindowContent(index) {
