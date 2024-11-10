@@ -281,32 +281,34 @@ export class MatchingGateway implements OnGatewayDisconnect {
   @SubscribeMessage('driverReject')
   async handleDriverReject(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() data,
+    @MessageBody() matchedPath,
   ) {
     const targetMatchedPath = await this.matchedPathRepository.findOne({
-      where: { id: data.matchedPath.id },
+      where: { id: matchedPath.id },
     })
     const targetDriverId = targetMatchedPath.driverIdArr.pop()
     let targetDriver = await this.userRepository.findOne({
       where: { id: targetDriverId },
     })
-    if (targetDriver.lock) {
+    while (targetDriver.lock && targetDriver !== undefined) {
       targetDriver = await this.userRepository.findOne({
         where: { id: targetMatchedPath.driverIdArr.pop() },
       })
     }
-    if (targetDriver !== undefined) {
-      targetDriver.lock = true
-      await this.userRepository.save(targetDriver)
-      socket.to(targetDriver.socketId).emit('letsDrive')
-    } else {
+    if (targetDriver === undefined) {
       const targetUser1 = await this.userRepository.findOne({
         where: { id: targetMatchedPath.users[0].id },
       })
       const targetUser2 = await this.userRepository.findOne({
         where: { id: targetMatchedPath.users[1].id },
       })
+      socket.to(targetUser1.socketId).emit('noDriver')
+      socket.to(targetUser2.socketId).emit('noDriver')
+      return
     }
+    targetDriver.lock = true
+    await this.userRepository.save(targetDriver)
+    socket.to(targetDriver.socketId).emit('letsDrive', matchedPath)
   }
 
   @SubscribeMessage('hereIsLocation')
@@ -337,16 +339,31 @@ export class MatchingGateway implements OnGatewayDisconnect {
         targetMatchedPath.driverIdArr.push(data.driverId)
         await this.matchedPathRepository.save(targetMatchedPath)
         // socket.emit('letsDrive', data.matchedPath)
-        return
       }
+      const refreshTargetMatchedPath = await this.matchedPathRepository.findOne(
+        {
+          where: { id: data.matchedPath.id },
+        },
+      )
       const targetDriverId = targetMatchedPath.driverIdArr.pop()
       let targetDriver = await this.userRepository.findOne({
         where: { id: targetDriverId },
       })
-      if (targetDriver.lock) {
+      while (targetDriver.lock && targetDriver !== undefined) {
         targetDriver = await this.userRepository.findOne({
           where: { id: targetMatchedPath.driverIdArr.pop() },
         })
+      }
+      if (targetDriver === undefined) {
+        const targetUser1 = await this.userRepository.findOne({
+          where: { id: targetMatchedPath.users[0].id },
+        })
+        const targetUser2 = await this.userRepository.findOne({
+          where: { id: targetMatchedPath.users[1].id },
+        })
+        socket.to(targetUser1.socketId).emit('noDriver')
+        socket.to(targetUser2.socketId).emit('noDriver')
+        return
       }
       targetDriver.lock = true
       await this.userRepository.save(targetDriver)
