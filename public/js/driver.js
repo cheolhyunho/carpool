@@ -251,7 +251,7 @@ socket.on('letsDrive', function (matchedPath) {
       updateInfowindowContent(3)
     }
   })
-  async function fetchWaittingPayment() {
+  async function fetchWaitingPayment() {
     try {
       const response = await fetch('matchedPath/waittingPayment')
       if (response.ok) {
@@ -279,7 +279,7 @@ socket.on('letsDrive', function (matchedPath) {
     forRemoveMap.remove()
     infoBox.remove()
     logOutButton.remove()
-    fetchWaittingPayment()
+    fetchWaitingPayment()
   })
   rejectButton.addEventListener('click', () => {
     location.reload()
