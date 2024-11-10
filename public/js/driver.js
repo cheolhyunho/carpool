@@ -404,10 +404,6 @@ socket.on('updateLocation', (matchedPath) => {
       console.log(matchedPath)
       socket.emit('realTimeLocation', data)
     })
-    finishDriveButton.addEventListener('click', () => {
-      socket.emit('finishDrive')
-      window.location.href = window.location.origin + '/driver'
-    })
   } catch (error) {
     console.error(error)
   }
@@ -435,95 +431,7 @@ logoutButton.addEventListener('click', function () {
     })
 })
 
-// 페이지 로드 완료 후 실행되도록 보장
-// document.addEventListener('DOMContentLoaded', function () {
-//   // Kakao SDK 초기화 함수
-//   function initKakaoSDK() {
-//     const script = document.createElement('script')
-//     script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/v1/kakao.min.js'
-//     script.integrity =
-//       'sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4'
-//     script.crossOrigin = 'anonymous'
-
-//     return new Promise((resolve, reject) => {
-//       script.onload = () => {
-//         console.log('Kakao SDK 로드됨')
-//         if (typeof Kakao !== 'undefined') {
-//           Kakao.init('a98664e9f599be2547e4095d1a9c907d')
-//           console.log('Kakao SDK 초기화 완료')
-//           resolve()
-//         } else {
-//           reject('Kakao SDK 로드 실패')
-//         }
-//       }
-//       script.onerror = () => reject('Kakao SDK 로드 중 에러 발생')
-//       document.body.appendChild(script)
-//     })
-//   }
-
-//   // 네비게이션 시작 함수
-//   function startNavigation(matchedPath) {
-//     if (!matchedPath) {
-//       console.error('경로 정보가 없습니다')
-//       return
-//     }
-
-//     Kakao.Navi.start({
-//       name: '도착지',
-//       x: matchedPath.destinationPoint.lng,
-//       y: matchedPath.destinationPoint.lat,
-//       coordType: 'wgs84',
-//       viaPoints: [
-//         {
-//           name: '경유지1',
-//           x: matchedPath.origin.lng,
-//           y: matchedPath.origin.lat,
-//         },
-//         {
-//           name: '경유지2',
-//           x: matchedPath.firstWayPoint.lng,
-//           y: matchedPath.firstWayPoint.lat,
-//         },
-//         {
-//           name: '경유지3',
-//           x: matchedPath.secondWayPoint.lng,
-//           y: matchedPath.secondWayPoint.lat,
-//         },
-//       ],
-//     })
-//   }
-
-//   // SDK 초기화 실행
-//   let sdkInitialized = false
-//   initKakaoSDK()
-//     .then(() => {
-//       sdkInitialized = true
-//       console.log('SDK 초기화 완료')
-//     })
-//     .catch((error) => {
-//       console.error('SDK 초기화 실패:', error)
-//     })
-
-//   // Socket 이벤트 리스너
-//   socket.on('navigation', async (matchedPath) => {
-//     console.log('네비게이션 이벤트 받음:', matchedPath)
-
-//     // SDK가 초기화되지 않았다면 초기화 시도
-//     if (!sdkInitialized) {
-//       try {
-//         await initKakaoSDK()
-//         sdkInitialized = true
-//       } catch (error) {
-//         console.error('SDK 초기화 실패:', error)
-//         return
-//       }
-//     }
-
-//     try {
-//       console.log('네비게이션 시작:', matchedPath)
-//       startNavigation(matchedPath)
-//     } catch (error) {
-//       console.error('네비게이션 시작 실패:', error)
-//     }
-//   })
-// })
+finishDriveButton.addEventListener('click', () => {
+  socket.emit('finishDrive')
+  window.location.href = window.location.origin + '/driver'
+})

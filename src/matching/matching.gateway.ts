@@ -383,15 +383,25 @@ export class MatchingGateway implements OnGatewayDisconnect {
             )
           } catch (err) {
             console.log('결제승인 오류메세지', err)
+
+            if (matchedPath.users[0].socketId) {
+              socket.to(matchedPath.users[0].socketId).emit('failedPay')
+            }
+
+            if (matchedPath.users[1].socketId) {
+              socket.to(matchedPath.users[1].socketId).emit('failedPay')
+            }
+
+            socket.emit('failedPay')
+            return
           }
 
-          const updatedMatchedPath = await this.entityManager.findOne(
-            MatchedPathEntity,
-            {
-              where: { id: matchedPath.id },
-              relations: ['users'],
-            },
-          )
+          const updatedMatchedPath = await this.matchedPathRepository
+            .createQueryBuilder('matchedPath')
+            .leftJoinAndSelect('matchedPath.users', 'users')
+            .where('matchedPath.id = :id', { id: matchedPath.id })
+            .orderBy('users.id', 'ASC')
+            .getOne()
           const firstUser = await this.entityManager.findOne(UserEntity, {
             where: { id: matchedPath.users[0].id },
             relations: ['unmatchedPath'],
@@ -431,6 +441,8 @@ export class MatchingGateway implements OnGatewayDisconnect {
           }
           socket.emit('failedPay')
         }
+      } else {
+        socket.emit('failedPay')
       }
     }
   }
