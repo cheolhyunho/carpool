@@ -40,8 +40,9 @@ export class MatchedPathEntity extends CommonEntity {
   @Column({ type: 'bool', nullable: false, default: false })
   isReal: boolean
 
-  //* Relation */
+  @Column('uuid', { array: true, nullable: true })
 
+  //* Relation */
   @OneToMany(() => UserEntity, (user: UserEntity) => user.matchedPath, {})
   users: UserEntity[]
 

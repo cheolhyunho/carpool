@@ -95,7 +95,7 @@ fetch('/unmatchedPath/userId', {
     console.error(error)
   })
 
-socket.on('wantLocation', (matchedPath) => {
+socket.on('wantLocation', (data) => {
   if ('geolocation' in navigator) {
     console.log('wantLocation On 실행중')
     const oldMapContainer = document.getElementById('map')
@@ -105,13 +105,14 @@ socket.on('wantLocation', (matchedPath) => {
     navigator.geolocation.getCurrentPosition(function (position) {
       const latitude = position.coords.latitude
       const longitude = position.coords.longitude
-      const data = {
+      const data2 = {
         lat: latitude,
         lng: longitude,
         matchedPath: matchedPath,
+        dirverId: data.driverId,
       }
       console.log('hereIsLocation 이벤트 실행전')
-      socket.emit('hereIsLocation', data)
+      socket.emit('hereIsLocation', data2)
       console.log('hereIsLocation 이벤트 실행후')
     })
   } else {
@@ -331,9 +332,9 @@ socket.on('failedPay', () => {
   location.reload()
 })
 let script = document.createElement('script')
-script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.1/kakao.min.js'
+script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js'
 script.integrity =
-  'sha384-kDljxUXHaJ9xAb2AzRd59KxjrFjzHa5TAoFQ6GbYTCAG0bjM55XohjjDT7tDDC01'
+  'sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4'
 script.crossOrigin = 'anonymous'
 
 script.onload = function () {
@@ -341,7 +342,7 @@ script.onload = function () {
   if (typeof Kakao !== 'undefined') {
     console.log('Kakao:', Kakao)
     // 스크립트가 로드된 후에 Kakao를 초기화합니다.
-    Kakao.init('a98664e9f599be2547e4095d1a9c907d')
+    Kakao.init('86ae03c1d2c30d0b0a969db803f5a333')
 
     // Kakao 초기화 후에 startNavigation 함수를 설정합니다.
     window.startNavigation = function (matchedPath) {

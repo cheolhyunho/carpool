@@ -1,3 +1,4 @@
+import { IsUUID } from 'class-validator'
 import { Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import {
@@ -28,6 +29,9 @@ export class MatchingGateway implements OnGatewayDisconnect {
     private readonly entityManager: EntityManager,
     private readonly kakaoMobilityService: KakaoMobilityService,
   ) {}
+  // handleDisconnect(client: any) {
+  //   throw new Error('Method not implemented.')
+  // }
 
   private logger = new Logger('gateway')
   @SubscribeMessage('driverMode')
@@ -146,13 +150,18 @@ export class MatchingGateway implements OnGatewayDisconnect {
 
   async sendWantLocationEvent(matchedPath, socket) {
     const drivers = await this.userRepository.find({
-      where: { isDriver: true },
+      /* lcok:false 추가*/
+      where: { isDriver: true, lock: false },
     })
 
     console.log('운행중인 모든 드라이버', drivers)
     for (const driver of drivers) {
+      const data = {
+        matchedPath,
+        dirverId: driver.id,
+      }
       console.log('wantLocation 이벤트 실행중', driver)
-      socket.to(driver.socketId).emit('wantLocation', matchedPath)
+      socket.to(driver.socketId).emit('wantLocation', data)
     }
     // const driver = await this.userRepository.findOne({
     //   where: { isDriver: true, isMatching: false },
@@ -212,7 +221,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     if (isAccepted && elapsedTime < timeoutLimit) {
       //택시기사매칭 로직
       const drivers = await this.userRepository.find({
-        where: { isDriver: true },
+        where: { isDriver: true, lock: false },
       })
 
       if (drivers.length === 0) {
@@ -282,14 +291,28 @@ export class MatchingGateway implements OnGatewayDisconnect {
         data.lat,
         data.lng,
       )
-
+      const targetMatchedPath = await this.matchedPathRepository.findOne({
+        where: { id: data.matchedPath.id },
+      })
       if (kakaoResponse.result_code === 104) {
-        socket.emit('letsDrive', data.matchedPath)
+        targetMatchedPath.driverIdArr.push(data.driverId)
+        await this.matchedPathRepository.save(targetMatchedPath)
+        // socket.emit('letsDrive', data.matchedPath)
       } else if (kakaoResponse.summary.duration <= 6000000000000) {
         console.log('택시기사에게 send:', data.matchedPath)
-        socket.emit('letsDrive', data.matchedPath)
+        const targetMatchedPath = await this.matchedPathRepository.findOne({
+          where: { id: data.matchedPath.id },
+        })
+        targetMatchedPath.driverIdArr.push(data.driverId)
+        await this.matchedPathRepository.save(targetMatchedPath)
+        // socket.emit('letsDrive', data.matchedPath)
         return
       }
+      const targetDriverId = targetMatchedPath.driverIdArr.pop()
+      const targetDriver = await this.userRepository.findOne({
+        where: { id: targetDriverId },
+      })
+      socket.to(targetDriver.socketId).emit('hereIsLocation', data)
     } catch (e) {
       console.log(e, 'hereIsLocation error')
     }
