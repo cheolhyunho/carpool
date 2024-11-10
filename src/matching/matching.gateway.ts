@@ -345,7 +345,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
           where: { id: data.matchedPath.id },
         },
       )
-      const targetDriverId = targetMatchedPath.driverIdArr.pop()
+      const targetDriverId = refreshTargetMatchedPath.driverIdArr.pop()
       let targetDriver = await this.userRepository.findOne({
         where: { id: targetDriverId },
       })
