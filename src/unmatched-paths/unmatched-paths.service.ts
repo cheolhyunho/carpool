@@ -141,6 +141,10 @@ export class UnmatchedPathsService {
       tmpArray,
       myId,
     )
+
+    if (resultId === '누가 나를 지정함') {
+      return '누가 나를 지정함'
+    }
     //자신의 목적지와 가장 가까운 상대찾기
     console.log(user.username, '도착지제일가까운', resultId)
     const currentUserUP = targetUnmatchedPath
@@ -472,7 +476,7 @@ export class UnmatchedPathsService {
     }
     const refreshedI = await this.userRepository.findOne(myId)
     if (refreshedI.lock) {
-      return '누군가 나를 최적의 상대로 꼽았고 따라서 나는 나의 최적의 상대를 찾는것을 종료한다'
+      return '누가 나를 지정함'
     }
     const refreshedPartner = await this.userRepository.findOne(minId)
     if (refreshedPartner.lock) {
