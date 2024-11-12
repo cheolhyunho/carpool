@@ -494,6 +494,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
       user.isDriver = false
       user.pgToken = null
       user.isAdmin = false
+      user.lock = false
       await this.userRepository.save(user)
     }
     this.logger.log(`disconnected : ${socket.id}`)
