@@ -71,6 +71,10 @@ export class MatchingGateway implements OnGatewayDisconnect {
     const startTime = Date.now()
     while (!matchFound) {
       response = await this.unmatchedPathService.setMatching(user)
+      if (response === '누가 나를 지정함') {
+        socket.emit('someonePointedMe')
+        break
+      }
       if (response !== null) {
         matchFound = true
       } else {
