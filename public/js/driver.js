@@ -282,7 +282,8 @@ socket.on('letsDrive', function (matchedPath) {
     fetchWaittingPayment()
   })
   rejectButton.addEventListener('click', () => {
-    location.reload()
+    socket.emit('iDontWantThisPath', matchedPath)
+    window.location.reload()
   })
 
   function updateInfowindowContent(index) {
