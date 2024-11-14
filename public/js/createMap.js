@@ -978,9 +978,7 @@ socket.on('noPeople', () => {
   alert('매칭상대가 존재하지 않습니다, 잠시후 다시 시도해주세요')
 })
 
-socket.on('someonePointedMe', () => {
-  alert('매칭 가능한 상대가 존재하지 않습니다. 잠시 후 다시 시도해주세요')
-})
+// socket.on('someonePointedMe', () => {})
 
 socket.on('matching', (matchingPath) => {
   var placeName = []

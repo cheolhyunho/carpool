@@ -73,12 +73,11 @@ export class MatchingGateway implements OnGatewayDisconnect {
     while (!matchFound) {
       response = await this.unmatchedPathService.setMatching(user)
       if (response === '누가 나를 지정함') {
-        socket.emit('someonePointedMe')
-        break
+        // socket.emit('someonePointedMe')
+        return
       }
       if (response !== null) {
         matchFound = true
-        MatchingGateway.matchedPaths.push(response.matchedPath.id)
       } else {
         console.log('대기중')
         await this.unmatchedPathService.sleep(1000)
@@ -105,13 +104,14 @@ export class MatchingGateway implements OnGatewayDisconnect {
         response.matchedFare < response.matchedUserUP.fare
       ) {
         this.isAlreadySentMap.set(response.matchedPath.summary.origin.x, true)
-        await this.matchedPathService.createMatchedPath(
+        const mp = await this.matchedPathService.createMatchedPath(
           response.matchedPath,
           response.currentFare,
           response.matchedFare,
           user,
           oppUser,
         )
+        MatchingGateway.matchedPaths.push(mp.id)
         socket.emit('matching', {
           ...response,
           username: user.username,
