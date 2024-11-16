@@ -974,9 +974,9 @@ socket.on('oppAlreadyMatched', () => {
     })
 })
 
-socket.on('noPeople', () => {
-  alert('매칭상대가 존재하지 않습니다, 잠시후 다시 시도해주세요')
-})
+// socket.on('noPeople', () => {
+//   alert('매칭상대가 존재하지 않습니다, 잠시후 다시 시도해주세요')
+// })
 
 // socket.on('someonePointedMe', () => {})
 

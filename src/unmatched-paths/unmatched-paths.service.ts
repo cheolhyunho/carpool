@@ -279,10 +279,10 @@ export class UnmatchedPathsService {
 
     console.log('톨비정산 후 각각 요금 :', currentFare, matchedFare)
 
-    const finalI = await this.userRepository.findOne(myId)
-    if (finalI.lock) {
-      return '누가 나를 지정함'
-    }
+    // const finalI = await this.userRepository.findOne(myId)
+    // if (finalI.lock) {
+    //   return '누가 나를 지정함'
+    // }
 
     return {
       currentUserUP: currentUserUP,
