@@ -6,6 +6,33 @@
   font-style: normal;
 }
 
+.buffering {
+  position: fixed; /* fixed로 변경하여 viewport 기준으로 배치 */
+  top: 50%; /* 상단에서 50% */
+  left: 50%; /* 좌측에서 50% */
+  transform: translate(
+    -50%,
+    -50%
+  ); /* 요소의 크기의 절반만큼 이동하여 중앙 정렬 */
+  display: inline-block;
+  width: 250px;
+  height: 250px;
+  border: 15px solid #b8b9ba;
+  border-top: 15px solid #3498db;
+  border-radius: 50%;
+  animation: spin 5s linear infinite;
+  z-index: 9999; /* 다른 요소들 위에 표시되도록 z-index 추가 */
+}
+
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
 body {
   background-color: white;
 }
