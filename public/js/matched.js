@@ -21,6 +21,7 @@ fetch('/unmatchedPath/userId', {
 
 socket.on('failedPay', () => {
   alert('상대방 결제문제로 매칭이 취소되었습니다.')
+  window.location.href = '/'
 })
 
 var mapContainer = document.getElementById('map') // 지도를 표시할 div
@@ -95,8 +96,5 @@ socket.on('hereIsRealTimeLocation', (data) => {
 socket.on('finishTracking', () => {
   console.log('finishTracking 실행중')
   socket.emit('deleteUnmatchedPathAndEtc')
-})
-
-socket.on('delteSocketIdAndEtc', () => {
   window.location.href = window.location.origin + '/unmatchedPath'
 })

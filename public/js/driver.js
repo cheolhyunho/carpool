@@ -251,7 +251,7 @@ socket.on('letsDrive', function (matchedPath) {
       updateInfowindowContent(3)
     }
   })
-  async function fetchWaittingPayment() {
+  async function fetchWaitingPayment() {
     try {
       const response = await fetch('matchedPath/waittingPayment')
       if (response.ok) {
@@ -279,7 +279,7 @@ socket.on('letsDrive', function (matchedPath) {
     forRemoveMap.remove()
     infoBox.remove()
     logOutButton.remove()
-    fetchWaittingPayment()
+    fetchWaitingPayment()
   })
   rejectButton.addEventListener('click', () => {
     socket.emit('iDontWantThisPath', matchedPath)
@@ -332,9 +332,9 @@ socket.on('failedPay', () => {
   location.reload()
 })
 let script = document.createElement('script')
-script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.1/kakao.min.js'
+script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/v1/kakao.min.js'
 script.integrity =
-  'sha384-kDljxUXHaJ9xAb2AzRd59KxjrFjzHa5TAoFQ6GbYTCAG0bjM55XohjjDT7tDDC01'
+  'sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4'
 script.crossOrigin = 'anonymous'
 
 script.onload = function () {
@@ -405,10 +405,6 @@ socket.on('updateLocation', (matchedPath) => {
       console.log(matchedPath)
       socket.emit('realTimeLocation', data)
     })
-    finishDriveButton.addEventListener('click', () => {
-      socket.emit('finishDrive')
-      window.location.href = window.location.origin + '/driver'
-    })
   } catch (error) {
     console.error(error)
   }
@@ -434,4 +430,9 @@ logoutButton.addEventListener('click', function () {
     .catch((error) => {
       console.error('Error:', error)
     })
+})
+
+finishDriveButton.addEventListener('click', () => {
+  socket.emit('finishDrive')
+  window.location.href = window.location.origin + '/driver'
 })

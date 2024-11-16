@@ -112,6 +112,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
           oppUser,
         )
         MatchingGateway.matchedPaths.push(mp.id)
+
         socket.emit('matching', {
           ...response,
           username: user.username,
@@ -182,10 +183,14 @@ export class MatchingGateway implements OnGatewayDisconnect {
       })
       .getOne()
     console.log('타겟유저:', targetUser.matchedPath)
-    let matchedPath = await this.matchedPathRepository.findOne({
-      where: { id: targetUser.matchedPath.id },
-      relations: ['users'],
-    })
+
+    let matchedPath = await this.matchedPathRepository
+      .createQueryBuilder('matchedPath')
+      .leftJoinAndSelect('matchedPath.users', 'users')
+      .where('matchedPath.id = :id', { id: targetUser.matchedPath.id })
+      .orderBy('users.id', 'ASC')
+      .getOne()
+
     const otherUser = matchedPath.users.find(
       (oppUser) => oppUser.id !== user.id,
     )
@@ -196,19 +201,21 @@ export class MatchingGateway implements OnGatewayDisconnect {
     //수락대기 최대시간
     const timeoutLimit = 60
     while (!isAccepted && elapsedTime < timeoutLimit) {
-      if (matchedPath.users[0].isMatching && matchedPath.users[1].isMatching) {
+      if (
+        matchedPath.users[0]?.isMatching &&
+        matchedPath.users[1]?.isMatching
+      ) {
         isAccepted = true
       } else {
         console.log('수락대기중')
 
         await this.unmatchedPathService.sleep(1000)
-        const updatedMatchedPath = await this.entityManager.findOne(
-          MatchedPathEntity,
-          {
-            where: { id: targetUser.matchedPath.id },
-            relations: ['users'],
-          },
-        )
+        const updatedMatchedPath = await this.matchedPathRepository
+          .createQueryBuilder('matchedPath')
+          .leftJoinAndSelect('matchedPath.users', 'users')
+          .where('matchedPath.id = :id', { id: targetUser.matchedPath.id })
+          .orderBy('users.id', 'ASC')
+          .getOne()
         matchedPath = updatedMatchedPath
         console.log(matchedPath.users)
         elapsedTime += 1
@@ -366,24 +373,17 @@ export class MatchingGateway implements OnGatewayDisconnect {
       )
 
       if (matchedPath.users[0].socketId && matchedPath.users[1].socketId) {
-        socket
-          .to(matchedPath.users[0].socketId)
-          .emit('kakaoPay', firstUserUrl.next_redirect_pc_url)
-        socket
-          .to(matchedPath.users[1].socketId)
-          .emit('kakaoPay', secondUserUrl.next_redirect_pc_url)
-
-        console.log('tid:', firstUserUrl.tid, secondUserUrl.tid)
+        socket.to(matchedPath.users[0].socketId).emit('kakaoPay', firstUserUrl)
+        socket.to(matchedPath.users[1].socketId).emit('kakaoPay', secondUserUrl)
 
         await this.unmatchedPathService.sleep(5000)
 
-        const updatedMatchedPath = await this.entityManager.findOne(
-          MatchedPathEntity,
-          {
-            where: { id: matchedPath.id },
-            relations: ['users'],
-          },
-        )
+        const updatedMatchedPath = await this.matchedPathRepository
+          .createQueryBuilder('matchedPath')
+          .leftJoinAndSelect('matchedPath.users', 'users')
+          .where('matchedPath.id = :id', { id: matchedPath.id })
+          .orderBy('users.id', 'ASC')
+          .getOne()
         matchedPath = updatedMatchedPath
 
         let isAccepted = false
@@ -401,13 +401,12 @@ export class MatchingGateway implements OnGatewayDisconnect {
           } else {
             console.log('결제완료대기중')
             await this.unmatchedPathService.sleep(1000)
-            const updatedMatchedPath = await this.entityManager.findOne(
-              MatchedPathEntity,
-              {
-                where: { id: matchedPath.id },
-                relations: ['users'],
-              },
-            )
+            const updatedMatchedPath = await this.matchedPathRepository
+              .createQueryBuilder('matchedPath')
+              .leftJoinAndSelect('matchedPath.users', 'users')
+              .where('matchedPath.id = :id', { id: matchedPath.id })
+              .orderBy('users.id', 'ASC')
+              .getOne()
             matchedPath = updatedMatchedPath
             console.log(matchedPath.users)
             elapsedTime += 1
@@ -420,22 +419,38 @@ export class MatchingGateway implements OnGatewayDisconnect {
             matchedPath.users[0].pgToken,
             matchedPath.users[1].pgToken,
           )
-          await this.kakaoMobilityService.getApprove(
-            firstUserUrl.tid,
-            matchedPath.users[0].pgToken,
-          )
-          await this.kakaoMobilityService.getApprove(
-            secondUserUrl.tid,
-            matchedPath.users[1].pgToken,
-          )
+          console.log('tid확인', firstUserUrl.tid, secondUserUrl.tid)
 
-          const updatedMatchedPath = await this.entityManager.findOne(
-            MatchedPathEntity,
-            {
-              where: { id: matchedPath.id },
-              relations: ['users'],
-            },
-          )
+          try {
+            await this.kakaoMobilityService.getApprove(
+              firstUserUrl.tid,
+              matchedPath.users[0].pgToken,
+            )
+            await this.kakaoMobilityService.getApprove(
+              secondUserUrl.tid,
+              matchedPath.users[1].pgToken,
+            )
+          } catch (err) {
+            console.log('결제승인 오류메세지', err)
+
+            if (matchedPath.users[0].socketId) {
+              socket.to(matchedPath.users[0].socketId).emit('failedPay')
+            }
+
+            if (matchedPath.users[1].socketId) {
+              socket.to(matchedPath.users[1].socketId).emit('failedPay')
+            }
+
+            socket.emit('failedPay')
+            return
+          }
+
+          const updatedMatchedPath = await this.matchedPathRepository
+            .createQueryBuilder('matchedPath')
+            .leftJoinAndSelect('matchedPath.users', 'users')
+            .where('matchedPath.id = :id', { id: matchedPath.id })
+            .orderBy('users.id', 'ASC')
+            .getOne()
           const firstUser = await this.entityManager.findOne(UserEntity, {
             where: { id: matchedPath.users[0].id },
             relations: ['unmatchedPath'],
@@ -449,20 +464,22 @@ export class MatchingGateway implements OnGatewayDisconnect {
             firstUser.unmatchedPath,
             secondUser.unmatchedPath,
           )
+
           console.log('navigation 이벤트 실행전')
           socket.emit('navigation', updatedMatchedPath)
           console.log('navigation 이벤트 실행후')
-          let setInt
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars, prefer-const
-          setInt = setInterval(() => {
+
+          const setInt = setInterval(() => {
             socket.emit('updateLocation', updatedMatchedPath)
           }, 10000)
+
           socket.on('finishDrive', () => {
             console.log('finishDrive 실행중')
             clearInterval(setInt)
             socket.to(firstUser.socketId).emit('finishTracking')
             socket.to(secondUser.socketId).emit('finishTracking')
           })
+
           return '승객들 결제완료'
         } else {
           if (matchedPath.users[0].socketId) {
@@ -473,6 +490,8 @@ export class MatchingGateway implements OnGatewayDisconnect {
           }
           socket.emit('failedPay')
         }
+      } else {
+        socket.emit('failedPay')
       }
     }
   }
@@ -488,8 +507,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
     user.matchedPath = null
 
     await this.userRepository.save(user)
-
-    socket.to(user.socketId).emit('delteSocketIdAndEtc')
   }
 
   @SubscribeMessage('socketIdSave')
@@ -542,7 +559,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
       user.isMatching = false
       user.socketId = null
       user.isDriver = false
-      user.pgToken = null
+      // user.pgToken = null
       user.isAdmin = false
       user.lock = false
       await this.userRepository.save(user)
