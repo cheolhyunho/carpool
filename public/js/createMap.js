@@ -14,6 +14,7 @@ const modeButton = document.getElementById('DriverMode')
 const boxAndButton = document.getElementById('boxAndButton')
 const placesListBox = document.getElementById('placesList')
 const paginationBox = document.getElementById('pagination')
+const buffering = document.querySelector('.buffering')
 
 modeButton.addEventListener('click', function () {
   window.location.href = window.location.origin + '/driver'
@@ -126,18 +127,16 @@ function handleButtonClick2(event) {
     setOriginPoint(originAddressInput.value)
   }
 }
+var markers = []
+function removeMarker() {
+  for (var i = 0; i < markers.length; i++) {
+    markers[i].setMap(null)
+  }
+  markers = []
+}
 
 //주소로 목적지를 정하는 함수
 function updateMapWithDestination(destinaitionAddress) {
-  var mapContainer = document.getElementById('map'), // 지도를 표시할 div
-    mapOption = {
-      center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-      level: 3, // 지도의 확대 레벨
-    }
-
-  // 지도를 생성합니다
-  var map = new kakao.maps.Map(mapContainer, mapOption)
-
   // 주소-좌표 변환 객체를 생성합니다
   var geocoder = new kakao.maps.services.Geocoder()
 
@@ -169,8 +168,6 @@ function updateMapWithDestination(destinaitionAddress) {
           lng: result[0].x,
         }
       } else {
-        var markers = []
-
         var ps = new kakao.maps.services.Places()
 
         // 검색 결과 목록이나 마커를 클릭했을 때 장소명을 표출할 인포윈도우를 생성합니다
@@ -391,17 +388,7 @@ function updateMapWithDestination(destinaitionAddress) {
   )
 }
 
-///////////////////////test
 function setOriginPoint(originAddress) {
-  var mapContainer = document.getElementById('map'), // 지도를 표시할 div
-    mapOption = {
-      center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-      level: 3, // 지도의 확대 레벨
-    }
-
-  // 지도를 생성합니다
-  var map = new kakao.maps.Map(mapContainer, mapOption)
-
   // 주소-좌표 변환 객체를 생성합니다
   var geocoder = new kakao.maps.services.Geocoder()
 
@@ -432,13 +419,7 @@ function setOriginPoint(originAddress) {
           lat: result[0].y,
           lng: result[0].x,
         }
-        // setOriginButton.addEventListener('click', function () {
-        //   console.log('출발지로 설정버튼 눌림')
-        //   sendPost(originPoint)
-        // })
       } else {
-        var markers = []
-
         var ps = new kakao.maps.services.Places()
 
         // 검색 결과 목록이나 마커를 클릭했을 때 장소명을 표출할 인포윈도우를 생성합니다
@@ -784,6 +765,9 @@ logoutButton.addEventListener('click', function () {
 
 matchingButton.addEventListener('click', function () {
   matchingButton.disabled = true
+  buffering.style.display = 'inline'
+  matchingButton.style.backgroundColor = 'rgba(128, 128, 128, 0.5)'
+
   fetch('/unmatchedPath/userId', {
     method: 'GET',
     headers: {
@@ -797,7 +781,6 @@ matchingButton.addEventListener('click', function () {
       return response.json()
     })
     .then((data) => {
-      matchingButton.style.backgroundColor = 'rgba(128, 128, 128, 0.5)'
       socket.emit('doMatch', data, (user) => {
         console.log('수신완료:', user)
       })
@@ -974,13 +957,13 @@ socket.on('oppAlreadyMatched', () => {
     })
 })
 
-// socket.on('noPeople', () => {
-//   alert('매칭상대가 존재하지 않습니다, 잠시후 다시 시도해주세요')
-// })
-
-// socket.on('someonePointedMe', () => {})
+socket.on('noPeople', () => {
+  buffering.style.display = 'none'
+  alert('매칭상대가 존재하지 않습니다, 잠시후 다시 시도해주세요')
+})
 
 socket.on('matching', (matchingPath) => {
+  buffering.style.display = 'none'
   var placeName = []
   switch (matchingPath.caseIndex) {
     case 0:
@@ -1235,6 +1218,7 @@ function isMobile() {
 }
 
 socket.on('noUnmatchedPath', () => {
+  buffering.style.display = 'none'
   alert('출발지와 목적지를 설정하고 매칭을 시도해주세요')
 })
 
@@ -1345,3 +1329,31 @@ function updateMapWithDestination2(destinaitionAddress) {
 setDestinationButton.addEventListener('click', function () {
   updateMapWithDestination2(destinationAddressInput.value)
 })
+
+originAddressInput.addEventListener('keypress', function (event) {
+  if (event.key === 'Enter') {
+    event.preventDefault() // 기본 동작 방지
+    searchOrigin()
+  }
+})
+
+function searchOrigin() {
+  const searchTerm = originAddressInput.value.trim()
+  if (searchTerm) {
+    setOriginPoint(searchTerm)
+  }
+}
+
+destinationAddressInput.addEventListener('keypress', function (event) {
+  if (event.key === 'Enter') {
+    event.preventDefault() // 기본 동작 방지
+    searchDes()
+  }
+})
+
+function searchDes() {
+  const searchTerm = destinationAddressInput.value.trim()
+  if (searchTerm) {
+    updateMapWithDestination(searchTerm)
+  }
+}

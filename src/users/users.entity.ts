@@ -58,10 +58,6 @@ export class UserEntity extends CommonEntity {
   @Column({ type: 'boolean', default: false })
   isMatching: boolean
 
-  @IsBoolean()
-  @Column({ type: 'boolean', default: false })
-  lock: boolean
-
   //* Relation */
 
   @OneToOne(() => UnmatchedPathEntity) // 단방향 연결, 양방향도 가능

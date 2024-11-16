@@ -72,10 +72,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
     const startTime = Date.now()
     while (!matchFound) {
       response = await this.unmatchedPathService.setMatching(user)
-      if (response === '누가 나를 지정함') {
-        // socket.emit('someonePointedMe')
-        return
-      }
       if (response !== null) {
         matchFound = true
       } else {
@@ -282,7 +278,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     await this.userRepository.save(currentUser)
   }
 
-  @SubscribeMessage('idonWantThisPath')
+  @SubscribeMessage('iDontWantThisPath')
   async handleIdonWantThisPath(
     @ConnectedSocket() socket: Socket,
     @MessageBody() matchedPath,
@@ -317,6 +313,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
       ) {
         const refreshedMatchedPath = await this.matchedPathRepository.findOne({
           where: { id: matchedPathId },
+          relations: ['users'],
         })
         if (!refreshedMatchedPath.lock) {
           refreshedMatchedPath.lock = true
@@ -561,7 +558,6 @@ export class MatchingGateway implements OnGatewayDisconnect {
       user.isDriver = false
       // user.pgToken = null
       user.isAdmin = false
-      user.lock = false
       await this.userRepository.save(user)
     }
     this.logger.log(`disconnected : ${socket.id}`)

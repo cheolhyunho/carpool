@@ -110,8 +110,6 @@ export class UnmatchedPathsService {
       .where('user.id = :userId', { userId: user.id })
       .getOne()
 
-    const myId = user.id
-
     const targetUnmatchedPath = await this.unmatchedPathRepository.findOne(
       targetUser.unmatchedPath.id,
     )
@@ -139,14 +137,8 @@ export class UnmatchedPathsService {
     const resultId = await this.setResultArray(
       savedTargetUnmatchedPath,
       tmpArray,
-      myId,
     )
 
-    if (resultId === '누가 나를 지정함') {
-      return '누가 나를 지정함'
-    } else if (resultId === '' || resultId === undefined || resultId === null) {
-      return '매칭할 상대가 없습니다'
-    }
     //자신의 목적지와 가장 가까운 상대찾기
     console.log(user.username, '도착지제일가까운', resultId)
     const currentUserUP = targetUnmatchedPath
@@ -278,11 +270,6 @@ export class UnmatchedPathsService {
     }
 
     console.log('톨비정산 후 각각 요금 :', currentFare, matchedFare)
-
-    // const finalI = await this.userRepository.findOne(myId)
-    // if (finalI.lock) {
-    //   return '누가 나를 지정함'
-    // }
 
     return {
       currentUserUP: currentUserUP,
@@ -455,7 +442,7 @@ export class UnmatchedPathsService {
     return tmpArray
   }
 
-  async setResultArray(savedTargetUnmatchedPath, tmpArray, myId) {
+  async setResultArray(savedTargetUnmatchedPath, tmpArray) {
     let minId = ''
     let minDistance = 1000000000000000
     for (let i = 0; i < tmpArray.length; i++) {
