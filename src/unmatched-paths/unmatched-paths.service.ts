@@ -481,16 +481,7 @@ export class UnmatchedPathsService {
         minDistance = kakaoResponse.summary.distance
       }
     }
-    const refreshedI = await this.userRepository.findOne(myId)
-    if (refreshedI.lock) {
-      return '누가 나를 지정함'
-    }
-    const refreshedPartner = await this.userRepository.findOne(minId)
-    if (refreshedPartner.lock) {
-      tmpArray = tmpArray.filter((id) => id !== minId)
-      this.setResultArray(savedTargetUnmatchedPath, tmpArray, myId)
-      return
-    }
+
     return minId
   }
 
