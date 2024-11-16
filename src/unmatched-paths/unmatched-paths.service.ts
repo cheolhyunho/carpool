@@ -121,7 +121,6 @@ export class UnmatchedPathsService {
     if (userArray == null) {
       return null
     }
-    console.log(user.username, '소켓필터후', userArray)
 
     const userIdArray = userArray.map((user) => user.id)
 
@@ -134,11 +133,12 @@ export class UnmatchedPathsService {
     let tmpArray = []
     //출발지 10km내 필터링
     tmpArray = await this.pushToTmpArray(savedTargetUnmatchedPath, tmpArray)
-    console.log(user.username, '출발지필터후', tmpArray)
+
     const resultId = await this.setResultArray(
       savedTargetUnmatchedPath,
       tmpArray,
     )
+
     //자신의 목적지와 가장 가까운 상대찾기
     console.log(user.username, '도착지제일가까운', resultId)
     const currentUserUP = targetUnmatchedPath
@@ -468,6 +468,7 @@ export class UnmatchedPathsService {
         minDistance = kakaoResponse.summary.distance
       }
     }
+
     return minId
   }
 

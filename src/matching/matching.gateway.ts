@@ -18,6 +18,7 @@ import { KakaoMobilityService } from 'src/common/kakaoMobilityService/kakao.mobi
 
 @WebSocketGateway()
 export class MatchingGateway implements OnGatewayDisconnect {
+  static matchedPaths = []
   constructor(
     private readonly unmatchedPathService: UnmatchedPathsService,
     private readonly matchedPathService: MatchedPathsService,
@@ -99,14 +100,14 @@ export class MatchingGateway implements OnGatewayDisconnect {
         response.matchedFare < response.matchedUserUP.fare
       ) {
         this.isAlreadySentMap.set(response.matchedPath.summary.origin.x, true)
-
-        await this.matchedPathService.createMatchedPath(
+        const mp = await this.matchedPathService.createMatchedPath(
           response.matchedPath,
           response.currentFare,
           response.matchedFare,
           user,
           oppUser,
         )
+        MatchingGateway.matchedPaths.push(mp.id)
 
         socket.emit('matching', {
           ...response,
@@ -277,30 +278,75 @@ export class MatchingGateway implements OnGatewayDisconnect {
     await this.userRepository.save(currentUser)
   }
 
+  @SubscribeMessage('iDontWantThisPath')
+  async handleIdonWantThisPath(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() matchedPath,
+  ) {
+    const targetMatchedPath = await this.matchedPathRepository.findOne({
+      where: { id: matchedPath.id },
+    })
+    targetMatchedPath.lock = false
+    await this.matchedPathRepository.save(targetMatchedPath)
+    MatchingGateway.matchedPaths.push(matchedPath.id)
+  }
+
   @SubscribeMessage('hereIsLocation')
   async requestToDriver(
     @ConnectedSocket() socket: Socket,
     @MessageBody() data,
   ) {
-    try {
-      console.log('hereIsLocation 실행중')
+    for (const matchedPathId of MatchingGateway.matchedPaths) {
+      const matchedPath = await this.matchedPathRepository.findOne({
+        where: { id: matchedPathId },
+      })
       const kakaoResponse = await this.kakaoMobilityService.getInfo(
-        data.matchedPath.origin.lat,
-        data.matchedPath.origin.lng,
+        matchedPath.origin.lat,
+        matchedPath.origin.lng,
         data.lat,
         data.lng,
       )
 
-      if (kakaoResponse.result_code === 104) {
-        socket.emit('letsDrive', data.matchedPath)
-      } else if (kakaoResponse.summary.duration <= 6000000000000) {
-        console.log('택시기사에게 send:', data.matchedPath)
-        socket.emit('letsDrive', data.matchedPath)
-        return
+      if (
+        kakaoResponse.result_code === 104 ||
+        kakaoResponse.summary.duration <= 6000000000000
+      ) {
+        const refreshedMatchedPath = await this.matchedPathRepository.findOne({
+          where: { id: matchedPathId },
+          relations: ['users'],
+        })
+        if (!refreshedMatchedPath.lock) {
+          refreshedMatchedPath.lock = true
+          await this.matchedPathRepository.save(refreshedMatchedPath)
+          MatchingGateway.matchedPaths = MatchingGateway.matchedPaths.filter(
+            (id) => id !== matchedPathId,
+          )
+          socket.emit('letsDrive', refreshedMatchedPath)
+          return
+        } else {
+          continue
+        }
       }
-    } catch (e) {
-      console.log(e, 'hereIsLocation error')
     }
+    // try {
+    //   console.log('hereIsLocation 실행중')
+    //   const kakaoResponse = await this.kakaoMobilityService.getInfo(
+    //     data.matchedPath.origin.lat,
+    //     data.matchedPath.origin.lng,
+    //     data.lat,
+    //     data.lng,
+    //   )
+
+    //   if (kakaoResponse.result_code === 104) {
+    //     socket.emit('letsDrive', data.matchedPath)
+    //   } else if (kakaoResponse.summary.duration <= 6000000000000) {
+    //     console.log('택시기사에게 send:', data.matchedPath)
+    //     socket.emit('letsDrive', data.matchedPath)
+    //     return
+    //   }
+    // } catch (e) {
+    //   console.log(e, 'hereIsLocation error')
+    // }
   }
 
   //택시기사가 수락했을때
