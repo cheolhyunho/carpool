@@ -58,6 +58,9 @@ export class UserEntity extends CommonEntity {
   @Column({ type: 'boolean', default: false })
   isMatching: boolean
 
+  @Column({ type: 'varchar', nullable: true })
+  opponentId: string
+
   //* Relation */
 
   @OneToOne(() => UnmatchedPathEntity) // 단방향 연결, 양방향도 가능

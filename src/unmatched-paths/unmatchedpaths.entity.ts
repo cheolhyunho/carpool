@@ -2,6 +2,7 @@ import { CommonEntity } from '../common/entities/common.entity' // ormconfig.jso
 import { Column, Entity, ManyToOne, OneToOne } from 'typeorm'
 import { MatchedPathEntity } from '../matched-paths/matchedPaths.entity'
 import { UserEntity } from '../users/users.entity'
+import { IsBoolean } from 'class-validator'
 
 @Entity({
   name: 'UnmatchedPaths',
@@ -24,6 +25,10 @@ export class UnmatchedPathEntity extends CommonEntity {
 
   @Column({ type: 'varchar', nullable: true, array: true, default: [] })
   userIdArray: string[]
+
+  @IsBoolean()
+  @Column({ type: 'boolean', nullable: false, default: false })
+  lock: boolean
 
   //* Relation */
 

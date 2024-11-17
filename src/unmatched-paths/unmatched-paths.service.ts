@@ -1,3 +1,4 @@
+import { UserRegisterDTO } from './../users/dtos/user-register.dto'
 import { KakaoMobilityService } from './../common/kakaoMobilityService/kakao.mobility.service'
 import { UserEntity } from './../users/users.entity'
 import { Injectable } from '@nestjs/common'
@@ -138,6 +139,9 @@ export class UnmatchedPathsService {
       savedTargetUnmatchedPath,
       tmpArray,
     )
+
+    user.opponentId = resultId
+    await this.userRepository.save(user)
 
     //자신의 목적지와 가장 가까운 상대찾기
     console.log(user.username, '도착지제일가까운', resultId)
@@ -282,6 +286,7 @@ export class UnmatchedPathsService {
       caseIndex: caseIndex,
     }
   }
+
   async fetchUnmatchedPaths(userId) {
     const queryBuilder = getConnection()
       .getRepository(UserEntity)
@@ -454,6 +459,7 @@ export class UnmatchedPathsService {
           userId: userId,
         })
         .getOne()
+      console.log('user:', user)
       const kakaoResponse = await this.kakaoMobilityService.getInfo(
         savedTargetUnmatchedPath.destinationPoint.lat,
         savedTargetUnmatchedPath.destinationPoint.lng,
@@ -475,4 +481,7 @@ export class UnmatchedPathsService {
   async sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms))
   }
+}
+function asnyc() {
+  throw new Error('Function not implemented.')
 }
