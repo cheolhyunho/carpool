@@ -15,6 +15,7 @@ import { MatchedPathEntity } from '../matched-paths/matchedPaths.entity'
 import { MatchedPathsService } from '../matched-paths/matched-paths.service'
 import { EntityManager } from 'typeorm'
 import { KakaoMobilityService } from 'src/common/kakaoMobilityService/kakao.mobility.service'
+import { ref } from 'joi'
 
 @WebSocketGateway()
 export class MatchingGateway implements OnGatewayDisconnect {
@@ -107,6 +108,31 @@ export class MatchingGateway implements OnGatewayDisconnect {
           user,
           oppUser,
         )
+        const refreshedOpp = this.userRepository.findOne(oppUser.id)
+
+        if ((await refreshedOpp).opponentId !== null) {
+          if ((await refreshedOpp).opponentId !== user.id) {
+            return this.handleSocket(socket, body)
+          }
+        } else {
+          let rereFreshedOpp = this.userRepository.findOne(oppUser.id)
+          let count = 0
+          while ((await rereFreshedOpp).opponentId === null) {
+            count += 1
+            rereFreshedOpp = this.userRepository.findOne(oppUser.id)
+
+            if (count === 500) {
+              break
+            }
+          }
+          if (
+            (await rereFreshedOpp).opponentId === null ||
+            (await rereFreshedOpp).opponentId !== user.id
+          ) {
+            return this.handleSocket(socket, body)
+          }
+        }
+
         MatchingGateway.matchedPaths.push(mp.id)
 
         socket.emit('matching', {

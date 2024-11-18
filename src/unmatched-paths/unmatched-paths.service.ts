@@ -138,6 +138,8 @@ export class UnmatchedPathsService {
       savedTargetUnmatchedPath,
       tmpArray,
     )
+    user.opponentId = resultId
+    await this.userRepository.save(user)
 
     //자신의 목적지와 가장 가까운 상대찾기
     console.log(user.username, '도착지제일가까운', resultId)
