@@ -409,7 +409,7 @@ function setOriginPoint(originAddress) {
         // 인포윈도우로 장소에 대한 설명을 표시합니다
         var infowindow = new kakao.maps.InfoWindow({
           content:
-            '<div style="width:150px;text-align:center;padding:6px 0;">목적지</div>',
+            '<div style="width:150px;text-align:center;padding:6px 0;">출발지</div>',
         })
         infowindow.open(map, marker)
 
@@ -1224,14 +1224,14 @@ socket.on('noUnmatchedPath', () => {
 
 // 돋보기 누르지 않고 출발지 설정버튼 누를때 주소를 좌표로 바꿔서 서버에 전송하는 함수
 function setOriginPoint2(originAddress) {
-  var mapContainer = document.getElementById('map'), // 지도를 표시할 div
-    mapOption = {
-      center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-      level: 3, // 지도의 확대 레벨
-    }
+  // var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+  //   mapOption = {
+  //     center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+  //     level: 3, // 지도의 확대 레벨
+  //   }
 
-  // 지도를 생성합니다
-  var map = new kakao.maps.Map(mapContainer, mapOption)
+  // // 지도를 생성합니다
+  // var map = new kakao.maps.Map(mapContainer, mapOption)
 
   // 주소-좌표 변환 객체를 생성합니다
   var geocoder = new kakao.maps.services.Geocoder()
@@ -1253,7 +1253,7 @@ function setOriginPoint2(originAddress) {
         // 인포윈도우로 장소에 대한 설명을 표시합니다
         var infowindow = new kakao.maps.InfoWindow({
           content:
-            '<div style="width:150px;text-align:center;padding:6px 0;">목적지</div>',
+            '<div style="width:150px;text-align:center;padding:6px 0;">출발지</div>',
         })
         infowindow.open(map, marker)
 
@@ -1278,14 +1278,14 @@ setOriginButton.addEventListener('click', function () {
 
 //도착지 설정버튼을 돋보기 없이 눌렀을때 좌표 전송 함수
 function updateMapWithDestination2(destinaitionAddress) {
-  var mapContainer = document.getElementById('map'), // 지도를 표시할 div
-    mapOption = {
-      center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-      level: 3, // 지도의 확대 레벨
-    }
+  // var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+  //   mapOption = {
+  //     center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+  //     level: 3, // 지도의 확대 레벨
+  //   }
 
-  // 지도를 생성합니다
-  var map = new kakao.maps.Map(mapContainer, mapOption)
+  // // 지도를 생성합니다
+  // var map = new kakao.maps.Map(mapContainer, mapOption)
 
   // 주소-좌표 변환 객체를 생성합니다
   var geocoder = new kakao.maps.services.Geocoder()
