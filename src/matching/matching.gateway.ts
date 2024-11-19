@@ -28,6 +28,8 @@ export class MatchingGateway implements OnGatewayDisconnect {
     private readonly entityManager: EntityManager,
     private readonly kakaoMobilityService: KakaoMobilityService,
   ) {}
+  isAlreadySentMap = new Map()
+  matchedMap = new Map()
 
   private logger = new Logger('gateway')
   @SubscribeMessage('driverMode')
@@ -40,11 +42,10 @@ export class MatchingGateway implements OnGatewayDisconnect {
     currentUser.isDriver = true
     await this.userRepository.save(currentUser)
   }
-  isAlreadySentMap = new Map()
 
   @SubscribeMessage('doMatch')
   async handleSocket(@ConnectedSocket() socket: Socket, @MessageBody() body) {
-    const user = await this.userRepository.findOne({
+    let user = await this.userRepository.findOne({
       where: { id: body.id },
       relations: ['unmatchedPath', 'matchedPath'],
     })
@@ -66,7 +67,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     let response = null
     let matchFound = false
     //테스트시에 주석처리
-    await this.unmatchedPathService.sleep(5000)
+    await this.unmatchedPathService.sleep(2000)
 
     const startTime = Date.now()
     while (!matchFound) {
@@ -83,6 +84,12 @@ export class MatchingGateway implements OnGatewayDisconnect {
     }
     if (Date.now() - startTime <= 60000) {
       const matchedUserUP = response.matchedUserUP
+
+      user = await this.userRepository.findOne({
+        where: { id: body.id },
+        relations: ['unmatchedPath', 'matchedPath'],
+      })
+
       const oppUser = await this.userRepository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.unmatchedPath', 'unmatchedPath')
@@ -93,12 +100,21 @@ export class MatchingGateway implements OnGatewayDisconnect {
         .getOne()
 
       if (
+        !this.matchedMap.get(oppUser.id) &&
+        !this.matchedMap.get(user.id) &&
+        user.matchedPath == null &&
         oppUser.matchedPath == null &&
-        !this.isAlreadySentMap.get(response.matchedPath.summary.origin.x) &&
+        // !this.isAlreadySentMap.get(response.matchedPath.summary.origin.x) &&
         response.currentFare < response.currentUserUP.fare &&
         response.matchedFare < response.matchedUserUP.fare
       ) {
-        this.isAlreadySentMap.set(response.matchedPath.summary.origin.x, true)
+        // this.isAlreadySentMap.set(response.matchedPath.summary.origin.x, true)
+
+        this.matchedMap.set(user.id, true)
+
+        this.matchedMap.set(oppUser.id, true)
+
+        console.log('$진입', user.username, this.matchedMap)
 
         await this.matchedPathService.createMatchedPath(
           response.matchedPath,
@@ -113,6 +129,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
           username: user.username,
           oppname: `${oppUser.username[0]}*${oppUser.username.slice(2)}`,
         })
+
         let temp = response.currentUserUP
         response.currentUserUP = response.matchedUserUP
         response.matchedUserUP = temp
@@ -129,17 +146,33 @@ export class MatchingGateway implements OnGatewayDisconnect {
           username: oppUser.username,
           oppname: `${user.username[0]}*${user.username.slice(2)}`,
         })
-      }
 
-      const updateUser = await this.userRepository.findOne({
-        where: { id: body.id },
-        relations: ['matchedPath'],
-      })
+        this.matchedMap.set(user.id, false)
 
-      if (updateUser.matchedPath == null) {
-        console.log('Map', this.isAlreadySentMap)
-        this.isAlreadySentMap.set(response.matchedPath.summary.origin.x, false)
-        socket.emit('oppAlreadyMatched')
+        this.matchedMap.set(oppUser.id, false)
+      } else {
+        console.log('$빠꾸', user.username, this.matchedMap)
+
+        if (this.matchedMap.get(user.id) || user.matchedPath) {
+          return
+        }
+
+        if (this.matchedMap.get(oppUser.id) || oppUser.matchedPath) {
+          socket.emit('oppAlreadyMatched')
+        }
+
+        const updateUser = await this.userRepository.findOne({
+          where: { id: body.id },
+          relations: ['matchedPath'],
+        })
+
+        if (updateUser.matchedPath == null) {
+          this.isAlreadySentMap.set(
+            response.matchedPath.summary.origin.x,
+            false,
+          )
+          socket.emit('oppAlreadyMatched')
+        }
       }
     } else {
       socket.emit('noPeople')
