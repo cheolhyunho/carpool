@@ -345,10 +345,14 @@ export class MatchingGateway implements OnGatewayDisconnect {
         kakaoResponse.result_code === 104 ||
         kakaoResponse.summary.duration <= 6000000000000
       ) {
-        const refreshedMatchedPath = await this.matchedPathRepository.findOne({
-          where: { id: matchedPathId },
-          relations: ['users'],
-        })
+        const refreshedMatchedPath = await this.matchedPathRepository
+          .createQueryBuilder('matchedPath')
+          .leftJoinAndSelect('matchedPath.users', 'users')
+          .where('matchedPath.id = :id', { id: matchedPath.id })
+          .orderBy('users.id', 'ASC')
+          .getOne()
+
+        console.log('-------', refreshedMatchedPath)
         if (!refreshedMatchedPath.lock) {
           refreshedMatchedPath.lock = true
           await this.matchedPathRepository.save(refreshedMatchedPath)
@@ -585,6 +589,10 @@ export class MatchingGateway implements OnGatewayDisconnect {
       where: { socketId: socket.id },
       relations: ['matchedPath', 'unmatchedPath'],
     })
+
+    MatchingGateway.matchedPaths = MatchingGateway.matchedPaths.filter(
+      (id) => id !== user.matchedPath.id,
+    )
 
     if (user) {
       user.isMatching = false
