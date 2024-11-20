@@ -591,7 +591,7 @@ export class MatchingGateway implements OnGatewayDisconnect {
     })
 
     MatchingGateway.matchedPaths = MatchingGateway.matchedPaths.filter(
-      (id) => id !== user.matchedPath.id,
+      (id) => id !== user?.matchedPath?.id,
     )
 
     if (user) {

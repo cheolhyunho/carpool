@@ -440,7 +440,7 @@ function updateMapWithDestination(destinaitionAddress) {
   )
 }
 
-let = previousOriginInfo = null
+let previousOriginInfo = null
 function setOriginPoint(originAddress) {
   // 주소-좌표 변환 객체를 생성합니다
   var geocoder = new kakao.maps.services.Geocoder()
@@ -789,6 +789,48 @@ kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
   sendPost(coord)
   console.log(latlng)
 })
+
+kakao.maps.event.addListener(map, 'rightclick', function (mouseEvent) {
+  var latlng = mouseEvent.latLng
+  var message = '목적지'
+
+  coord = {
+    lat: latlng.getLat(),
+    lng: latlng.getLng(),
+  }
+
+  displayDesMarker2(latlng, message)
+  setDestination(coord)
+  console.log(latlng)
+})
+
+function displayDesMarker2(locPosition, message) {
+  removeMarkerForOrigin()
+  if (previousDesInfo) {
+    previousDesInfo.close()
+  }
+  // 마커를 생성합니다
+  var marker = new kakao.maps.Marker({
+    map: map,
+    position: locPosition,
+  })
+
+  markersForDes.push(marker)
+
+  var iwContent = message, // 인포윈도우에 표시할 내용
+    iwRemoveable = true
+
+  // 인포윈도우를 생성합니다
+  var infowindow = new kakao.maps.InfoWindow({
+    content: iwContent,
+    removable: iwRemoveable,
+  })
+
+  // 인포윈도우를 마커위에 표시합니다
+  infowindow.open(map, marker)
+
+  previousDesInfo = infowindow
+}
 
 // init 함수 수정
 function init() {

@@ -139,6 +139,10 @@ export class UnmatchedPathsService {
       tmpArray,
     )
 
+    if (resultId === null || resultId === undefined) {
+      return null // 또는 적절한 에러 처리
+    }
+
     //자신의 목적지와 가장 가까운 상대찾기
     console.log(user.username, '도착지제일가까운', resultId)
     const currentUserUP = targetUnmatchedPath
@@ -443,7 +447,7 @@ export class UnmatchedPathsService {
   }
 
   async setResultArray(savedTargetUnmatchedPath, tmpArray) {
-    let minId = ''
+    let minId = null
     let minDistance = 1000000000000000
     for (let i = 0; i < tmpArray.length; i++) {
       const userId = tmpArray[i]
