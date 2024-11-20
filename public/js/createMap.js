@@ -717,11 +717,17 @@ var mapContainer = document.getElementById('map'), // 지도를 표시할 div
 var map = new kakao.maps.Map(mapContainer, mapOption) // 지도를 생성합니다
 
 function displayMarker(locPosition, message) {
+  removeMarkerForOrigin()
+  if (previousOriginInfo) {
+    previousOriginInfo.close()
+  }
   // 마커를 생성합니다
   var marker = new kakao.maps.Marker({
     map: map,
     position: locPosition,
   })
+
+  markersForOrigin.push(marker)
 
   var iwContent = message, // 인포윈도우에 표시할 내용
     iwRemoveable = true
@@ -735,9 +741,54 @@ function displayMarker(locPosition, message) {
   // 인포윈도우를 마커위에 표시합니다
   infowindow.open(map, marker)
 
+  previousOriginInfo = infowindow
+
   // 지도 중심좌표를 접속위치로 변경합니다
   map.setCenter(locPosition)
 }
+
+//위 displayMarker에서 지도 지도 중심을 바꾸는 map.setCenter만 제외
+function displayMarker2(locPosition, message) {
+  removeMarkerForOrigin()
+  if (previousOriginInfo) {
+    previousOriginInfo.close()
+  }
+  // 마커를 생성합니다
+  var marker = new kakao.maps.Marker({
+    map: map,
+    position: locPosition,
+  })
+
+  markersForOrigin.push(marker)
+
+  var iwContent = message, // 인포윈도우에 표시할 내용
+    iwRemoveable = true
+
+  // 인포윈도우를 생성합니다
+  var infowindow = new kakao.maps.InfoWindow({
+    content: iwContent,
+    removable: iwRemoveable,
+  })
+
+  // 인포윈도우를 마커위에 표시합니다
+  infowindow.open(map, marker)
+
+  previousOriginInfo = infowindow
+}
+
+kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
+  var latlng = mouseEvent.latLng
+  var message = '출발지'
+
+  coord = {
+    lat: latlng.getLat(),
+    lng: latlng.getLng(),
+  }
+
+  displayMarker2(latlng, message)
+  sendPost(coord)
+  console.log(latlng)
+})
 
 // init 함수 수정
 function init() {
