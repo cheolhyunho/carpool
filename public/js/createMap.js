@@ -16,6 +16,10 @@ const placesListBox = document.getElementById('placesList')
 const paginationBox = document.getElementById('pagination')
 const buffering = document.querySelector('.buffering')
 
+var markers = []
+var markersForDes = []
+var markersForOrigin = []
+
 modeButton.addEventListener('click', function () {
   window.location.href = window.location.origin + '/driver'
   fetch('/unmatchedPath/userId', {
@@ -127,13 +131,49 @@ function handleButtonClick2(event) {
     setOriginPoint(originAddressInput.value)
   }
 }
-var markers = []
+
 function removeMarker() {
   for (var i = 0; i < markers.length; i++) {
     markers[i].setMap(null)
   }
-  markers = []
+  markers.length = 0
 }
+
+function setMarkersForOrigin(map) {
+  for (var i = 0; i < markersForOrigin.length; i++) {
+    markersForOrigin[i].setMap(map)
+  }
+}
+
+function showMarkerForOrigin() {
+  setMarkersForOrigin(map)
+}
+
+function removeMarkerForOrigin() {
+  for (var i = 0; i < markersForOrigin.length; i++) {
+    markersForOrigin[i].setMap(null)
+  }
+  markersForOrigin = []
+}
+
+function setMarkersForDes(map) {
+  for (var i = 0; i < markersForDes.length; i++) {
+    markersForDes[i].setMap(map)
+  }
+}
+
+function showMarkerForDes() {
+  setMarkersForDes(map)
+}
+
+function removeMarkerForDes() {
+  for (var i = 0; i < markersForDes.length; i++) {
+    markersForDes[i].setMap(null)
+  }
+  markersForDes = []
+}
+
+let previousDesInfo = null
 
 //주소로 목적지를 정하는 함수
 function updateMapWithDestination(destinaitionAddress) {
@@ -154,12 +194,24 @@ function updateMapWithDestination(destinaitionAddress) {
           position: coords,
         })
 
+        removeMarkerForDes()
+        markersForDes.push(marker)
+        showMarkerForDes()
+
+        if (previousDesInfo) {
+          previousDesInfo.close()
+        }
+
         // 인포윈도우로 장소에 대한 설명을 표시합니다
         var infowindow = new kakao.maps.InfoWindow({
           content:
             '<div style="width:150px;text-align:center;padding:6px 0;">목적지</div>',
+          zIndex: 1,
         })
+
         infowindow.open(map, marker)
+
+        previousDesInfo = infowindow
 
         // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
         map.setCenter(coords)
@@ -333,7 +385,7 @@ function updateMapWithDestination(destinaitionAddress) {
           for (var i = 0; i < markers.length; i++) {
             markers[i].setMap(null)
           }
-          markers = []
+          markers.length = 0
         }
 
         // 검색결과 목록 하단에 페이지번호를 표시는 함수입니다
@@ -388,6 +440,7 @@ function updateMapWithDestination(destinaitionAddress) {
   )
 }
 
+let = previousOriginInfo = null
 function setOriginPoint(originAddress) {
   // 주소-좌표 변환 객체를 생성합니다
   var geocoder = new kakao.maps.services.Geocoder()
@@ -406,13 +459,21 @@ function setOriginPoint(originAddress) {
           position: coords,
         })
 
+        removeMarkerForOrigin()
+        markersForOrigin.push(marker)
+        showMarkerForOrigin()
+
         // 인포윈도우로 장소에 대한 설명을 표시합니다
         var infowindow = new kakao.maps.InfoWindow({
           content:
             '<div style="width:150px;text-align:center;padding:6px 0;">출발지</div>',
         })
-        infowindow.open(map, marker)
 
+        if (previousOriginInfo) {
+          previousOriginInfo.close()
+        }
+        infowindow.open(map, marker)
+        previousOriginInfo = infowindow
         // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
         map.setCenter(coords)
         const originPoint = {
@@ -554,6 +615,12 @@ function setOriginPoint(originAddress) {
           return el
         }
 
+        function setMarkers(map) {
+          for (var i = 0; i < markers.length; i++) {
+            markers[i].setMap(map)
+          }
+        }
+
         // 마커를 생성하고 지도 위에 마커를 표시하는 함수입니다
         function addMarker(position, idx, title) {
           var imageSrc =
@@ -575,7 +642,7 @@ function setOriginPoint(originAddress) {
               clickable: true,
             })
 
-          marker.setMap(map) // 지도 위에 마커를 표출합니다
+          // marker.setMap(map) // 지도 위에 마커를 표출합니다
           markers.push(marker) // 배열에 생성된 마커를 추가합니다
 
           return marker
@@ -999,8 +1066,6 @@ socket.on('matching', (matchingPath) => {
       ]
       break
   }
-
-  var markers = []
 
   var mapContainer = document.getElementById('map'), // 지도를 표시할 div
     mapOption = {
