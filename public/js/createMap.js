@@ -778,7 +778,7 @@ function displayMarker2(locPosition, message) {
   previousOriginInfo = infowindow
 }
 
-kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
+kakao.maps.event.addListener(map, 'dblclick', function (mouseEvent) {
   var latlng = mouseEvent.latLng
   var message = '출발지'
 
@@ -793,7 +793,16 @@ kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
   originAddressInput.value = '✅ 출발지 마커 설정 완료!'
 })
 
+let isProcessing = false
+let debounceTimer
 kakao.maps.event.addListener(map, 'rightclick', function (mouseEvent) {
+  if (isProcessing) {
+    return
+  }
+
+  isProcessing = true
+  clearTimeout(debounceTimer)
+
   var latlng = mouseEvent.latLng
   var message = '목적지'
 
@@ -806,10 +815,14 @@ kakao.maps.event.addListener(map, 'rightclick', function (mouseEvent) {
   setDestination(coord)
   destinationAddressInput.placeholder = '✅ 목적지 마커 설정 완료!'
   destinationAddressInput.value = '✅ 목적지 마커 설정 완료!'
+
+  debounceTimer = setTimeout(() => {
+    isProcessing = false
+  }, 500)
 })
 
 function displayDesMarker2(locPosition, message) {
-  removeMarkerForOrigin()
+  removeMarkerForDes()
   if (previousDesInfo) {
     previousDesInfo.close()
   }
