@@ -716,6 +716,8 @@ var mapContainer = document.getElementById('map'), // 지도를 표시할 div
   }
 var map = new kakao.maps.Map(mapContainer, mapOption) // 지도를 생성합니다
 
+map.setCursor('pointer')
+
 function displayMarker(locPosition, message) {
   removeMarkerForOrigin()
   if (previousOriginInfo) {
@@ -787,7 +789,8 @@ kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
 
   displayMarker2(latlng, message)
   sendPost(coord)
-  console.log(latlng)
+  originAddressInput.placeholder = '✅ 출발지 마커 설정 완료!'
+  originAddressInput.value = '✅ 출발지 마커 설정 완료!'
 })
 
 kakao.maps.event.addListener(map, 'rightclick', function (mouseEvent) {
@@ -801,7 +804,8 @@ kakao.maps.event.addListener(map, 'rightclick', function (mouseEvent) {
 
   displayDesMarker2(latlng, message)
   setDestination(coord)
-  console.log(latlng)
+  destinationAddressInput.placeholder = '✅ 목적지 마커 설정 완료!'
+  destinationAddressInput.value = '✅ 목적지 마커 설정 완료!'
 })
 
 function displayDesMarker2(locPosition, message) {
@@ -873,7 +877,7 @@ function init() {
 
 document.addEventListener('DOMContentLoaded', init)
 currentAddressSettingButton.addEventListener('click', function () {
-  originAddressInput.value = '     <현재위치로 출발지 설정됨>'
+  originAddressInput.value = '✅ 현재위치로 설정 완료!'
   navigator.geolocation.getCurrentPosition(function (position) {
     var lat = position.coords.latitude,
       lng = position.coords.longitude
