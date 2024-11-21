@@ -282,8 +282,7 @@ socket.on('letsDrive', function (matchedPath) {
     fetchWaitingPayment()
   })
   rejectButton.addEventListener('click', () => {
-    socket.emit('iDontWantThisPath', matchedPath)
-    window.location.reload()
+    location.reload()
   })
 
   function updateInfowindowContent(index) {
@@ -332,9 +331,9 @@ socket.on('failedPay', () => {
   location.reload()
 })
 let script = document.createElement('script')
-script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/v1/kakao.min.js'
+script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.3/kakao.min.js'
 script.integrity =
-  'sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4'
+  'sha384-kLbo2SvoNtOFiniJ1EQ9o2iDA8i3xp+O6Cns+L5cd4RsOJfl+43z5pvieT2ayq3C'
 script.crossOrigin = 'anonymous'
 
 script.onload = function () {

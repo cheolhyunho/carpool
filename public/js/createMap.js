@@ -16,6 +16,10 @@ const placesListBox = document.getElementById('placesList')
 const paginationBox = document.getElementById('pagination')
 const buffering = document.querySelector('.buffering')
 
+var markers = []
+var markersForDes = []
+var markersForOrigin = []
+
 modeButton.addEventListener('click', function () {
   window.location.href = window.location.origin + '/driver'
   fetch('/unmatchedPath/userId', {
@@ -127,13 +131,49 @@ function handleButtonClick2(event) {
     setOriginPoint(originAddressInput.value)
   }
 }
-var markers = []
+
 function removeMarker() {
   for (var i = 0; i < markers.length; i++) {
     markers[i].setMap(null)
   }
-  markers = []
+  markers.length = 0
 }
+
+function setMarkersForOrigin(map) {
+  for (var i = 0; i < markersForOrigin.length; i++) {
+    markersForOrigin[i].setMap(map)
+  }
+}
+
+function showMarkerForOrigin() {
+  setMarkersForOrigin(map)
+}
+
+function removeMarkerForOrigin() {
+  for (var i = 0; i < markersForOrigin.length; i++) {
+    markersForOrigin[i].setMap(null)
+  }
+  markersForOrigin = []
+}
+
+function setMarkersForDes(map) {
+  for (var i = 0; i < markersForDes.length; i++) {
+    markersForDes[i].setMap(map)
+  }
+}
+
+function showMarkerForDes() {
+  setMarkersForDes(map)
+}
+
+function removeMarkerForDes() {
+  for (var i = 0; i < markersForDes.length; i++) {
+    markersForDes[i].setMap(null)
+  }
+  markersForDes = []
+}
+
+let previousDesInfo = null
 
 //주소로 목적지를 정하는 함수
 function updateMapWithDestination(destinaitionAddress) {
@@ -154,12 +194,24 @@ function updateMapWithDestination(destinaitionAddress) {
           position: coords,
         })
 
+        removeMarkerForDes()
+        markersForDes.push(marker)
+        showMarkerForDes()
+
+        if (previousDesInfo) {
+          previousDesInfo.close()
+        }
+
         // 인포윈도우로 장소에 대한 설명을 표시합니다
         var infowindow = new kakao.maps.InfoWindow({
           content:
             '<div style="width:150px;text-align:center;padding:6px 0;">목적지</div>',
+          zIndex: 1,
         })
+
         infowindow.open(map, marker)
+
+        previousDesInfo = infowindow
 
         // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
         map.setCenter(coords)
@@ -333,7 +385,7 @@ function updateMapWithDestination(destinaitionAddress) {
           for (var i = 0; i < markers.length; i++) {
             markers[i].setMap(null)
           }
-          markers = []
+          markers.length = 0
         }
 
         // 검색결과 목록 하단에 페이지번호를 표시는 함수입니다
@@ -388,6 +440,7 @@ function updateMapWithDestination(destinaitionAddress) {
   )
 }
 
+let previousOriginInfo = null
 function setOriginPoint(originAddress) {
   // 주소-좌표 변환 객체를 생성합니다
   var geocoder = new kakao.maps.services.Geocoder()
@@ -406,13 +459,21 @@ function setOriginPoint(originAddress) {
           position: coords,
         })
 
+        removeMarkerForOrigin()
+        markersForOrigin.push(marker)
+        showMarkerForOrigin()
+
         // 인포윈도우로 장소에 대한 설명을 표시합니다
         var infowindow = new kakao.maps.InfoWindow({
           content:
-            '<div style="width:150px;text-align:center;padding:6px 0;">목적지</div>',
+            '<div style="width:150px;text-align:center;padding:6px 0;">출발지</div>',
         })
-        infowindow.open(map, marker)
 
+        if (previousOriginInfo) {
+          previousOriginInfo.close()
+        }
+        infowindow.open(map, marker)
+        previousOriginInfo = infowindow
         // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
         map.setCenter(coords)
         const originPoint = {
@@ -554,6 +615,12 @@ function setOriginPoint(originAddress) {
           return el
         }
 
+        function setMarkers(map) {
+          for (var i = 0; i < markers.length; i++) {
+            markers[i].setMap(map)
+          }
+        }
+
         // 마커를 생성하고 지도 위에 마커를 표시하는 함수입니다
         function addMarker(position, idx, title) {
           var imageSrc =
@@ -575,7 +642,7 @@ function setOriginPoint(originAddress) {
               clickable: true,
             })
 
-          marker.setMap(map) // 지도 위에 마커를 표출합니다
+          // marker.setMap(map) // 지도 위에 마커를 표출합니다
           markers.push(marker) // 배열에 생성된 마커를 추가합니다
 
           return marker
@@ -649,12 +716,20 @@ var mapContainer = document.getElementById('map'), // 지도를 표시할 div
   }
 var map = new kakao.maps.Map(mapContainer, mapOption) // 지도를 생성합니다
 
+map.setCursor('pointer')
+
 function displayMarker(locPosition, message) {
+  removeMarkerForOrigin()
+  if (previousOriginInfo) {
+    previousOriginInfo.close()
+  }
   // 마커를 생성합니다
   var marker = new kakao.maps.Marker({
     map: map,
     position: locPosition,
   })
+
+  markersForOrigin.push(marker)
 
   var iwContent = message, // 인포윈도우에 표시할 내용
     iwRemoveable = true
@@ -668,8 +743,110 @@ function displayMarker(locPosition, message) {
   // 인포윈도우를 마커위에 표시합니다
   infowindow.open(map, marker)
 
+  previousOriginInfo = infowindow
+
   // 지도 중심좌표를 접속위치로 변경합니다
   map.setCenter(locPosition)
+}
+
+//위 displayMarker에서 지도 지도 중심을 바꾸는 map.setCenter만 제외
+function displayMarker2(locPosition, message) {
+  removeMarkerForOrigin()
+  if (previousOriginInfo) {
+    previousOriginInfo.close()
+  }
+  // 마커를 생성합니다
+  var marker = new kakao.maps.Marker({
+    map: map,
+    position: locPosition,
+  })
+
+  markersForOrigin.push(marker)
+
+  var iwContent = message, // 인포윈도우에 표시할 내용
+    iwRemoveable = true
+
+  // 인포윈도우를 생성합니다
+  var infowindow = new kakao.maps.InfoWindow({
+    content: iwContent,
+    removable: iwRemoveable,
+  })
+
+  // 인포윈도우를 마커위에 표시합니다
+  infowindow.open(map, marker)
+
+  previousOriginInfo = infowindow
+}
+
+kakao.maps.event.addListener(map, 'dblclick', function (mouseEvent) {
+  var latlng = mouseEvent.latLng
+  var message = '출발지'
+
+  coord = {
+    lat: latlng.getLat(),
+    lng: latlng.getLng(),
+  }
+
+  displayMarker2(latlng, message)
+  sendPost(coord)
+  originAddressInput.placeholder = '✅ 출발지 마커 설정 완료!'
+  originAddressInput.value = '✅ 출발지 마커 설정 완료!'
+})
+
+let isProcessing = false
+let debounceTimer
+kakao.maps.event.addListener(map, 'rightclick', function (mouseEvent) {
+  if (isProcessing) {
+    return
+  }
+
+  isProcessing = true
+  clearTimeout(debounceTimer)
+
+  var latlng = mouseEvent.latLng
+  var message = '목적지'
+
+  coord = {
+    lat: latlng.getLat(),
+    lng: latlng.getLng(),
+  }
+
+  displayDesMarker2(latlng, message)
+  setDestination(coord)
+  destinationAddressInput.placeholder = '✅ 목적지 마커 설정 완료!'
+  destinationAddressInput.value = '✅ 목적지 마커 설정 완료!'
+
+  debounceTimer = setTimeout(() => {
+    isProcessing = false
+  }, 500)
+})
+
+function displayDesMarker2(locPosition, message) {
+  removeMarkerForDes()
+  if (previousDesInfo) {
+    previousDesInfo.close()
+  }
+  // 마커를 생성합니다
+  var marker = new kakao.maps.Marker({
+    map: map,
+    position: locPosition,
+  })
+
+  markersForDes.push(marker)
+
+  var iwContent = message, // 인포윈도우에 표시할 내용
+    iwRemoveable = true
+
+  // 인포윈도우를 생성합니다
+  var infowindow = new kakao.maps.InfoWindow({
+    content: iwContent,
+    removable: iwRemoveable,
+  })
+
+  // 인포윈도우를 마커위에 표시합니다
+  infowindow.open(map, marker)
+
+  previousDesInfo = infowindow
 }
 
 // init 함수 수정
@@ -713,7 +890,7 @@ function init() {
 
 document.addEventListener('DOMContentLoaded', init)
 currentAddressSettingButton.addEventListener('click', function () {
-  originAddressInput.value = '     <현재위치로 출발지 설정됨>'
+  originAddressInput.value = '✅ 현재위치로 설정 완료!'
   navigator.geolocation.getCurrentPosition(function (position) {
     var lat = position.coords.latitude,
       lng = position.coords.longitude
@@ -1000,8 +1177,6 @@ socket.on('matching', (matchingPath) => {
       break
   }
 
-  var markers = []
-
   var mapContainer = document.getElementById('map'), // 지도를 표시할 div
     mapOption = {
       center: new kakao.maps.LatLng(37.566826, 126.9786567), // 지도의 중심좌표
@@ -1224,14 +1399,14 @@ socket.on('noUnmatchedPath', () => {
 
 // 돋보기 누르지 않고 출발지 설정버튼 누를때 주소를 좌표로 바꿔서 서버에 전송하는 함수
 function setOriginPoint2(originAddress) {
-  var mapContainer = document.getElementById('map'), // 지도를 표시할 div
-    mapOption = {
-      center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-      level: 3, // 지도의 확대 레벨
-    }
+  // var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+  //   mapOption = {
+  //     center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+  //     level: 3, // 지도의 확대 레벨
+  //   }
 
-  // 지도를 생성합니다
-  var map = new kakao.maps.Map(mapContainer, mapOption)
+  // // 지도를 생성합니다
+  // var map = new kakao.maps.Map(mapContainer, mapOption)
 
   // 주소-좌표 변환 객체를 생성합니다
   var geocoder = new kakao.maps.services.Geocoder()
@@ -1253,7 +1428,7 @@ function setOriginPoint2(originAddress) {
         // 인포윈도우로 장소에 대한 설명을 표시합니다
         var infowindow = new kakao.maps.InfoWindow({
           content:
-            '<div style="width:150px;text-align:center;padding:6px 0;">목적지</div>',
+            '<div style="width:150px;text-align:center;padding:6px 0;">출발지</div>',
         })
         infowindow.open(map, marker)
 
@@ -1278,14 +1453,14 @@ setOriginButton.addEventListener('click', function () {
 
 //도착지 설정버튼을 돋보기 없이 눌렀을때 좌표 전송 함수
 function updateMapWithDestination2(destinaitionAddress) {
-  var mapContainer = document.getElementById('map'), // 지도를 표시할 div
-    mapOption = {
-      center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-      level: 3, // 지도의 확대 레벨
-    }
+  // var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+  //   mapOption = {
+  //     center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+  //     level: 3, // 지도의 확대 레벨
+  //   }
 
-  // 지도를 생성합니다
-  var map = new kakao.maps.Map(mapContainer, mapOption)
+  // // 지도를 생성합니다
+  // var map = new kakao.maps.Map(mapContainer, mapOption)
 
   // 주소-좌표 변환 객체를 생성합니다
   var geocoder = new kakao.maps.services.Geocoder()

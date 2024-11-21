@@ -1,3 +1,5 @@
+const endButton = document.getElementById('end')
+
 const socket = io('/')
 fetch('/unmatchedPath/userId', {
   method: 'GET',
@@ -96,5 +98,9 @@ socket.on('hereIsRealTimeLocation', (data) => {
 socket.on('finishTracking', () => {
   console.log('finishTracking 실행중')
   socket.emit('deleteUnmatchedPathAndEtc')
+  window.location.href = window.location.origin + '/unmatchedPath'
+})
+
+endButton.addEventListener('click', function () {
   window.location.href = window.location.origin + '/unmatchedPath'
 })
