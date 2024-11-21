@@ -277,8 +277,7 @@ body {
   margin: 10px 0 30px 10px;
   padding: 5px;
   overflow-y: auto;
-  /* background: rgba(255, 255, 255, 0.7); */
-  background: #f0f3f5;
+  background: transparent;
   z-index: 2;
   font-size: 12px;
   border-radius: 10px;
@@ -832,7 +831,7 @@ body {
     margin: 10px 0 30px 10px;
     padding: 5px;
     overflow-y: auto;
-    background: #f0f3f5;
+    background: transparent;
     z-index: 2;
     font-size: 12px;
     border-radius: 10px;
